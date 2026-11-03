@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Forgia degli Eroi · Argini Ludici</title>
+<link rel="icon" href="logo-argini-ludici.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="carte.css">
+<link rel="stylesheet" href="tema-argini.css">
+</head>
+<body>
+<header class="testata no-print">
+  <div class="logo"><img src="logo-argini-ludici.jpg" alt="Argini Ludici – Compagnia di gioco"><span>La Forgia degli Eroi</span> <small>Argini Ludici · D&amp;D 5e</small></div>
+  <div id="barra-info" class="info-salvataggio"></div>
+</header>
+<main id="app" class="no-print"></main>
+<div id="stampa"></div>
+<input type="file" id="file-import" accept=".json,application/json" hidden>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="cloud.js"></script>
+<script src="dati.js"></script>
+<script src="sottoclassi.js"></script>
+<script src="scelte.js"></script>
+<script src="sfondi.js"></script>
+<script src="inc_dati.js"></script>
+<script src="inc_xan.js"></script>
+<script src="inc_mdg2.js"></script>
+<script src="inc_extra.js"></script>
+<script src="inc_tasha.js"></script>
+<script src="inc_correzioni.js"></script>
+<script src="inc_carte.js"></script>
+<script src="incantesimi.js"></script>
+<script src="inc_consigli.js"></script>
+<script src="inc_consigli_extra.js"></script>
+<script>DND.caricaIncantesimi();</script>
+<script src="descrizioni.js"></script>
+<script src="casuale.js"></script>
+<script src="motore.js"></script>
+<script src="carte.js"></script>
+<script src="magia.js"></script>
+<script src="scheda.js"></script>
+<script src="scheda_uff.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

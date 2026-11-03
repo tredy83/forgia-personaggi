@@ -1,0 +1,41 @@
+/* ====== Carte incantesimo (stile ispirato a nBeebz's 5e Spell Cards, CC BY-NC-SA 4.0) ====== */
+@font-face{font-family:"Ringbearer";src:url(carte/RINGM___.TTF)}
+@font-face{font-family:"MPlantin";src:url(carte/MPLANTIN.ttf);font-weight:400;font-style:normal}
+@font-face{font-family:"MPlantin";src:url(carte/MPLANTI1.ttf);font-weight:700;font-style:normal}
+@font-face{font-family:"MPlantin";src:url(carte/MPLANTI3.ttf);font-weight:400;font-style:italic}
+.carte-doc{overflow-x:auto}
+.cartapag{position:relative;width:210mm;height:297mm;background:#fff;margin:0 auto 1rem;box-shadow:var(--ombra,0 2px 8px #0003);page:carte;overflow:hidden}
+.carta{position:absolute;width:63mm;height:88mm;box-sizing:border-box;background:#fff center/100% 100% no-repeat;border:.1mm solid #c8c8c8;overflow:hidden;font-family:"MPlantin",Georgia,serif;color:#000}
+.carta>*{position:absolute;margin:0}
+.carta .c-bar{left:5.6mm;top:5.9mm;width:51.8mm;height:7.2mm;background:var(--c)}
+.carta .c-sc{left:5.5mm;top:5.2mm;width:8.9mm;height:8.9mm}
+.carta .c-nome{left:15.8mm;top:5.9mm;width:30.5mm;height:7.2mm;line-height:7.2mm;color:#fff;font-family:"Ringbearer",serif;font-size:13pt;white-space:nowrap;overflow:hidden}
+.carta .c-liv{right:6.4mm;top:5.9mm;height:7.2mm;line-height:7.2mm;color:#fff;font-weight:700;font-size:9.5pt}
+.carta .c-r{left:7.5mm;height:5mm;line-height:5mm;font-size:8.8pt}
+.carta .c-v{left:29mm;width:16.4mm;height:5mm;display:flex;align-items:center;font-weight:700;font-size:8.6pt;line-height:1.05}
+.carta .c-v.conc{left:32.4mm;width:13mm}
+.carta .c-conc{left:26.2mm;top:20.1mm;height:4.4mm}
+.carta .c-cls{left:41mm;top:14.6mm;width:16.6mm}
+.carta .c-cls div{position:relative;height:3.1mm;line-height:3.1mm;text-align:right;padding-right:1.9mm;font-size:7.2pt;color:#b0b0b0;white-space:nowrap}
+.carta .c-cls div.on{color:var(--cd)}
+.carta .c-cls div.on::after{content:"";position:absolute;right:0;top:.4mm;width:.9mm;height:2.3mm;background:var(--cd)}
+.carta .ic{opacity:.2}
+.carta .ic.on{opacity:1}
+.carta .c-cost{left:38.4mm;top:31.8mm;font-size:6pt;font-weight:700;line-height:5mm}
+.carta .c-band{left:5.6mm;top:39.8mm;width:51.8mm;height:6.2mm;box-sizing:border-box;padding:0 1.6mm;background:var(--c);color:#fff;font-style:italic;font-size:7.4pt;line-height:6.2mm;white-space:nowrap;overflow:hidden}
+.carta .c-txt{left:7.6mm;top:47.4mm;width:48.4mm;height:32.4mm;overflow:hidden;font-size:6.6pt;line-height:1.13}
+.carta .c-txt p{margin:0 0 .9mm}
+.carta .c-ref{right:7.4mm;top:80.9mm;font-style:italic;font-size:6.6pt}
+.carta.dorso{border-color:#c8c8c8}
+.carte-opz label{display:inline-flex;gap:.35rem;align-items:center;margin-right:1rem}
+@media print{
+  .cartapag{margin:0;box-shadow:none;break-after:page;page-break-after:always}
+  .cartapag:last-child{break-after:auto;page-break-after:auto}
+}
+@page carte{size:A4;margin:0}
+.carta.dorso .d-t{left:0;right:0;text-align:center;font-family:"Ringbearer",serif;white-space:nowrap}
+.carta.dorso.d-pergamena .d-t{top:61.2mm;font-size:21pt;color:#fff;-webkit-text-stroke:.5mm #000;paint-order:stroke fill;text-shadow:0 0 .6mm #000}
+.carta.dorso.d-nero .d-t{top:68mm;font-size:22pt;color:#fff}
+.carta.dorso.d-bianco .d-t{top:55mm;font-size:21pt;color:#000}
+
+.carta .c-in{display:flow-root}

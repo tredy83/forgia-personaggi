@@ -1,0 +1,101 @@
+/* Descrizioni sintetiche (parole nostre) di razze, classi e sottoclassi: "cosa diventa il personaggio" */
+(function (G) {
+  const D = (G.DND = G.DND || {});
+  D.DESC = {
+    razza: {
+      umano: 'Il più versatile: nessun punto debole e un piccolo bonus a tutte le caratteristiche. Ottimo per chi vuole poter fare qualsiasi cosa e costruire il personaggio come preferisce.',
+      elfo: 'Agile, elegante e longevo, con sensi acutissimi e una naturale grazia. Non dorme ma medita, e resiste agli incantesimi che affascinano. Perfetto per arcieri, ladri e maghi.',
+      nano: 'Basso ma robusto come la roccia: resiste ai veleni, vede al buio e si muove sicuro anche con armature pesanti. Il compagno ideale per chi vuole stare in prima linea e non mollare mai.',
+      halfling: 'Piccolo, fortunato e coraggioso: quando il dado dice 1 può ritirarlo e la paura quasi non lo tocca. Ottimo per ladri furtivi, e per chi ama cavarsela con astuzia e simpatia.',
+      dragonide: 'Un guerriero con sangue di drago: soffia un’arma del suo elemento e resiste a quel tipo di danno. Grosso, forte e carismatico, è un eroe nato per la prima linea.',
+      gnomo: 'Piccolo, curioso e pieno di idee, è difficile da ingannare con la magia: ha vantaggio ai tiri salvezza su Intelligenza, Saggezza e Carisma contro la magia. Adatto a maghi, inventori e ingegnosi di ogni tipo.',
+      mezzelfo: 'Metà umano e metà elfo: carismatico, adattabile e bravo con le persone. Prende un po’ di tutto, ed è perfetto per bardi, stregoni, warlock e chiunque ami parlare e convincere.',
+      mezzorco: 'Forza bruta e testa dura: quando arriva a 0 PF può restare in piedi una volta, e i colpi critici fanno più male. Ideale per barbari e guerrieri che amano menare le mani.',
+      tiefling: 'Dal sangue infernale, con corna, coda e un fascino un po’ inquietante: resiste al fuoco e conosce piccoli incantesimi infernali. Ottimo per chi ama la magia, il mistero e i personaggi “diversi”.',
+    },
+    sub: {
+      'elfo/alto': 'Elfo studioso e magico: impara un trucchetto da mago e ha un bonus all’Intelligenza. Perfetto per i maghi.',
+      'elfo/boschi': 'Elfo della foresta, veloce e silenzioso: si muove più in fretta e si nasconde bene tra la natura. Perfetto per ranger, druidi e ladri.',
+      'elfo/drow': 'Elfo oscuro che vive sottoterra: vede al buio più lontano e ha magie innate, ma soffre la luce del sole. Per chi ama personaggi misteriosi e carismatici.',
+      'nano/colline': 'Nano saggio e resistente: più punti ferita e Saggezza in più. Ottimo chierico o guerriero tenace.',
+      'nano/montagne': 'Nano forte e corazzato: più Forza e competenza con le armature medie. Ottimo per guerrieri e paladini.',
+      'halfling/piedelesto': 'Halfling furtivo e simpatico: si nasconde anche dietro creature più grandi. Perfetto per ladri e personaggi d’astuzia.',
+      'halfling/tozzo': 'Halfling robusto: resiste ai veleni e ha un bonus alla Costituzione. Pochi lo fermano, anche se piccolo.',
+      'gnomo/rocce': 'Gnomo inventore: sa costruire piccoli congegni e conosce bene la storia degli oggetti. Per maghi e per chi ama gli ingranaggi.',
+      'gnomo/foreste': 'Gnomo magico della foresta: conosce Illusione Minore e parla con le piccole bestie. Per maghi, druidi e ranger.',
+    },
+    classe: {
+      barbaro: 'Un guerriero che si scatena in una furia selvaggia: resiste ai colpi, fa molto male e ha tantissimi punti ferita. Semplice da giocare: ci si butta in mezzo e si colpisce forte. Ottimo per iniziare.',
+      bardo: 'Un artista magico che ispira gli alleati con canto, musica e parole. Sa un po’ di tutto: lancia incantesimi, cura, confonde i nemici ed è il re delle chiacchiere. Versatile ma richiede un po’ di fantasia.',
+      chierico: 'Un servitore di una divinità che cura gli amici e scaccia i nemici col potere sacro. Armato e corazzato, è insieme guaritore e combattente. Utilissimo in ogni gruppo.',
+      druido: 'Un custode della natura: lancia incantesimi, parla con gli animali e si trasforma in bestie con la Forma Selvatica. Potente e spettacolare, ma più complesso da gestire.',
+      guerriero: 'Il combattente per eccellenza: bravo con ogni arma e armatura, con più attacchi e tanta resistenza. Il più facile da imparare, ideale per chi comincia a giocare.',
+      ladro: 'Un maestro di furtività e astuzia: colpisce di sorpresa con l’Attacco Furtivo, scassina e nasconde. Fragile in battaglia ma decisivo se gioca d’astuzia.',
+      mago: 'Uno studioso di magia con il più vasto libro di incantesimi del gioco: fa danni enormi e risolve problemi con la mente. Fragile all’inizio, potentissimo con il tempo.',
+      monaco: 'Un artista marziale rapido come il vento: colpisce a mani nude con raffiche di pugni e usa l’energia ki per imprese incredibili. Agile e veloce, difficile da colpire.',
+      paladino: 'Un cavaliere sacro legato a un giuramento: corazzato, con la Punizione Divina che fa danni enormi, e capace di curare e proteggere. Eroe da prima linea con un cuore nobile.',
+      ranger: 'Un esploratore e cacciatore: ottimo con l’arco, conosce i luoghi selvaggi e la sua preda non scappa. Agile, adatto a chi ama le avventure all’aperto, con un po’ di magia della natura.',
+      stregone: 'Un mago “di nascita”: la magia gli scorre nel sangue e la plasma con la Metamagia. Conosce pochi incantesimi ma li usa in modo creativo. Carismatico e potente, ma poco robusto.',
+      warlock: 'Ha stretto un patto con un essere potente che gli dona poteri: pochi incantesimi, ma sempre al massimo livello e che si recuperano in fretta. Misterioso, con attacchi a distanza sempre pronti.',
+    },
+    sottoclasse: {
+      'barbaro/berserker': 'Furia pura: attacchi in più mentre sei infuriato. Fa tantissimi danni, ma ti stanca.',
+      'barbaro/totemico': 'Furia collegata a uno spirito animale (orso, aquila, lupo): più resistenza e doti speciali.',
+      'bardo/sapienza': 'Bardo studioso: impara incantesimi extra da qualunque lista e disturba i nemici con le parole.',
+      'bardo/valore': 'Bardo guerriero: usa armature medie e armi da guerra, ispira i compagni in battaglia.',
+      'chierico/conoscenza': 'Chierico del sapere: impara lingue e abilità, legge nelle menti e sa tantissime cose.',
+      'chierico/vita': 'Il guaritore per eccellenza: le sue cure sono più potenti e ha armatura pesante.',
+      'chierico/luce': 'Chierico del fuoco e della luce: scaccia le tenebre e scatena fiamme e radiosità.',
+      'chierico/natura': 'Chierico legato alla natura: parla con animali e piante e ha un’armatura robusta.',
+      'chierico/tempesta': 'Chierico di tuono e fulmini: colpisce forte in mischia e punisce chi lo attacca.',
+      'chierico/inganno': 'Chierico trickster: inganna, si sdoppia e usa magie di furtività e travestimento.',
+      'chierico/guerra': 'Chierico guerriero: ottimo in battaglia, con attacchi extra e benedizioni di guerra.',
+      'druido/terra': 'Druido legato al territorio: ottiene incantesimi extra del luogo scelto e magie da campo.',
+      'druido/luna': 'Druido bestia: si trasforma in animali molto più forti e combatte in prima linea.',
+      'guerriero/campione': 'Il guerriero semplice e forte: colpi critici più frequenti e tanta resistenza. Facile da giocare.',
+      'guerriero/maestro': 'Guerriero tattico: usa manovre di battaglia per colpire, disarmare, spaventare e proteggere.',
+      'guerriero/cavaliere': 'Guerriero con un po’ di magia arcana: lancia incantesimi da mago e lega a sé un’arma.',
+      'ladro/ladro': 'Ladro classico: veloce, ottimo per scassinare, scalare e rubare. Il più “da ladro” di tutti.',
+      'ladro/assassino': 'Ladro killer: colpisce di sorpresa con danni enormi e conosce veleni e travestimenti.',
+      'ladro/mistificatore': 'Ladro magico: lancia incantesimi da mago, ha una mano magica e inganna in modi creativi.',
+      'mago/abiurazione': 'Mago protettore: crea scudi magici che assorbono i danni e neutralizza magie nemiche.',
+      'mago/ammaliamento': 'Mago incantatore di menti: affascina i nemici e li induce a fare ciò che vuole.',
+      'mago/divinazione': 'Mago veggente: prevede il futuro e può sostituire due tiri di dado della giornata con risultati già noti.',
+      'mago/evocazione': 'Mago evocatore: crea mostri e oggetti dal nulla e li rende più resistenti.',
+      'mago/illusione': 'Mago illusionista: crea immagini e inganni che ingannano i sensi.',
+      'mago/invocazione': 'Mago dei danni a distanza: palle di fuoco e fulmini potenti, che sa non colpire gli amici.',
+      'mago/necromanzia': 'Mago della morte: assorbe vita dai nemici e anima scheletri e zombi.',
+      'mago/trasmutazione': 'Mago trasformista: cambia la materia, si trasforma e crea la Pietra del Mago.',
+      'monaco/manoaperta': 'Il monaco classico: colpi speciali che fanno cadere, spingere o stordire e cura se stesso.',
+      'monaco/ombra': 'Monaco ninja: si teletrasporta tra le ombre e colpisce da dietro.',
+      'monaco/elementi': 'Monaco elementale: usa fuoco, acqua, aria e terra con il suo ki.',
+      'paladino/devozione': 'Paladino ideale: protegge i buoni, scaccia il male e brilla di luce sacra.',
+      'paladino/antichi': 'Paladino della natura: usa magia della luce, resiste agli incantesimi e protegge la vita.',
+      'paladino/vendetta': 'Paladino implacabile: giura vendetta contro i malvagi e insegue un nemico alla volta senza lasciarlo scappare.',
+      'ranger/cacciatore': 'Ranger killer di mostri: ottimo contro creature grosse e gruppi, con tattiche di caccia.',
+      'ranger/bestie': 'Ranger con compagno animale: un orso, un lupo o un cinghiale combatte al suo fianco.',
+      'stregone/draconica': 'Stregone con sangue di drago: più PF, scaglie protettive e magie legate al suo elemento.',
+      'stregone/selvaggia': 'Stregone del caos: la sua magia è imprevedibile, con effetti casuali spettacolari e rischiosi.',
+      'warlock/fatato': 'Patto con un fatato: incanta, spaventa e svanisce. Un po’ trickster.',
+      'warlock/immondo': 'Patto con un immondo: ottiene PF extra con i nemici uccisi e magie infuocate.',
+      'warlock/antico': 'Patto con un Grande Antico: poteri mentali, telepatia e magie dell’orrore.',
+    },
+  };
+    /* Allineamenti: descrizioni in parole mie, per i ragazzi */
+  D.DESC.allin = {
+    'Legale Buono': 'Fa la cosa giusta rispettando le regole e la parola data. Protegge gli altri con onestà e disciplina, come un cavaliere o un buon capitano. Esempio: un paladino che difende il villaggio.',
+    'Neutrale Buono': 'Vuole il bene di tutti e lo fa senza badare troppo alle regole: se serve le segue, se non servono le lascia stare. Esempio: un guaritore che aiuta chiunque ne abbia bisogno.',
+    'Caotico Buono': 'Segue il cuore e la libertà. Ha un gran buon cuore ma non sopporta ordini e leggi ingiuste. Esempio: un ladro gentiluomo che ruba ai prepotenti per aiutare i poveri.',
+    'Legale Neutrale': 'Per lui contano le regole, la legge e la tradizione, più del bene o del male. Esempio: un giudice che applica la legge sempre allo stesso modo, o un monaco molto disciplinato.',
+    'Neutrale': 'Non si schiera: cerca equilibrio e buon senso, e decide caso per caso. Spesso ama la natura più delle faccende di città. Esempio: un druido che protegge il bosco senza fare il tifo per nessuno.',
+    'Caotico Neutrale': 'Fa quello che gli passa per la testa: libero e imprevedibile, senza voler né aiutare né far male apposta. Esempio: un bardo girovago che cambia idea a ogni locanda.',
+    'Legale Malvagio': 'Usa le regole, i contratti e il potere per ottenere ciò che vuole, anche a danno degli altri. Esempio: un tiranno crudele ma ordinato, o un nobile che sfrutta la legge.',
+    'Neutrale Malvagio': 'Pensa solo a sé stesso e prende ciò che gli conviene, con o senza regole. Esempio: un mercenario senza scrupoli che tradisce se gli conviene.',
+    'Caotico Malvagio': 'Violento, impulsivo e senza rispetto per nessuno: fa il male per capriccio o per rabbia. Esempio: un bandito feroce che distrugge tutto ciò che incontra.'
+  };
+  D.descBox = function (testo, titolo) {
+    if (!testo) return '';
+    const e = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    return '<div class="scelta-info"><b>' + e(titolo) + '</b> ' + e(testo) + '</div>';
+  };
+})(window);

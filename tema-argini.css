@@ -1,0 +1,79 @@
+/* TEMA ARGINI LUDICI – stessi colori e font del sito (viola scuro, lavanda, rosso, oro; Bowlby One + Quicksand).
+   Riguarda solo l'interfaccia a schermo: la scheda stampata e le carte restano bianche. */
+:root{
+  --bg:#2a2142; --bg2:#33284f; --lav:#dcc6ff; --lav-soft:#efe4ff; --mid:#775a8b; --deep:#45306f;
+  --red:#c63a43; --gold:#f2b23c; --ink:#2a2142;
+  /* ridefinizione dei colori usati dal resto dell'interfaccia */
+  --carta:var(--lav); --pergamena:var(--lav-soft); --inchiostro:var(--ink); --bordeaux:var(--red); --oro:var(--gold);
+  --verde:#1f6b4a; --grigio:#5a4580; --linea:#b79ae0; --bianco:#fff; --ombra:0 2px 0 rgba(0,0,0,.18);
+}
+body{font-family:'Quicksand',system-ui,sans-serif;font-weight:500;background:var(--bg);color:var(--lav);line-height:1.55}
+h1,h2,h3{font-family:'Bowlby One','Arial Black',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;line-height:1.1}
+h4{font-family:'Quicksand',sans-serif;font-weight:700}
+main > h2, main > h3{color:var(--lav)}
+.card h3,.card h2{color:var(--mid);font-size:1.15rem}
+.card{border:0;border-radius:26px;padding:1.3rem 1.5rem;color:var(--ink);box-shadow:none}
+.card p,.card li,.card td{color:var(--ink);font-weight:600}
+.card .mute,.mute{font-weight:500}
+main > .mute,main > p,main > .vuoto{color:var(--lav)}
+label{color:var(--grigio);font-weight:700}
+
+/* testata */
+.testata{background:rgba(42,33,66,.96);backdrop-filter:blur(8px);border-bottom:1px solid rgba(220,198,255,.25);box-shadow:none;color:var(--lav)}
+.logo{display:flex;align-items:center;gap:.7rem;font-family:'Bowlby One',sans-serif;font-size:1.05rem;letter-spacing:.04em;text-transform:uppercase;color:var(--lav)}
+.logo img{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#fff;border:3px solid var(--lav)}
+.logo small{font-family:'Quicksand',sans-serif;text-transform:none;letter-spacing:0;font-weight:700;color:var(--gold);opacity:1;margin-left:.2rem}
+.info-salvataggio{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;justify-content:flex-end;color:var(--lav);opacity:1;font-weight:600}
+.info-salvataggio em{color:var(--gold);font-style:normal}
+@media(max-width:700px){.logo small{display:none}.testata{padding:.5rem .8rem}}
+
+/* pulsanti: a pillola come sul sito */
+button,.btn{border-radius:999px;font-family:'Quicksand',sans-serif;font-weight:700;border:2px solid var(--red);background:var(--red);color:#fff;padding:.5rem 1.1rem;transition:transform .12s,background .12s}
+button:hover{filter:none;background:#d84852;border-color:#d84852;transform:scale(1.03)}
+button.sec{background:transparent;color:var(--deep);border:2px solid var(--deep)}
+button.sec:hover{background:rgba(69,48,111,.1);transform:none}
+button.oro{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+button.oro:hover{background:#ffc352;border-color:#ffc352}
+button.pericolo{background:#8e1d27;border-color:#8e1d27}
+button.pic{padding:.2rem .8rem;font-size:.85rem}
+.barra-elenco button.sec,button.chiaro,.testata button.sec,main > .barra-elenco ~ p button.sec{color:var(--lav);border-color:var(--lav)}
+.barra-elenco button.sec:hover,button.chiaro:hover{background:rgba(220,198,255,.15)}
+.testata button.pic{padding:.15rem .7rem}
+
+/* campi */
+input,select,textarea{border:2px solid var(--linea);border-radius:14px;background:#fff;color:var(--ink);font-family:'Quicksand',sans-serif;font-weight:600}
+input:focus,select:focus,textarea:focus{outline:3px solid var(--gold);outline-offset:1px}
+input[type=checkbox],input[type=radio]{accent-color:var(--red)}
+
+/* tabelle, chip, avvisi */
+th{color:var(--mid)}
+th,td{border-bottom:1px solid rgba(119,90,139,.3)}
+tr.spento{opacity:.55}
+.chip{background:var(--lav-soft);border:1px solid var(--linea);color:var(--deep);font-weight:700}
+.chip.ok{background:#d9f2e3;border-color:#5fae82;color:#14513a}.chip.ko{background:#f9dcdf;border-color:#c97b83;color:#7d1d27}
+.avviso{background:#fff3cf;border:2px solid var(--gold);color:var(--ink);border-radius:14px}
+.consiglio{background:#fff3cf;border-left:5px solid var(--gold);color:var(--ink);border-radius:10px}
+.bg-descr,.p-box,.stat div{background:var(--lav-soft);border-color:var(--linea);color:var(--ink);border-radius:14px}
+.vuoto{color:var(--deep)}
+.inc-desc summary{color:var(--red);font-weight:700}
+.sel-lista label{color:var(--ink);font-weight:600}.sel-lista label.dis{color:#8a7aa8}
+.slot-btn{border-color:var(--red)}.slot-btn.usato{background:var(--red)}
+
+/* schede (tab) */
+.tabs button{background:var(--bg2);color:var(--lav);border:2px solid rgba(220,198,255,.35);text-transform:uppercase;letter-spacing:.05em;font-size:.8rem}
+.tabs button:hover{background:#3d3160;transform:none}
+.tabs button.attiva{background:var(--red);border-color:var(--red);color:#fff}
+.riepilogo .nome{font-family:'Bowlby One',sans-serif;font-size:1.05rem;text-transform:uppercase;color:var(--deep)}
+.anteprima{background:#3b2f5c;border-radius:20px}
+
+/* accesso */
+.login{max-width:430px;margin:2rem auto;text-align:center}
+.login label{display:block;text-align:left;margin-top:.8rem}
+.login input{width:100%}
+.login .avviso{text-align:left}
+.logo-login{width:150px;height:150px;border-radius:50%;object-fit:cover;margin:0 auto .5rem;background:#fff;border:4px solid var(--deep)}
+.centro{text-align:center;padding:3rem 0}
+
+.sel-lista label em{flex-basis:100%;padding-left:1.5rem;margin-top:-.1rem}
+.sel-lista label{flex-wrap:wrap}
+

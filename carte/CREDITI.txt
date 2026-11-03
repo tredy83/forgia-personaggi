@@ -1,0 +1,8 @@
+Carte incantesimo: grafica, icone, cerchi delle scuole e dorsi derivati da
+"nBeebz's 5e Spell Cards" (v1.3) di nBeebz - licenza CC BY-NC-SA 4.0
+(https://creativecommons.org/licenses/by-nc-sa/4.0/). Uso non commerciale.
+Icone: The Noun Project (Hea Poh Lin, Edward Boatman, Mungang Kim, Linda Yuki Nakanishi).
+Cerchi delle scuole: "The Arcane Arts" di Icrangirl (DeviantArt).
+Dorso pergamena/nero: "Dungeons and Dragons Wallpaper" di Xabian (DeviantArt) e versione dell'autore.
+Font inclusi dal pacchetto originale: Ringbearer (titoli), MPlantin (testi).
+Questa versione e' in italiano e condivisa con la stessa licenza CC BY-NC-SA 4.0.
