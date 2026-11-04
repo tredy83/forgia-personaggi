@@ -3,7 +3,7 @@
 .inc-sel{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
 .inc-turni span.inc-t{display:inline-flex;align-items:center;justify-content:center;width:1.9rem;height:1.9rem;border:2px solid #775a8b;border-radius:50%;margin:.15rem;cursor:pointer;font-size:.8rem;background:#fff}
 .inc-turni span.inc-t.on{background:#c63a43;color:#fff;border-color:#c63a43}
-.inc-m{display:flex;justify-content:space-between;gap:.5rem;align-items:center;padding:.3rem 0;border-bottom:1px solid #0002;flex-wrap:wrap}
+.inc-m{display:flex;gap:.6rem;align-items:center;padding:.4rem .3rem;border-bottom:1px solid #0002;cursor:pointer}.inc-m.sel{background:#c9a22722}.inc-m input{width:1.2rem;height:1.2rem}
 .inc-tab{width:100%;border-collapse:collapse}.inc-tab th{font-size:.75rem;text-align:left;text-transform:uppercase;color:#775a8b}
 .inc-tab td{padding:.15rem .2rem;vertical-align:middle}.inc-tab input[type=text],.inc-tab input[type=number]{width:100%;min-width:0}
 .inc-tab input.n2{width:4.2rem}.inc-tab input.n3{width:7rem}.inc-tab tr.sorp{background:#fdf1d4}.inc-bt{white-space:nowrap}

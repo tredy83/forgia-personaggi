@@ -36,7 +36,7 @@
     if (!C.utente) { el.innerHTML = ''; return; }
     const st = C.stato(); const sinc = st.errore ? '<b title="' + esc(st.errore) + '">⚠ non sincronizzato</b>' : st.inCoda ? 'sincronizzo…' : '☁ sincronizzato';
     el.innerHTML = '<span class="utente-barra">👤 ' + esc(C.utente.nome) + ' <em>(' + (C.utente.ruolo === 'gestore' ? 'gestore' : 'genitore') + ')</em></span> <span class="sync">' + n + ' personaggi · ' + sinc + '</span>'
-      + (C.utente.ruolo === 'gestore' ? ' <button class="pic sec chiaro" data-az="vaiBestiario">Bestiario</button> <button class="pic sec chiaro" data-az="vaiParty">Party Tracker</button> <button class="pic sec chiaro" data-az="vaiUtenti">Account</button>' : '') + ' <button class="pic sec chiaro" data-az="vaiProfilo">Profilo</button> <button class="pic sec chiaro" data-az="esci">Esci</button>';
+      + (C.utente.ruolo === 'gestore' ? ' <button class="pic sec chiaro" data-az="vaiBestiario">Bestiario</button> <button class="pic sec chiaro" data-az="vaiParty">Party Tracker</button> <button class="pic sec chiaro" data-az="vaiIncontri">Incontri</button> <button class="pic sec chiaro" data-az="vaiUtenti">Account</button>' : '') + ' <button class="pic sec chiaro" data-az="vaiProfilo">Profilo</button> <button class="pic sec chiaro" data-az="esci">Esci</button>';
   };
 
   const campagne = () => { const m = new Map(); DB.personaggi.forEach((p) => { const c = String(p.campagna || '').trim(); if (c && !m.has(c.toLowerCase())) m.set(c.toLowerCase(), c); }); return [...m.values()].sort((a, b) => a.localeCompare(b, 'it')); };
@@ -68,7 +68,7 @@
       + '<button data-az="nuovo">＋ Nuovo personaggio</button>'
       + '<input type="search" placeholder="Cerca per nome, cognome o campagna…" value="' + esc(S.filtro) + '" data-az="filtro">'
       + '<button class="sec" data-az="toggleCestino">' + (S.cestino ? '← Torna ai personaggi' : '🗑 Cestino (' + nCest + ')') + '</button>'
-      + (!C.attivo ? '<button class="sec" data-az="vaiBestiario">📖 Bestiario</button><button class="sec" data-az="vaiParty">🧭 Party Tracker</button>' : '')
+      + (!C.attivo ? '<button class="sec" data-az="vaiBestiario">📖 Bestiario</button><button class="sec" data-az="vaiParty">🧭 Party Tracker</button><button class="sec" data-az="vaiIncontri">⚔ Incontri</button>' : '')
       + '<button class="sec" data-az="esporta">⬇ Esporta archivio</button>'
       + '<button class="sec" data-az="importa">⬆ Importa archivio</button>'
       + '</div><div class="card">' + tabella + '</div>'

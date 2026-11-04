@@ -23,7 +23,7 @@
   const cloud = () => C.attivo && C.utente && C.utente.ruolo === 'gestore';
 
   /* ---------- stato ---------- */
-  const B = { mostri: null, carico: false, errore: '', imgIds: new Set(), imgMem: new Map(), avv: [], avvId: null, tab: 'cerca', q: '', tipo: '', tg: '', fo: '', gsMin: '', gsMax: '', sel: null, limite: 40, msg: '', imp: '', opz: { dorso: 'immagine', leggi: 'normale', esemplari: false, ordine: 'nome' }, stampa: '', prep: false };
+  const B = { mostri: null, carico: false, errore: '', imgIds: new Set(), imgMem: new Map(), avv: [], avvId: null, tab: 'cerca', q: '', tipo: '', tg: '', fo: '', gsMin: '', gsMax: '', sel: null, sc: new Set(), modo: 'bes', limite: 40, msg: '', imp: '', opz: { dorso: 'immagine', leggi: 'normale', esemplari: false, ordine: 'nome' }, stampa: '', prep: false };
   let ridisegna = () => {};
   const TIPI_FIX = { '/mmondo': 'Immondo', 'Elemento/e': 'Elementale', 'Folle.tto': 'Folletto', Giganle: 'Gigante' };
   const nomeNorm = (n) => String(n || '').trim().replace(/\s+/g, ' ').toLowerCase();
@@ -200,7 +200,7 @@
   }
   function righeRisultati() {
     const L = filtra(); const mostra = L.slice(0, B.limite);
-    const hr = mostra.map((m) => '<div class="bes-riga' + (B.sel === m.id ? ' sel' : '') + '" data-az="besApri" data-id="' + m.id + '"><div class="bes-r1"><b>' + esc(m.n) + '</b> <span class="mute">' + tipoRiga(m).split(',')[0] + '</span></div><div class="bes-r2">' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + ' · GS ' + esc(gsT(m)) + ' · CA ' + esc(m.ca) + ' · PF ' + esc(m.pf) + (B.imgIds.has(m.id) ? ' · 🖼' : '') + '</div><button class="pic ' + (inAvv(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '" title="' + (avvCorr() ? 'Aggiungi a «' + esc(avvCorr().nome) + '»' : 'Aggiungi a un\'avventura') + '">' + (inAvv(m.id) ? '✔' + inAvv(m.id) : '＋') + '</button></div>').join('');
+    const hr = mostra.map((m) => '<div class="bes-riga' + (B.sel === m.id ? ' sel' : '') + '" data-az="besApri" data-id="' + m.id + '"><input type="checkbox" class="bes-ck" data-az="besCk" data-id="' + m.id + '"' + (B.sc.has(m.id) ? ' checked' : '') + ' title="Seleziona per stampare le carte"><div class="bes-r1"><b>' + esc(m.n) + '</b> <span class="mute">' + tipoRiga(m).split(',')[0] + '</span></div><div class="bes-r2">' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + ' · GS ' + esc(gsT(m)) + ' · CA ' + esc(m.ca) + ' · PF ' + esc(m.pf) + (B.imgIds.has(m.id) ? ' · 🖼' : '') + '</div><button class="pic ' + (inAvv(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '" title="' + (avvCorr() ? 'Aggiungi a «' + esc(avvCorr().nome) + '»' : 'Aggiungi a un\'avventura') + '">' + (inAvv(m.id) ? '✔' + inAvv(m.id) : '＋') + '</button></div>').join('');
     return '<div class="mute" style="margin:.3rem 0">' + L.length + ' mostri' + (L.length > mostra.length ? ' (ne mostro ' + mostra.length + ')' : '') + '</div>' + (hr || '<div class="vuoto">Nessun mostro trovato.</div>') + (L.length > mostra.length ? '<p><button class="sec" data-az="besAltri">Mostra altri…</button></p>' : '');
   }
   /* ---------- incantesimi del mostro ---------- */
@@ -275,6 +275,7 @@
       + '<select data-az="besF" data-k="gsMin">' + o('', 'GS da…', B.gsMin === '') + gs.map((g) => o(g, 'GS ' + g, B.gsMin === g)).join('') + '</select>'
       + '<select data-az="besF" data-k="gsMax">' + o('', 'GS fino a…', B.gsMax === '') + gs.map((g) => o(g, 'GS ' + g, B.gsMax === g)).join('') + '</select></div></div>'
       + '<div class="card bes-barra-avv">' + barraAvv() + '</div>'
+      + (B.sc.size ? '<div class="card bes-stampa"><h4>🖨 Carte dei mostri selezionati (' + B.sc.size + ')</h4><p class="mute">' + [...B.sc].map((id) => (B.mappa.get(id) || {}).n).filter(Boolean).sort((x, y) => x.localeCompare(y, 'it')).map(esc).join(', ') + '</p>' + opzioniStampa() + '<p><button class="oro" data-az="besStampaSel">👁 Crea le carte</button> <button data-az="besStampaSelOra">🖨 Stampa</button> <button class="sec" data-az="besScSvuota">Deseleziona tutti</button> <span class="mute">' + (B.stampa || '') + '</span></p><div id="bes-prev"></div></div>' : '<p class="mute" style="margin:.4rem 0">☑ Spunta i mostri nell\'elenco per stampare le loro carte; con ＋ li aggiungi a un\'avventura.</p>')
       + '<div class="bes-griglia"><div class="card"><div id="bes-ris">' + righeRisultati() + '</div></div><div class="card" id="bes-det">' + dettaglio() + '</div></div>';
   };
   function conteggiAvv(a) { return (a.voci || []).reduce((s, v) => s + v.q, 0); }
@@ -282,7 +283,7 @@
     const a = avvCorr(); const sel = '<select data-az="besAvvSel">' + (B.avv.length ? '' : '<option value="">— nessuna avventura —</option>') + B.avv.map((x) => '<option value="' + x.id + '"' + (x.id === B.avvId ? ' selected' : '') + '>' + esc(x.nome || 'Senza nome') + ' (' + conteggiAvv(x) + ')</option>').join('') + '</select>';
     let corpo = '<p class="mute">Crea una lista per ogni avventura (ogni avventura deve avere un nome diverso), poi aggiungi i mostri dalla scheda <b>Cerca</b> con il pulsante ＋.</p>';
     if (a) {
-      const righe = (a.voci || []).map((v) => { const m = B.mappa.get(v.id); if (!m) return ''; return '<tr><td><a href="#" data-az="besApriDa" data-id="' + m.id + '">' + esc(m.n) + '</a> <span class="mute">GS ' + esc(gsT(m)) + ' · ' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + '</span>' + (B.imgIds.has(m.id) ? ' 🖼' : '') + '</td><td class="q"><button class="pic sec" data-az="besQta" data-id="' + m.id + '" data-d="-1">−</button> <b>' + v.q + '</b> <button class="pic sec" data-az="besQta" data-id="' + m.id + '" data-d="1">＋</button></td><td><button class="pic sec" data-az="besTogliVoce" data-id="' + m.id + '" title="Togli">✕</button></td></tr>'; }).join('');
+      const righe = (a.voci || []).slice().sort((x, y) => String((B.mappa.get(x.id) || {}).n || '').localeCompare(String((B.mappa.get(y.id) || {}).n || ''), 'it')).map((v) => { const m = B.mappa.get(v.id); if (!m) return ''; return '<tr><td><a href="#" data-az="besApriDa" data-id="' + m.id + '">' + esc(m.n) + '</a> <span class="mute">GS ' + esc(gsT(m)) + ' · ' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + '</span>' + (B.imgIds.has(m.id) ? ' 🖼' : '') + '</td><td class="q"><button class="pic sec" data-az="besQta" data-id="' + m.id + '" data-d="-1">−</button> <b>' + v.q + '</b> <button class="pic sec" data-az="besQta" data-id="' + m.id + '" data-d="1">＋</button></td><td><button class="pic sec" data-az="besTogliVoce" data-id="' + m.id + '" title="Togli">✕</button></td></tr>'; }).join('');
       const senza = (a.voci || []).map((v) => B.mappa.get(v.id)).filter((m) => m && !B.imgIds.has(m.id));
       corpo = '<div class="riga"><div class="col"><label>Nome dell\'avventura</label><input type="text" data-az="besAvvNome" value="' + esc(a.nome) + '"></div></div>'
         + ((a.voci || []).length ? '<table class="bes-tab"><thead><tr><th>Mostro</th><th>Quantità</th><th></th></tr></thead><tbody>' + righe + '</tbody></table>' : '<div class="vuoto">La lista è vuota: aggiungi dei mostri dalla scheda Cerca.</div>')
@@ -306,11 +307,11 @@
   X.vistaBestiario = function () {
     if (!B.carico) { if (!B.prep) { B.prep = true; carica(); } return '<div class="barra-elenco"><button class="sec" data-az="tornaElenco">← Personaggi</button></div><p class="mute centro">Carico il bestiario…</p>'; }
     const vuoto = !(B.mostri || []).length;
-    const tabs = [['cerca', '🔎 Cerca'], ['avv', '📜 Avventure'], ['inc', '⚔ Incontri'], ['dati', '⚙ Dati e immagini']].map(([id, l]) => '<button class="' + (B.tab === id ? 'attiva' : '') + '" data-az="besTab" data-t="' + id + '">' + l + '</button>').join('');
-    return '<div class="barra-elenco"><button class="sec" data-az="tornaElenco">← Personaggi</button><b style="font-size:1.1rem">📖 Bestiario del Dungeon Master</b></div>'
+    const tabs = [['cerca', '🔎 Cerca'], ['avv', '📜 Avventure'], ['dati', '⚙ Dati e immagini']].map(([id, l]) => '<button class="' + (B.tab === id ? 'attiva' : '') + '" data-az="besTab" data-t="' + id + '">' + l + '</button>').join('');
+    return '<div class="barra-elenco"><button class="sec" data-az="tornaElenco">← Personaggi</button><b style="font-size:1.1rem">' + (B.modo === 'inc' ? '⚔ Incontri e iniziativa' : '📖 Bestiario del Dungeon Master') + '</b>' + (B.modo === 'inc' ? ' <button class="sec" data-az="vaiBestiario">📖 Bestiario</button>' : ' <button class="sec" data-az="vaiIncontri">⚔ Incontri</button>') + '</div>'
       + (B.errore ? '<div class="avviso">⚠ ' + esc(B.errore) + '</div>' : '')
-      + (vuoto && B.tab !== 'dati' ? '<div class="avviso">Il bestiario è vuoto: importa il file dei mostri dalla scheda <b>Dati e immagini</b>. <button class="pic oro" data-az="besTab" data-t="dati">Vai</button></div>' : '')
-      + '<div class="tabs bes-tabs">' + tabs + '</div>' + (B.tab === 'cerca' ? tabCerca() : B.tab === 'avv' ? tabAvv() : B.tab === 'inc' ? X.tabIncontri() : tabDati())
+      + (vuoto && B.tab !== 'dati' && B.modo !== 'inc' ? '<div class="avviso">Il bestiario è vuoto: importa il file dei mostri dalla scheda <b>Dati e immagini</b>. <button class="pic oro" data-az="besTab" data-t="dati">Vai</button></div>' : '')
+      + (B.modo === 'inc' ? X.tabIncontri() : '<div class="tabs bes-tabs">' + tabs + '</div>' + (B.tab === 'cerca' ? tabCerca() : B.tab === 'avv' ? tabAvv() : tabDati()))
       + '<input type="file" id="bes-file-json" accept=".json,application/json" hidden data-az="besFileJson"><input type="file" id="bes-file-img" accept="image/*" hidden data-az="besFileImg"><input type="file" id="bes-file-imgs" accept="image/*" multiple hidden data-az="besFileImgs">';
   };
 
@@ -333,6 +334,7 @@
       B.msg = ''; await salvaAvv(a).catch((e) => { B.errore = e.message; });
       toast('✔ ' + (m ? m.n : 'Mostro') + ' aggiunto a «' + a.nome + '» (' + conteggiAvv(a) + ' mostri' + (v ? ', ora ×' + v.q : '') + ')'); ridisegna();
     };
+    const vociSel = () => [...B.sc].map((id) => ({ m: B.mappa.get(id), n: 1 })).filter((v) => v.m).sort((x, y) => x.m.n.localeCompare(y.m.n, 'it'));
     const vociStampa = (a) => (a.voci || []).map((v) => ({ m: B.mappa.get(v.id), n: B.opz.esemplari ? v.q : 1 })).filter((v) => v.m);
     const prova = async (voci) => {
       const cont = document.getElementById('bes-prev'); if (!cont) return;
@@ -359,7 +361,8 @@
       });
     }
     const az = {
-      vaiBestiario() { S.vista = 'bestiario'; render(); },
+      vaiBestiario() { S.vista = 'bestiario'; B.modo = 'bes'; if (B.tab === 'inc') B.tab = 'cerca'; render(); },
+      vaiIncontri() { S.vista = 'bestiario'; B.modo = 'inc'; B.tab = 'inc'; render(); },
       besTab(el) { B.tab = el.dataset.t; B.stampa = ''; render(); },
       besQ(el) { B.q = el.value; B.limite = 40; const r = $('#bes-ris'); if (r) r.innerHTML = righeRisultati(); },
       besF(el) { B[el.dataset.k] = el.value; B.limite = 40; render(); },
@@ -377,6 +380,10 @@
       async besQta(el) { const a = avvCorr(); const v = a && a.voci.find((x) => x.id === Number(el.dataset.id)); if (!v) return; v.q = Math.max(1, v.q + Number(el.dataset.d)); await salvaAvv(a).catch((e) => { B.errore = e.message; }); ridisegna(); },
       async besTogliVoce(el) { const a = avvCorr(); if (!a) return; a.voci = a.voci.filter((x) => x.id !== Number(el.dataset.id)); await salvaAvv(a).catch((e) => { B.errore = e.message; }); ridisegna(); },
       besOpz(el) { B.opz[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; B.stampa = ''; ridisegna(); },
+      besCk(el, e) { const id = Number(el.dataset.id); if (el.checked) B.sc.add(id); else B.sc.delete(id); B.stampa = ''; ridisegna(); },
+      besScSvuota() { B.sc.clear(); B.stampa = ''; ridisegna(); },
+      async besStampaSel() { await prova(vociSel()); },
+      async besStampaSelOra() { await stampaOra(vociSel()); },
       async besStampaAvv() { const a = avvCorr(); if (a) await prova(vociStampa(a)); },
       async besStampaOra() { const a = avvCorr(); if (a) await stampaOra(vociStampa(a)); },
       async besStampa1(el) {
@@ -426,7 +433,7 @@
       },
     };
     document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.az === 'besQ') az.besQ(e.target); });
-    Object.assign(az, X.azioniIncontri({ B, avvCorr, salva: salvaAvv, ridisegna: () => ridisegna(), toast, pgs: () => (c.pgs ? c.pgs() : []) }));
+    Object.assign(az, X.azioniIncontri({ B, avvCorr, salva: salvaAvv, opzioniStampa, prova, stampaOra, ridisegna: () => ridisegna(), toast, pgs: () => (c.pgs ? c.pgs() : []) }));
     return az;
   };
   X.bestiarioReset = () => { B.mostri = null; B.mappa = null; B.carico = false; B.prep = false; B.imgIds = new Set(); B.imgMem.clear(); B.avv = []; B.avvId = null; B.sel = null; };

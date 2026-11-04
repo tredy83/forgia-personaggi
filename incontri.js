@@ -35,19 +35,20 @@
       + (!(a.voci || []).length ? '<p class="mute">Questa avventura non ha ancora mostri: aggiungili dalla scheda Cerca con il pulsante ＋.</p>' : '') + '</div>';
     if (!inc) return h + '<div class="card"><p class="mute">Premi <b>＋ Nuovo incontro</b> per cominciare (es. «Incontro 1»). Poi scegli quali mostri dell\'avventura ne fanno parte: entrano nella griglia con l\'iniziativa già tirata.</p></div>';
     const turni = Array.from({ length: NT }, (_, i) => '<span class="inc-t' + (i < (inc.turni || 0) ? ' on' : '') + '" data-az="incTurno" data-k="' + (i + 1) + '">' + (i + 1) + '</span>').join('');
-    const mostri = (a.voci || []).map((v) => { const m = B.mappa.get(v.id); if (!m) return ''; const gia = inc.righe.filter((r) => r.mid === m.id).length;
-      return '<div class="inc-m"><span><b>' + esc2(m.n) + '</b> <span class="mute">GS ' + esc2(m.gs) + ' · CA ' + esc2(m.ca) + ' · PF ' + esc2(m.pf) + ' · iniz. ' + (mod(m.car ? m.car[1] : 10) >= 0 ? '+' : '−') + Math.abs(mod(m.car ? m.car[1] : 10)) + (gia ? ' · nell\'incontro: ' + gia : '') + '</span></span>'
-        + '<span><input class="n2" type="number" min="1" max="30" value="' + v.q + '" id="inc-q-' + m.id + '"> <button class="sec" data-az="incAgg" data-id="' + m.id + '">＋ Aggiungi</button></span></div>'; }).join('');
+    const ord = (a.voci || []).map((v) => ({ v, m: B.mappa.get(v.id) })).filter((x) => x.m).sort((x, y) => x.m.n.localeCompare(y.m.n, 'it'));
+    const mostri = ord.map(({ v, m }) => { const gia = inc.righe.some((r) => r.mid === m.id);
+      return '<label class="inc-m' + (gia ? ' sel' : '') + '"><input type="checkbox" data-az="incSelMostro" data-id="' + m.id + '"' + (gia ? ' checked' : '') + '> <span><b>' + esc2(m.n) + '</b>' + (v.q > 1 ? ' <span class="chip">× ' + v.q + '</span>' : '') + ' <span class="mute">GS ' + esc2(m.gs) + ' · CA ' + esc2(m.ca) + ' · PF ' + esc2(m.pf) + ' · iniz. ' + (mod(m.car ? m.car[1] : 10) >= 0 ? '+' : '−') + Math.abs(mod(m.car ? m.car[1] : 10)) + '</span></span></label>'; }).join('');
     const pgs = api.pgs().filter((p) => !p.cestinato).sort((x, y) => String(x.nome).localeCompare(String(y.nome), 'it'));
     h += '<div class="card"><div class="riga"><div class="col"><label>Nome dell\'incontro</label><input type="text" data-az="incNome" value="' + esc2(inc.nome) + '"></div></div>'
       + '<label>Note (nome dell\'incontro, pagina dell\'avventura, appunti…)</label><textarea data-az="incNote" rows="2" placeholder="Es. Pag. 42 · Imboscata nel bosco">' + esc2(inc.note || '') + '</textarea>'
-      + '<p class="inc-turni"><b>Turni</b> <span class="mute">(tocca un numero per segnare i turni fatti)</span><br>' + turni + ' <button class="pic sec" data-az="incTurnoZero">azzera</button></p></div>'
-      + '<div class="card"><h4>Mostri dell\'avventura</h4><p class="mute">Scegli quanti ne entrano nell\'incontro. Ogni tipo tira <b>una sola iniziativa</b> (d20 + Destrezza): 4 goblin hanno tutti lo stesso valore.</p>' + (mostri || '<p class="mute">Nessun mostro.</p>')
-      + '<p><button class="oro" data-az="incAggTutti">＋ Aggiungi tutti i mostri dell\'avventura</button></p>'
-      + '<h4>Personaggi</h4><div class="riga"><select id="inc-pg"><option value="">— scegli un personaggio salvato —</option>' + pgs.map((p) => '<option value="' + p.id + '">' + esc2(p.nome || 'Senza nome') + (p.campagna ? ' · ' + esc2(p.campagna) : '') + '</option>').join('') + '</select> <button class="sec" data-az="incAggPg">＋ Aggiungi</button> <button class="sec" data-az="incAggLibero">＋ Riga libera</button></div>'
+      + '<p class="inc-turni"><b>Turni</b> <span class="mute">(tocca un numero per segnare i turni fatti)</span><br>' + turni + '</p></div>'
+      + '<div class="card"><h4>2 · Scegli i mostri dell\'incontro</h4><p class="mute">Spunta quali mostri dell\'avventura partecipano: entrano nella griglia con l\'iniziativa già tirata (d20 + Destrezza, <b>un solo tiro per tipo</b>). Le quantità sono quelle decise nell\'avventura (<b>× n</b>).</p>' + (mostri || '<p class="mute">Nessun mostro.</p>')
+      + '<p><button class="sec" data-az="incSelTutti">☑ Seleziona tutti</button> <button class="sec" data-az="incSelNessuno">☐ Deseleziona tutti</button></p>'
+      + '<h4>Personaggi (facoltativo)</h4><div class="riga"><select id="inc-pg"><option value="">— scegli un personaggio salvato —</option>' + pgs.map((p) => '<option value="' + p.id + '">' + esc2(p.nome || 'Senza nome') + (p.campagna ? ' · ' + esc2(p.campagna) : '') + '</option>').join('') + '</select> <button class="sec" data-az="incAggPg">＋ Aggiungi</button> <button class="sec" data-az="incAggLibero">＋ Riga libera</button></div>'
       + '<p class="mute" style="font-size:.8rem">I personaggi si possono anche scrivere a mano sul foglio stampato, nella riga del loro valore di iniziativa.</p></div>'
-      + '<div class="card"><h4>Griglia dell\'incontro</h4>' + tabella(inc)
-      + '<p><button class="sec" data-az="incTiraTutti">🎲 Tira di nuovo tutte le iniziative dei mostri</button> <button class="oro" data-az="incStampa">🖨 Stampa (A4)</button> <button class="sec pericolo" data-az="incElimina">Elimina incontro</button></p></div>';
+      + '<div class="card"><h4>3 · Griglia dell\'iniziativa</h4>' + tabella(inc)
+      + '<p><button class="sec" data-az="incTiraTutti">🎲 Tira di nuovo tutte le iniziative dei mostri</button> <button class="oro" data-az="incStampa">🖨 Stampa la griglia (A4)</button> <button class="sec pericolo" data-az="incElimina">Elimina incontro</button></p></div>'
+      + '<div class="card bes-stampa"><h4>4 · Carte dei mostri di questo incontro</h4>' + api.opzioniStampa() + '<p><button class="oro" data-az="incCarteProva">👁 Crea le carte</button> <button data-az="incCarteStampa">🖨 Stampa le carte</button> <span class="mute">' + esc2(B.stampa || '') + '</span></p><div id="bes-prev"></div></div>';
     return h;
   };
 
@@ -69,6 +70,8 @@
     api = a0;
     const cur = () => { const a = api.avvCorr(); return a ? { a, inc: corr(a) } : {}; };
     const salva = async (a) => { a.aggiornato = new Date().toISOString(); await api.salva(a); };
+    const voci = () => { const { inc } = cur(); if (!inc) return []; const per = new Map(); inc.righe.forEach((r) => { if (r.mid) per.set(r.mid, (per.get(r.mid) || 0) + 1); });
+      return [...per].map(([id, n]) => ({ m: api.B.mappa.get(id), n: api.B.opz.esemplari ? n : 1 })).filter((v) => v.m).sort((x, y) => x.m.n.localeCompare(y.m.n, 'it')); };
     const riga = (inc, id) => inc.righe.find((r) => r.id === id);
     const nuovaRiga = (m, ini, g, nome) => ({ id: rid(), g, mid: m.id, n: nome, ca: m.ca, pf: m.pf, ini, sorp: false });
     const aggMostro = (inc, m, q) => {
@@ -86,9 +89,15 @@
       async incNome(el) { const { a, inc } = cur(); if (!inc) return; const v = el.value.trim().replace(/\s+/g, ' '); if (!v) { G.alert('Il nome non può essere vuoto.'); el.value = inc.nome; return; } if (incontri(a).some((x) => x.id !== inc.id && x.nome.toLowerCase() === v.toLowerCase())) { G.alert('Esiste già un incontro con questo nome.'); el.value = inc.nome; return; } inc.nome = v; await salva(a); api.ridisegna(); },
       async incNote(el) { const { a, inc } = cur(); if (!inc) return; inc.note = el.value; clearTimeout(az._t); az._t = setTimeout(() => salva(a), 400); },
       async incTurno(el) { const { a, inc } = cur(); if (!inc) return; const k = Number(el.dataset.k); inc.turni = (inc.turni || 0) === k ? k - 1 : k; await salva(a); api.ridisegna(); },
-      async incTurnoZero() { const { a, inc } = cur(); if (!inc) return; inc.turni = 0; await salva(a); api.ridisegna(); },
-      async incAgg(el) { const { a, inc } = cur(); if (!inc) return; const m = api.B.mappa.get(Number(el.dataset.id)); const q = Math.max(1, Math.min(30, Number((document.getElementById('inc-q-' + el.dataset.id) || {}).value) || 1)); if (!m) return; aggMostro(inc, m, q); await salva(a); api.toast('✔ ' + q + ' × ' + m.n + ' nell\'incontro «' + inc.nome + '» (iniziativa tirata)'); api.ridisegna(); },
-      async incAggTutti() { const { a, inc } = cur(); if (!inc) return; let n = 0; (a.voci || []).forEach((v) => { const m = api.B.mappa.get(v.id); if (m) { aggMostro(inc, m, v.q); n += v.q; } }); await salva(a); api.toast('✔ ' + n + ' mostri aggiunti a «' + inc.nome + '»'); api.ridisegna(); },
+      async incSelMostro(el) {
+        const { a, inc } = cur(); if (!inc) return; const m = api.B.mappa.get(Number(el.dataset.id)); if (!m) return; const v = (a.voci || []).find((x) => x.id === m.id);
+        if (el.checked) { if (!inc.righe.some((r) => r.mid === m.id)) aggMostro(inc, m, Math.max(1, (v && v.q) || 1)); } else inc.righe = inc.righe.filter((r) => r.mid !== m.id);
+        await salva(a); api.ridisegna();
+      },
+      async incSelTutti() { const { a, inc } = cur(); if (!inc) return; (a.voci || []).forEach((v) => { const m = api.B.mappa.get(v.id); if (m && !inc.righe.some((r) => r.mid === m.id)) aggMostro(inc, m, Math.max(1, v.q || 1)); }); await salva(a); api.ridisegna(); },
+      async incSelNessuno() { const { a, inc } = cur(); if (!inc) return; inc.righe = inc.righe.filter((r) => !r.mid); await salva(a); api.ridisegna(); },
+      async incCarteProva() { const v = voci(); if (!v.length) { api.toast('Scegli prima i mostri dell\'incontro'); return; } await api.prova(v); },
+      async incCarteStampa() { const v = voci(); if (!v.length) { api.toast('Scegli prima i mostri dell\'incontro'); return; } await api.stampaOra(v); },
       async incAggPg() {
         const { a, inc } = cur(); if (!inc) return; const id = (document.getElementById('inc-pg') || {}).value; const p = id && api.pgs().find((x) => x.id === id); if (!p) { api.toast('Scegli un personaggio dall\'elenco'); return; }
         let ca = '', pf = ''; try { const d = G.DND.M.derive(p); ca = d.ca; pf = d.pf; } catch (e) { /* ignora */ }

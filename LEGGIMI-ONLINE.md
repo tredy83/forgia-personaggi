@@ -72,9 +72,11 @@ Il pulsante **Bestiario** (nella barra in alto, visibile solo ai gestori) apre i
 - Stampa: A4 orizzontale, 8 PG per foglio; margini «nessuno» e «Grafica di sfondo» attiva.
 - Nessuna modifica alle regole Firestore: il campo `campagna` viaggia nel documento del personaggio.
 
-## 7. Incontri e initiative tracker (solo gestori)
+## 7. Incontri e iniziativa (solo gestori)
 
-Nel Bestiario, scheda **⚔ Incontri**: scegli l'avventura, crea un incontro («Incontro 1», con note libere: nome, pagina dell'avventura…), aggiungi i mostri dell'avventura (quanti ne servono) e i personaggi salvati. I mostri entrano nella griglia con l'iniziativa già tirata (d20 + Destrezza, **una sola per tipo**: 4 goblin = stesso valore). Colonne: Sorpreso, Iniziativa, Nome, CA, PF. Puoi cambiare ogni valore, tirare di nuovo (🎲 per un gruppo, o tutti), segnare i turni (contatore da 1 a 20) e **stampare in A4**: la griglia ha i valori di iniziativa fissi da 20 a −5 (si estende se serve), con i mostri già nella loro riga e righe vuote per scrivere a mano i personaggi. Gli incontri sono salvati dentro l'avventura (online, con le regole Firestore già esistenti).
+Sezione a parte, pulsante **Incontri** (accanto a Bestiario). Flusso: crei l'avventura e scegli i suoi mostri con ＋ (la quantità si decide lì) → in Incontri scegli l'avventura, crei un incontro (nome unico, note libere) → spunti i mostri (in ordine alfabetico) che partecipano: entrano nella griglia con l'iniziativa già tirata (d20 + Destrezza, un solo tiro per tipo) → stampi la **griglia A4** (iniziativa fissa da 20 a −5, mostri già nella loro riga, righe vuote per i personaggi) e le **carte dei mostri** dell'incontro. Gli incontri sono salvati dentro l'avventura.
+
+Nel **Bestiario → Cerca** puoi anche spuntare dei mostri e stampare direttamente le loro carte, senza avventura.
 
 ## Cosa NON è stato provato
 
