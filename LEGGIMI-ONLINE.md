@@ -58,6 +58,8 @@ Il pulsante **Bestiario** (nella barra in alto, visibile solo ai gestori) apre i
 
 **Modalità locale** (senza Firebase): dati e immagini restano nel browser (IndexedDB) di quel dispositivo.
 
+**Avventure e immagini**: nella scheda Cerca, sopra l'elenco, c'è la barra «I mostri con ＋ vanno in: [avventura]»: scegli lì la lista di destinazione. Ogni ＋ mostra una conferma e diventa ✔ con la quantità; i nomi delle avventure devono essere tutti diversi. Per le immagini: «🔎 Cerca un'immagine», poi sull'immagine trovata tasto destro → «Copia immagine», clic nella casella tratteggiata della scheda e Ctrl+V (o trascina l'immagine nella scheda): si salva da sola.
+
 **Testi dei mostri**: vengono dalla lettura automatica (OCR) dei PDF, quindi possono contenere piccoli refusi; le cifre stampate in modo anomalo sul manuale sono state mantenute come stampate.
 
 ## 6. Campagna e Party Tracker (solo gestori)

@@ -25,6 +25,11 @@
   /* ---------- stato ---------- */
   const B = { mostri: null, carico: false, errore: '', imgIds: new Set(), imgMem: new Map(), avv: [], avvId: null, tab: 'cerca', q: '', tipo: '', tg: '', fo: '', gsMin: '', gsMax: '', sel: null, limite: 40, msg: '', imp: '', opz: { dorso: 'immagine', leggi: 'normale', esemplari: false, ordine: 'nome' }, stampa: '', prep: false };
   let ridisegna = () => {};
+  const TIPI_FIX = { '/mmondo': 'Immondo', 'Elemento/e': 'Elementale', 'Folle.tto': 'Folletto', Giganle: 'Gigante' };
+  const nomeNorm = (n) => String(n || '').trim().replace(/\s+/g, ' ').toLowerCase();
+  const nomeEsiste = (n, escludiId) => B.avv.some((a) => a.id !== escludiId && nomeNorm(a.nome) === nomeNorm(n));
+  const toast = (txt) => { let t = document.getElementById('bes-toast'); if (!t) { t = document.createElement('div'); t.id = 'bes-toast'; document.body.appendChild(t); } t.textContent = txt; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 3200); };
+  const inAvv = (id) => { const a = B.avv.find((x) => x.id === B.avvId); const v = a && (a.voci || []).find((x) => x.id === id); return v ? v.q : 0; };
   const FONTI = { mm: { n: 'Manuale dei Mostri', s: 'Man. Mostri' }, mtm: { n: 'Mordenkainen presenta: Mostri del Multiverso', s: 'Mostri Multiverso' } };
   const fonte = (m) => FONTI[m.fo || 'mm'] || { n: String(m.fo), s: String(m.fo) };
   const gsT = (m) => (m.gs === '' || m.gs == null ? '—' : m.gs);
@@ -38,11 +43,15 @@
       let lista = null;
       if (cloud()) { try { lista = await C.mostriLeggi(); if (lista.length) await kv.set('mostri', lista); } catch (e) { B.errore = e.message; } }
       if (!lista || !lista.length) lista = (await kv.get('mostri')) || [];
+      lista.forEach((m) => { if (TIPI_FIX[m.tipo]) m.tipo = TIPI_FIX[m.tipo]; });
       B.mostri = lista.slice().sort((a, b) => a.n.localeCompare(b.n, 'it') || (a.id - b.id));
       B.mappa = new Map(B.mostri.map((m) => [m.id, m]));
       B.imgIds = new Set(cloud() ? await C.imgIndice().catch(async () => (await kv.get('imgids')) || []) : ((await kv.get('imgids')) || []));
       B.avv = cloud() ? await C.avvLeggi().catch(async () => (await kv.get('avv')) || []) : ((await kv.get('avv')) || []);
       if (cloud()) { kv.set('imgids', [...B.imgIds]); kv.set('avv', B.avv); }
+      const visti = new Set(); const cambiate = [];
+      B.avv.forEach((a) => { let n = nomeNorm(a.nome), k = 2; const base = String(a.nome || 'Avventura').trim(); while (visti.has(n)) { a.nome = base + ' (' + k++ + ')'; n = nomeNorm(a.nome); cambiate.push(a); } visti.add(n); });
+      for (const a of cambiate) await salvaAvv(a).catch(() => {});
       if (!B.avvId && B.avv.length) B.avvId = B.avv[0].id;
     } catch (e) { B.errore = e.message || String(e); B.mostri = B.mostri || []; B.mappa = B.mappa || new Map(); }
     B.carico = true; ridisegna();
@@ -191,7 +200,7 @@
   }
   function righeRisultati() {
     const L = filtra(); const mostra = L.slice(0, B.limite);
-    const hr = mostra.map((m) => '<div class="bes-riga' + (B.sel === m.id ? ' sel' : '') + '" data-az="besApri" data-id="' + m.id + '"><div class="bes-r1"><b>' + esc(m.n) + '</b> <span class="mute">' + tipoRiga(m).split(',')[0] + '</span></div><div class="bes-r2">' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + ' · GS ' + esc(gsT(m)) + ' · CA ' + esc(m.ca) + ' · PF ' + esc(m.pf) + (B.imgIds.has(m.id) ? ' · 🖼' : '') + '</div><button class="pic sec" data-az="besAgg" data-id="' + m.id + '" title="Aggiungi all\'avventura">＋</button></div>').join('');
+    const hr = mostra.map((m) => '<div class="bes-riga' + (B.sel === m.id ? ' sel' : '') + '" data-az="besApri" data-id="' + m.id + '"><div class="bes-r1"><b>' + esc(m.n) + '</b> <span class="mute">' + tipoRiga(m).split(',')[0] + '</span></div><div class="bes-r2">' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + ' · GS ' + esc(gsT(m)) + ' · CA ' + esc(m.ca) + ' · PF ' + esc(m.pf) + (B.imgIds.has(m.id) ? ' · 🖼' : '') + '</div><button class="pic ' + (inAvv(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '" title="' + (avvCorr() ? 'Aggiungi a «' + esc(avvCorr().nome) + '»' : 'Aggiungi a un\'avventura') + '">' + (inAvv(m.id) ? '✔' + inAvv(m.id) : '＋') + '</button></div>').join('');
     return '<div class="mute" style="margin:.3rem 0">' + L.length + ' mostri' + (L.length > mostra.length ? ' (ne mostro ' + mostra.length + ')' : '') + '</div>' + (hr || '<div class="vuoto">Nessun mostro trovato.</div>') + (L.length > mostra.length ? '<p><button class="sec" data-az="besAltri">Mostra altri…</button></p>' : '');
   }
   /* ---------- incantesimi del mostro ---------- */
@@ -247,9 +256,15 @@
   function dettaglio() {
     const m = B.mappa && B.mappa.get(B.sel); if (!m) return '<div class="vuoto">Scegli un mostro dall\'elenco per vederne la scheda.</div>';
     const img = B.imgMem.get(m.id);
-    return '<div class="bes-det"><div class="bes-az"><button class="oro" data-az="besStampa1" data-id="' + m.id + '">🖨 Stampa la carta</button> <button class="sec" data-az="besAgg" data-id="' + m.id + '">＋ Aggiungi all\'avventura</button> <button class="sec" data-az="besImg" data-id="' + m.id + '">🖼 ' + (B.imgIds.has(m.id) ? 'Cambia immagine' : 'Carica immagine') + '</button>' + (B.imgIds.has(m.id) ? ' <button class="sec" data-az="besImgTogli" data-id="' + m.id + '">Rimuovi immagine</button>' : '') + ' <a class="pic sec" target="_blank" rel="noopener" href="' + esc(ricercaImg(m)) + '">🔎 Cerca un\'immagine</a></div>'
+    return '<div class="bes-det"><div class="bes-az"><button class="oro" data-az="besStampa1" data-id="' + m.id + '">🖨 Stampa la carta</button> <button class="' + (inAvv(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '">' + (avvCorr() ? '＋ Aggiungi a «' + esc(avvCorr().nome) + '»' + (inAvv(m.id) ? ' (già ×' + inAvv(m.id) + ')' : '') : '＋ Aggiungi a un\'avventura') + '</button> <button class="sec" data-az="besImg" data-id="' + m.id + '">🖼 ' + (B.imgIds.has(m.id) ? 'Cambia immagine' : 'Carica immagine') + '</button>' + (B.imgIds.has(m.id) ? ' <button class="sec" data-az="besImgTogli" data-id="' + m.id + '">Rimuovi immagine</button>' : '') + ' <a class="pic sec" target="_blank" rel="noopener" href="' + esc(ricercaImg(m)) + '">🔎 Cerca un\'immagine</a></div>'
+      + '<div class="bes-paste" id="bes-paste" tabindex="0">📋 <b>Trovata l\'immagine?</b> Tasto destro → «Copia immagine», poi clicca qui e premi <b>Ctrl+V</b> (oppure trascinala qui sopra). Si salva da sola su ' + esc(m.n) + '.</div>'
       + avvisoInc(m) + (img ? '<img class="bes-foto" src="' + img + '" alt="">' : '') + '<div class="mb mb-sch"><h4>' + esc(m.n) + '</h4><div class="mb-t">' + tipoRiga(m) + '</div><hr class="mb-hr">' + corpoHTML(m) + '</div><p class="mute" style="font-size:.78rem">' + esc(fonte(m).n) + ', p. ' + esc(m.pg) + (m.inc ? ' · ⚠ scheda forse incompleta (azioni non trovate nella lettura del PDF): controlla sul manuale.' : '') + '</p></div>';
   }
+  const barraAvv = () => {
+    if (!B.avv.length) return '<b>📜 Avventura:</b> <span class="mute">non ne hai ancora una.</span> <button class="oro" data-az="besAvvNuova">＋ Crea la tua prima avventura</button> <span class="mute">Dai un nome alla tua avventura, poi con il pulsante ＋ accanto a ogni mostro lo aggiungi alla lista.</span>';
+    const a = avvCorr();
+    return '<b>📜 I mostri con ＋ vanno in:</b> <select data-az="besAvvSel">' + B.avv.map((x) => '<option value="' + x.id + '"' + (x.id === B.avvId ? ' selected' : '') + '>' + esc(x.nome || 'Senza nome') + ' (' + conteggiAvv(x) + ')</option>').join('') + '</select> <button class="sec" data-az="besAvvNuova">＋ Nuova avventura</button> <button class="sec" data-az="besTab" data-t="avv">Vedi la lista di «' + esc(a ? a.nome : '') + '» →</button>';
+  };
   const tabCerca = () => {
     const tipi = [...new Set((B.mostri || []).map((m) => m.tipo))].sort(); const tgs = ['Minuscol', 'Piccol', 'Medi', 'Grande', 'Enorme', 'Mastodontic'];
     const gs = optGS(); const o = (v, l, s) => '<option value="' + esc(v) + '"' + (s ? ' selected' : '') + '>' + esc(l) + '</option>';
@@ -259,12 +274,13 @@
       + '<select data-az="besF" data-k="tg">' + o('', 'Ogni taglia', !B.tg) + tgs.map((t) => o(t, t + 'a/o', B.tg === t)).join('') + '</select>'
       + '<select data-az="besF" data-k="gsMin">' + o('', 'GS da…', B.gsMin === '') + gs.map((g) => o(g, 'GS ' + g, B.gsMin === g)).join('') + '</select>'
       + '<select data-az="besF" data-k="gsMax">' + o('', 'GS fino a…', B.gsMax === '') + gs.map((g) => o(g, 'GS ' + g, B.gsMax === g)).join('') + '</select></div></div>'
+      + '<div class="card bes-barra-avv">' + barraAvv() + '</div>'
       + '<div class="bes-griglia"><div class="card"><div id="bes-ris">' + righeRisultati() + '</div></div><div class="card" id="bes-det">' + dettaglio() + '</div></div>';
   };
   function conteggiAvv(a) { return (a.voci || []).reduce((s, v) => s + v.q, 0); }
   const tabAvv = () => {
     const a = avvCorr(); const sel = '<select data-az="besAvvSel">' + (B.avv.length ? '' : '<option value="">— nessuna avventura —</option>') + B.avv.map((x) => '<option value="' + x.id + '"' + (x.id === B.avvId ? ' selected' : '') + '>' + esc(x.nome || 'Senza nome') + ' (' + conteggiAvv(x) + ')</option>').join('') + '</select>';
-    let corpo = '<p class="mute">Crea una lista per ogni avventura, poi aggiungi i mostri dalla scheda <b>Cerca</b> con il pulsante ＋.</p>';
+    let corpo = '<p class="mute">Crea una lista per ogni avventura (ogni avventura deve avere un nome diverso), poi aggiungi i mostri dalla scheda <b>Cerca</b> con il pulsante ＋.</p>';
     if (a) {
       const righe = (a.voci || []).map((v) => { const m = B.mappa.get(v.id); if (!m) return ''; return '<tr><td><a href="#" data-az="besApriDa" data-id="' + m.id + '">' + esc(m.n) + '</a> <span class="mute">GS ' + esc(gsT(m)) + ' · ' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + '</span>' + (B.imgIds.has(m.id) ? ' 🖼' : '') + '</td><td class="q"><button class="pic sec" data-az="besQta" data-id="' + m.id + '" data-d="-1">−</button> <b>' + v.q + '</b> <button class="pic sec" data-az="besQta" data-id="' + m.id + '" data-d="1">＋</button></td><td><button class="pic sec" data-az="besTogliVoce" data-id="' + m.id + '" title="Togli">✕</button></td></tr>'; }).join('');
       const senza = (a.voci || []).map((v) => B.mappa.get(v.id)).filter((m) => m && !B.imgIds.has(m.id));
@@ -301,10 +317,21 @@
   /* ---------- azioni ---------- */
   X.azioniBestiario = function (c) {
     const { S, render } = c; ridisegna = () => { if (S.vista === 'bestiario') { const y = window.scrollY; render(); window.scrollTo(0, y); } };
+    const creaAvv = async (msg) => {
+      let nome = ''; let testo = msg || 'Nome della nuova avventura:';
+      for (;;) {
+        nome = window.prompt(testo, nome); if (nome === null) return null; nome = nome.trim().replace(/\s+/g, ' ');
+        if (!nome) { testo = 'Il nome non può essere vuoto. Dai un nome alla tua avventura:'; continue; }
+        if (nomeEsiste(nome)) { testo = 'Esiste già un\'avventura chiamata «' + nome + '». Scegli un nome diverso:'; continue; }
+        break;
+      }
+      const a = { id: uid(), nome, voci: [] }; B.avv.push(a); B.avvId = a.id; await salvaAvv(a).catch((e) => { B.errore = e.message; }); return a;
+    };
     const aggiungi = async (id) => {
-      let a = avvCorr(); if (!a) { a = { id: uid(), nome: 'Nuova avventura', voci: [] }; B.avv.push(a); B.avvId = a.id; }
-      const v = a.voci.find((x) => x.id === id); if (v) v.q++; else a.voci.push({ id, q: 1 });
-      B.msg = ''; await salvaAvv(a).catch((e) => { B.errore = e.message; }); ridisegna();
+      let a = avvCorr(); if (!a) { a = await creaAvv('Dai un nome alla tua avventura (i mostri che aggiungi finiranno qui):'); if (!a) return; }
+      const m = B.mappa.get(id); const v = a.voci.find((x) => x.id === id); if (v) v.q++; else a.voci.push({ id, q: 1 });
+      B.msg = ''; await salvaAvv(a).catch((e) => { B.errore = e.message; });
+      toast('✔ ' + (m ? m.n : 'Mostro') + ' aggiunto a «' + a.nome + '» (' + conteggiAvv(a) + ' mostri' + (v ? ', ora ×' + v.q : '') + ')'); ridisegna();
     };
     const vociStampa = (a) => (a.voci || []).map((v) => ({ m: B.mappa.get(v.id), n: B.opz.esemplari ? v.q : 1 })).filter((v) => v.m);
     const prova = async (voci) => {
@@ -313,6 +340,24 @@
       const sp = $('.bes-stampa .mute:last-of-type'); if (sp) sp.textContent = B.stampa;
     };
     const stampaOra = async (voci) => { const cont = document.getElementById('bes-prev'); if (!cont) return; if (!cont.querySelector('.cartapag')) await prova(voci); if (!cont.querySelector('.cartapag')) return; document.getElementById('stampa').innerHTML = cont.innerHTML; window.print(); };
+    const imgDa = async (blob) => {
+      if (B.sel == null) { toast('Apri prima la scheda di un mostro'); return; }
+      const m = B.mappa.get(B.sel); try { await salvaImg(B.sel, await riduciImg(blob)); B.errore = ''; toast('✔ Immagine salvata per ' + (m ? m.n : 'il mostro')); } catch (e) { toast('Immagine non salvata: ' + e.message); } ridisegna();
+    };
+    const imgDaUrl = async (u) => { try { const r = await fetch(u, { mode: 'cors' }); if (!r.ok) throw new Error(); const b = await r.blob(); if (!/^image\//.test(b.type)) throw new Error(); await imgDa(b); } catch (e) { toast('Questo sito non permette il download diretto: tasto destro sull\'immagine → «Copia immagine», poi clicca nella scheda e premi Ctrl+V.'); } };
+    if (!X._besPaste) {
+      X._besPaste = true;
+      document.addEventListener('paste', (e) => {
+        if (S.vista !== 'bestiario' || B.tab !== 'cerca' || B.sel == null) return; const t = e.target; if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+        const it = [...(e.clipboardData ? e.clipboardData.items : [])].find((x) => x.type.startsWith('image/')); if (it) { e.preventDefault(); imgDa(it.getAsFile()); }
+      });
+      document.addEventListener('dragover', (e) => { if (S.vista === 'bestiario' && e.target.closest && e.target.closest('#bes-det')) e.preventDefault(); });
+      document.addEventListener('drop', (e) => {
+        if (S.vista !== 'bestiario' || !(e.target.closest && e.target.closest('#bes-det'))) return; e.preventDefault(); const dt = e.dataTransfer;
+        const f = [...(dt.files || [])].find((x) => x.type.startsWith('image/')); if (f) { imgDa(f); return; }
+        const u = (dt.getData('text/uri-list') || dt.getData('text/plain') || '').split('\n')[0].trim(); if (/^https?:/.test(u)) imgDaUrl(u);
+      });
+    }
     const az = {
       vaiBestiario() { S.vista = 'bestiario'; render(); },
       besTab(el) { B.tab = el.dataset.t; B.stampa = ''; render(); },
@@ -326,8 +371,8 @@
       async besApriDa(el, e) { if (e) e.preventDefault(); B.sel = Number(el.dataset.id); B.tab = 'cerca'; await leggiImg(B.sel); render(); },
       besAgg(el, e) { if (e) e.stopPropagation(); aggiungi(Number(el.dataset.id)); },
       besAvvSel(el) { B.avvId = el.value; B.stampa = ''; render(); },
-      async besAvvNuova() { const nome = window.prompt('Nome della nuova avventura:', ''); if (nome === null) return; const a = { id: uid(), nome: nome.trim() || 'Nuova avventura', voci: [] }; B.avv.push(a); B.avvId = a.id; await salvaAvv(a).catch((e) => { B.errore = e.message; }); B.tab = 'avv'; render(); },
-      async besAvvNome(el) { const a = avvCorr(); if (!a) return; a.nome = el.value; await salvaAvv(a).catch((e) => { B.errore = e.message; }); const y = window.scrollY; render(); window.scrollTo(0, y); },
+      async besAvvNuova() { const a = await creaAvv(); if (!a) return; toast('✔ Avventura «' + a.nome + '» creata: ora i mostri con ＋ vanno qui'); ridisegna(); },
+      async besAvvNome(el) { const a = avvCorr(); if (!a) return; const nv = el.value.trim().replace(/\s+/g, ' '); if (!nv) { window.alert('Il nome non può essere vuoto.'); el.value = a.nome; return; } if (nomeEsiste(nv, a.id)) { window.alert('Esiste già un\'avventura chiamata «' + nv + '»: scegli un nome diverso.'); el.value = a.nome; return; } a.nome = nv; await salvaAvv(a).catch((e) => { B.errore = e.message; }); const y = window.scrollY; render(); window.scrollTo(0, y); },
       async besAvvElimina() { const a = avvCorr(); if (!a || !window.confirm('Eliminare l\'avventura «' + a.nome + '»?')) return; B.avv = B.avv.filter((x) => x.id !== a.id); B.avvId = B.avv[0] ? B.avv[0].id : null; if (cloud()) await C.avvElimina(a.id).catch((e) => { B.errore = e.message; }); await kv.set('avv', B.avv); render(); },
       async besQta(el) { const a = avvCorr(); const v = a && a.voci.find((x) => x.id === Number(el.dataset.id)); if (!v) return; v.q = Math.max(1, v.q + Number(el.dataset.d)); await salvaAvv(a).catch((e) => { B.errore = e.message; }); ridisegna(); },
       async besTogliVoce(el) { const a = avvCorr(); if (!a) return; a.voci = a.voci.filter((x) => x.id !== Number(el.dataset.id)); await salvaAvv(a).catch((e) => { B.errore = e.message; }); ridisegna(); },
