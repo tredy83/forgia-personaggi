@@ -72,6 +72,10 @@ Il pulsante **Bestiario** (nella barra in alto, visibile solo ai gestori) apre i
 - Stampa: A4 orizzontale, 8 PG per foglio; margini «nessuno» e «Grafica di sfondo» attiva.
 - Nessuna modifica alle regole Firestore: il campo `campagna` viaggia nel documento del personaggio.
 
+## 7. Incontri e initiative tracker (solo gestori)
+
+Nel Bestiario, scheda **⚔ Incontri**: scegli l'avventura, crea un incontro («Incontro 1», con note libere: nome, pagina dell'avventura…), aggiungi i mostri dell'avventura (quanti ne servono) e i personaggi salvati. I mostri entrano nella griglia con l'iniziativa già tirata (d20 + Destrezza, **una sola per tipo**: 4 goblin = stesso valore). Colonne: Sorpreso, Iniziativa, Nome, CA, PF. Puoi cambiare ogni valore, tirare di nuovo (🎲 per un gruppo, o tutti), segnare i turni (contatore da 1 a 20) e **stampare in A4**: la griglia ha i valori di iniziativa fissi da 20 a −5 (si estende se serve), con i mostri già nella loro riga e righe vuote per scrivere a mano i personaggi. Gli incontri sono salvati dentro l'avventura (online, con le regole Firestore già esistenti).
+
 ## Cosa NON è stato provato
 
 Il collegamento reale a Firebase non si può provare senza il tuo progetto: la logica dell'app è stata verificata con un Firebase simulato, il Bestiario con Firestore vero non è ancora stato provato; le regole di sicurezza vanno provate con tre accessi di prova (gestore, genitore A, genitore B): il genitore B non deve vedere i personaggi del genitore A.

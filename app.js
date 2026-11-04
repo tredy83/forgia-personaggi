@@ -540,7 +540,7 @@
   };
 
   Object.assign(azioni, window.FORGIA_X.azioni({ S, corrente, salvaCorrente, render }));
-  Object.assign(azioni, window.FORGIA_X.azioniBestiario({ S, render }));
+  Object.assign(azioni, window.FORGIA_X.azioniBestiario({ S, render, pgs: () => DB.personaggi }));
   Object.assign(azioni, window.FORGIA_X.azioniParty({ S, render, pgs: () => DB.personaggi, scrivi, trova }));
 
   /* ---------- eventi ---------- */

@@ -306,11 +306,11 @@
   X.vistaBestiario = function () {
     if (!B.carico) { if (!B.prep) { B.prep = true; carica(); } return '<div class="barra-elenco"><button class="sec" data-az="tornaElenco">← Personaggi</button></div><p class="mute centro">Carico il bestiario…</p>'; }
     const vuoto = !(B.mostri || []).length;
-    const tabs = [['cerca', '🔎 Cerca'], ['avv', '📜 Avventure'], ['dati', '⚙ Dati e immagini']].map(([id, l]) => '<button class="' + (B.tab === id ? 'attiva' : '') + '" data-az="besTab" data-t="' + id + '">' + l + '</button>').join('');
+    const tabs = [['cerca', '🔎 Cerca'], ['avv', '📜 Avventure'], ['inc', '⚔ Incontri'], ['dati', '⚙ Dati e immagini']].map(([id, l]) => '<button class="' + (B.tab === id ? 'attiva' : '') + '" data-az="besTab" data-t="' + id + '">' + l + '</button>').join('');
     return '<div class="barra-elenco"><button class="sec" data-az="tornaElenco">← Personaggi</button><b style="font-size:1.1rem">📖 Bestiario del Dungeon Master</b></div>'
       + (B.errore ? '<div class="avviso">⚠ ' + esc(B.errore) + '</div>' : '')
       + (vuoto && B.tab !== 'dati' ? '<div class="avviso">Il bestiario è vuoto: importa il file dei mostri dalla scheda <b>Dati e immagini</b>. <button class="pic oro" data-az="besTab" data-t="dati">Vai</button></div>' : '')
-      + '<div class="tabs bes-tabs">' + tabs + '</div>' + (B.tab === 'cerca' ? tabCerca() : B.tab === 'avv' ? tabAvv() : tabDati())
+      + '<div class="tabs bes-tabs">' + tabs + '</div>' + (B.tab === 'cerca' ? tabCerca() : B.tab === 'avv' ? tabAvv() : B.tab === 'inc' ? X.tabIncontri() : tabDati())
       + '<input type="file" id="bes-file-json" accept=".json,application/json" hidden data-az="besFileJson"><input type="file" id="bes-file-img" accept="image/*" hidden data-az="besFileImg"><input type="file" id="bes-file-imgs" accept="image/*" multiple hidden data-az="besFileImgs">';
   };
 
@@ -426,6 +426,7 @@
       },
     };
     document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.az === 'besQ') az.besQ(e.target); });
+    Object.assign(az, X.azioniIncontri({ B, avvCorr, salva: salvaAvv, ridisegna: () => ridisegna(), toast, pgs: () => (c.pgs ? c.pgs() : []) }));
     return az;
   };
   X.bestiarioReset = () => { B.mostri = null; B.mappa = null; B.carico = false; B.prep = false; B.imgIds = new Set(); B.imgMem.clear(); B.avv = []; B.avvId = null; B.sel = null; };

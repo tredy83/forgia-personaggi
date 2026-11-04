@@ -1,0 +1,25 @@
+/* Initiative tracker */
+@page incontro{size:A4;margin:0}
+.inc-sel{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
+.inc-turni span.inc-t{display:inline-flex;align-items:center;justify-content:center;width:1.9rem;height:1.9rem;border:2px solid #775a8b;border-radius:50%;margin:.15rem;cursor:pointer;font-size:.8rem;background:#fff}
+.inc-turni span.inc-t.on{background:#c63a43;color:#fff;border-color:#c63a43}
+.inc-m{display:flex;justify-content:space-between;gap:.5rem;align-items:center;padding:.3rem 0;border-bottom:1px solid #0002;flex-wrap:wrap}
+.inc-tab{width:100%;border-collapse:collapse}.inc-tab th{font-size:.75rem;text-align:left;text-transform:uppercase;color:#775a8b}
+.inc-tab td{padding:.15rem .2rem;vertical-align:middle}.inc-tab input[type=text],.inc-tab input[type=number]{width:100%;min-width:0}
+.inc-tab input.n2{width:4.2rem}.inc-tab input.n3{width:7rem}.inc-tab tr.sorp{background:#fdf1d4}.inc-bt{white-space:nowrap}
+/* foglio A4 */
+.ig-print{display:none}
+.ig-pag{width:210mm;min-height:296mm;box-sizing:border-box;padding:9mm 10mm;background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;page:incontro;break-after:page}
+.ig-pag:last-child{break-after:auto}
+.ig-top{display:flex;gap:4mm;align-items:center;height:20mm;border-bottom:1.5px solid #000;padding-bottom:2mm}
+.ig-top img{height:16mm}.ig-tit{width:62mm}.ig-tit b{display:block;font:700 15pt Georgia,serif}.ig-tit span{font-size:8pt}
+.ig-note{flex:1;font-size:9pt;border:1px solid #000;border-radius:2mm;height:16mm;padding:1.5mm 2.5mm;overflow:hidden}
+.ig-turni{display:flex;align-items:center;gap:1.2mm;margin:2.5mm 0}.ig-turni b{font-size:9pt;margin-right:2mm;text-transform:uppercase}
+.ig-turni span{width:7.2mm;height:7.2mm;border:1.2px solid #000;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:7pt}
+.ig-turni span.on{background:#000;color:#fff}
+.ig-h,.ig-r{display:grid;grid-template-columns:20mm 24mm 1fr 15mm 38mm}
+.ig-h{font-size:7.5pt;text-transform:uppercase;font-weight:700;border:1.4px solid #000;background:#e4e4e4}.ig-h span{padding:1.2mm 2mm;text-align:center;border-left:1px solid #000}.ig-h span:first-child{border-left:0}
+.ig-r{height:var(--rh);font-size:var(--fs);border:1px solid #000;border-top:0}
+.ig-r span{border-left:1px solid #000;display:flex;align-items:center;padding:0 2mm;overflow:hidden;white-space:nowrap}
+.ig-r span:first-child{border-left:0;justify-content:center;font-size:13pt}.ig-i{justify-content:center;font-weight:700}.ig-c{justify-content:center}
+@media print{.ig-print{display:block}.ig-print .ig-pag{-webkit-print-color-adjust:exact;print-color-adjust:exact}}

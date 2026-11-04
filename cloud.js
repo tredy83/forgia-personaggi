@@ -132,7 +132,7 @@
     } catch (e) { throw new Error(errore(e)); }
   };
   C.avvLeggi = async () => { try { const s = await db.collection('avventure').get(); return s.docs.map((d) => Object.assign({ id: d.id }, d.data())); } catch (e) { throw new Error(errore(e)); } };
-  C.avvScrivi = (a) => db.collection('avventure').doc(a.id).set({ nome: a.nome || '', voci: a.voci || [], aggiornato: a.aggiornato || '' }).catch((e) => { throw new Error(errore(e)); });
+  C.avvScrivi = (a) => db.collection('avventure').doc(a.id).set({ nome: a.nome || '', voci: a.voci || [], incontri: a.incontri || [], aggiornato: a.aggiornato || '' }).catch((e) => { throw new Error(errore(e)); });
   C.avvElimina = (id) => db.collection('avventure').doc(id).delete().catch((e) => { throw new Error(errore(e)); });
 
   /* ---- il mio profilo ---- */
