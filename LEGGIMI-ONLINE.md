@@ -74,7 +74,7 @@ Il pulsante **Bestiario** (nella barra in alto, visibile solo ai gestori) apre i
 
 ## 7. Incontri e iniziativa (solo gestori)
 
-Sezione a parte, pulsante **Incontri** (accanto a Bestiario). Flusso: crei l'avventura e scegli i suoi mostri con ＋ (la quantità si decide lì) → in Incontri scegli l'avventura, crei un incontro (nome unico, note libere) → spunti i mostri (in ordine alfabetico) che partecipano: entrano nella griglia con l'iniziativa già tirata (d20 + Destrezza, un solo tiro per tipo) → stampi la **griglia A4** (iniziativa fissa da 20 a −5, mostri già nella loro riga, righe vuote per i personaggi) e le **carte dei mostri** dell'incontro. Gli incontri sono salvati dentro l'avventura.
+Sezione a parte, pulsante **Incontri** (accanto a Bestiario). Flusso: crei l'avventura e scegli i suoi mostri con ＋ (solo quali, senza quantità; premendo ✔ lo togli) → in Incontri scegli l'avventura, crei un incontro (nome unico, note libere) → spunti i mostri (in ordine alfabetico) che partecipano e indichi **quanti** sono in quell'incontro: entrano nella griglia con l'iniziativa già tirata (d20 + Destrezza, un solo tiro per tipo) → stampi la **griglia A4** (iniziativa fissa da 20 a −5, mostri già nella loro riga, righe vuote per i personaggi) e le **carte dei mostri** dell'incontro. Gli incontri sono salvati dentro l'avventura.
 
 Nel **Bestiario → Cerca** puoi anche spuntare dei mostri e stampare direttamente le loro carte, senza avventura.
 
