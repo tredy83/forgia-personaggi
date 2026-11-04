@@ -23,7 +23,7 @@
   const cloud = () => C.attivo && C.utente && C.utente.ruolo === 'gestore';
 
   /* ---------- stato ---------- */
-  const B = { mostri: null, carico: false, errore: '', imgIds: new Set(), imgMem: new Map(), avv: [], avvId: null, tab: 'cerca', q: '', tipo: '', tg: '', fo: '', gsMin: '', gsMax: '', sel: null, sc: new Set(), modo: 'bes', limite: 40, msg: '', imp: '', opz: { dorso: 'immagine', leggi: 'normale', esemplari: false, ordine: 'nome' }, stampa: '', prep: false };
+  const B = { mostri: null, carico: false, errore: '', imgIds: new Set(), imgMem: new Map(), avv: [], avvId: null, tab: 'cerca', q: '', tipo: '', tg: '', fo: '', gsMin: '', gsMax: '', sel: null, sc: new Set(), sa: new Set(), dlg: '', modo: 'bes', limite: 40, msg: '', imp: '', opz: { dorso: 'immagine', leggi: 'normale', esemplari: false, ordine: 'nome' }, stampa: '', prep: false };
   let ridisegna = () => {};
   const TIPI_FIX = { '/mmondo': 'Immondo', 'Elemento/e': 'Elementale', 'Folle.tto': 'Folletto', Giganle: 'Gigante' };
   const nomeNorm = (n) => String(n || '').trim().replace(/\s+/g, ' ').toLowerCase();
@@ -200,8 +200,8 @@
   }
   function righeRisultati() {
     const L = filtra(); const mostra = L.slice(0, B.limite);
-    const hr = mostra.map((m) => '<div class="bes-riga' + (B.sel === m.id ? ' sel' : '') + '" data-az="besApri" data-id="' + m.id + '"><input type="checkbox" class="bes-ck" data-az="besCk" data-id="' + m.id + '"' + (B.sc.has(m.id) ? ' checked' : '') + ' title="Seleziona per stampare le carte"><div class="bes-r1"><b>' + esc(m.n) + '</b> <span class="mute">' + tipoRiga(m).split(',')[0] + '</span></div><div class="bes-r2">' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + ' · GS ' + esc(gsT(m)) + ' · CA ' + esc(m.ca) + ' · PF ' + esc(m.pf) + (B.imgIds.has(m.id) ? ' · 🖼' : '') + '</div><button class="pic ' + (inAvv(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '" title="' + (avvCorr() ? 'Aggiungi a «' + esc(avvCorr().nome) + '»' : 'Aggiungi a un\'avventura') + '">' + (inAvv(m.id) ? '✔' : '＋') + '</button></div>').join('');
-    return '<div class="mute" style="margin:.3rem 0">' + L.length + ' mostri' + (L.length > mostra.length ? ' (ne mostro ' + mostra.length + ')' : '') + '</div>' + (hr || '<div class="vuoto">Nessun mostro trovato.</div>') + (L.length > mostra.length ? '<p><button class="sec" data-az="besAltri">Mostra altri…</button></p>' : '');
+    const hr = mostra.map((m) => '<div class="bes-riga' + (B.sel === m.id ? ' sel' : '') + '" data-az="besApri" data-id="' + m.id + '"><input type="checkbox" class="bes-ck" data-az="besCk" data-id="' + m.id + '"' + (B.sc.has(m.id) ? ' checked' : '') + ' title="Seleziona per stampare le carte"><div class="bes-r1"><b>' + esc(m.n) + '</b> <span class="mute">' + tipoRiga(m).split(',')[0] + '</span></div><div class="bes-r2">' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + ' · GS ' + esc(gsT(m)) + ' · CA ' + esc(m.ca) + ' · PF ' + esc(m.pf) + (B.imgIds.has(m.id) ? ' · 🖼' : '') + '</div><button class="pic ' + (B.sa.has(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '" title="Seleziona per aggiungere a un\'avventura">' + (B.sa.has(m.id) ? '✔' : '＋') + '</button></div>').join('');
+    return '<div class="bes-intest"><span>☑ Selezionare per <b>stampare</b></span><span><b>＋ Selezionare</b> per aggiungere ad avventura</span></div><div class="mute" style="margin:.3rem 0">' + L.length + ' mostri' + (L.length > mostra.length ? ' (ne mostro ' + mostra.length + ')' : '') + '</div>' + (hr || '<div class="vuoto">Nessun mostro trovato.</div>') + (L.length > mostra.length ? '<p><button class="sec" data-az="besAltri">Mostra altri…</button></p>' : '');
   }
   /* ---------- incantesimi del mostro ---------- */
   const nn = (t) => norm(String(t || '').replace(/\([^)]*\)/g, ' ')).replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -256,7 +256,7 @@
   function dettaglio() {
     const m = B.mappa && B.mappa.get(B.sel); if (!m) return '<div class="vuoto">Scegli un mostro dall\'elenco per vederne la scheda.</div>';
     const img = B.imgMem.get(m.id);
-    return '<div class="bes-det"><div class="bes-az"><button class="oro" data-az="besStampa1" data-id="' + m.id + '">🖨 Stampa la carta</button> <button class="' + (inAvv(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '">' + (avvCorr() ? (inAvv(m.id) ? '✔ Nell\'avventura «' + esc(avvCorr().nome) + '» (clicca per togliere)' : '＋ Aggiungi a «' + esc(avvCorr().nome) + '»') : '＋ Aggiungi a un\'avventura') + '</button> <button class="sec" data-az="besImg" data-id="' + m.id + '">🖼 ' + (B.imgIds.has(m.id) ? 'Cambia immagine' : 'Carica immagine') + '</button>' + (B.imgIds.has(m.id) ? ' <button class="sec" data-az="besImgTogli" data-id="' + m.id + '">Rimuovi immagine</button>' : '') + ' <a class="pic sec" target="_blank" rel="noopener" href="' + esc(ricercaImg(m)) + '">🔎 Cerca un\'immagine</a></div>'
+    return '<div class="bes-det"><div class="bes-az"><button class="oro" data-az="besStampa1" data-id="' + m.id + '">🖨 Stampa la carta</button> <button class="' + (B.sa.has(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '">' + (B.sa.has(m.id) ? '✔ Selezionato per l\'avventura (clicca per togliere)' : '＋ Seleziona per aggiungere a un\'avventura') + '</button> <button class="sec" data-az="besImg" data-id="' + m.id + '">🖼 ' + (B.imgIds.has(m.id) ? 'Cambia immagine' : 'Carica immagine') + '</button>' + (B.imgIds.has(m.id) ? ' <button class="sec" data-az="besImgTogli" data-id="' + m.id + '">Rimuovi immagine</button>' : '') + ' <a class="pic sec" target="_blank" rel="noopener" href="' + esc(ricercaImg(m)) + '">🔎 Cerca un\'immagine</a></div>'
       + '<div class="bes-paste" id="bes-paste" tabindex="0">📋 <b>Trovata l\'immagine?</b> Tasto destro → «Copia immagine», poi clicca qui e premi <b>Ctrl+V</b> (oppure trascinala qui sopra). Si salva da sola su ' + esc(m.n) + '.</div>'
       + avvisoInc(m) + (img ? '<img class="bes-foto" src="' + img + '" alt="">' : '') + '<div class="mb mb-sch"><h4>' + esc(m.n) + '</h4><div class="mb-t">' + tipoRiga(m) + '</div><hr class="mb-hr">' + corpoHTML(m) + '</div><p class="mute" style="font-size:.78rem">' + esc(fonte(m).n) + ', p. ' + esc(m.pg) + (m.inc ? ' · ⚠ scheda forse incompleta (azioni non trovate nella lettura del PDF): controlla sul manuale.' : '') + '</p></div>';
   }
@@ -264,6 +264,18 @@
     if (!B.avv.length) return '<b>📜 Avventura:</b> <span class="mute">non ne hai ancora una.</span> <button class="oro" data-az="besAvvNuova">＋ Crea la tua prima avventura</button> <span class="mute">Dai un nome alla tua avventura, poi con il pulsante ＋ accanto a ogni mostro lo aggiungi alla lista.</span>';
     const a = avvCorr();
     return '<b>📜 I mostri con ＋ vanno in:</b> <select data-az="besAvvSel">' + B.avv.map((x) => '<option value="' + x.id + '"' + (x.id === B.avvId ? ' selected' : '') + '>' + esc(x.nome || 'Senza nome') + ' (' + conteggiAvv(x) + ')</option>').join('') + '</select> <button class="sec" data-az="besAvvNuova">＋ Nuova avventura</button> <button class="sec" data-az="besTab" data-t="avv">Vedi la lista di «' + esc(a ? a.nome : '') + '» →</button>';
+  };
+  const pannelloSa = () => {
+    if (!B.sa.size) return '';
+    const nomi = [...B.sa].map((id) => (B.mappa.get(id) || {}).n).filter(Boolean).sort((x, y) => x.localeCompare(y, 'it')).map(esc).join(', ');
+    let h = '<div class="card bes-barra-avv"><b>📜 Mostri scelti per un\'avventura (' + B.sa.size + ')</b><p class="mute">' + nomi + '</p>';
+    if (!B.dlg) h += '<p><button class="oro" data-az="besSaAvanti">Avanti →</button> <button class="sec" data-az="besSaSvuota">Annulla selezione</button></p>';
+    else {
+      h += '<p><b>Vuoi creare una nuova avventura o aggiungere a una esistente?</b></p><p><button class="' + (B.dlg === 'nuova' ? 'oro' : 'sec') + '" data-az="besSaScelta" data-v="nuova">＋ Crea una nuova avventura</button> <button class="' + (B.dlg === 'esist' ? 'oro' : 'sec') + '" data-az="besSaScelta" data-v="esist"' + (B.avv.length ? '' : ' disabled') + '>Aggiungi a una esistente</button> <button class="sec" data-az="besSaSvuota">Annulla</button></p>';
+      if (B.dlg === 'nuova') h += '<p><input type="text" id="bes-sa-nome" placeholder="Nome della nuova avventura" maxlength="80"> <button class="oro" data-az="besSaConferma">Crea e aggiungi</button></p>';
+      else h += '<p><select id="bes-sa-avv">' + B.avv.map((x) => '<option value="' + x.id + '"' + (x.id === B.avvId ? ' selected' : '') + '>' + esc(x.nome || 'Senza nome') + ' (' + conteggiAvv(x) + ')</option>').join('') + '</select> <button class="oro" data-az="besSaConferma">Aggiungi</button></p>';
+    }
+    return h + '</div>';
   };
   const tabCerca = () => {
     const tipi = [...new Set((B.mostri || []).map((m) => m.tipo))].sort(); const tgs = ['Minuscol', 'Piccol', 'Medi', 'Grande', 'Enorme', 'Mastodontic'];
@@ -274,7 +286,7 @@
       + '<select data-az="besF" data-k="tg">' + o('', 'Ogni taglia', !B.tg) + tgs.map((t) => o(t, t + 'a/o', B.tg === t)).join('') + '</select>'
       + '<select data-az="besF" data-k="gsMin">' + o('', 'GS da…', B.gsMin === '') + gs.map((g) => o(g, 'GS ' + g, B.gsMin === g)).join('') + '</select>'
       + '<select data-az="besF" data-k="gsMax">' + o('', 'GS fino a…', B.gsMax === '') + gs.map((g) => o(g, 'GS ' + g, B.gsMax === g)).join('') + '</select></div></div>'
-      + '<div class="card bes-barra-avv">' + barraAvv() + '</div>'
+      + pannelloSa()
       + (B.sc.size ? '<div class="card bes-stampa"><h4>🖨 Carte dei mostri selezionati (' + B.sc.size + ')</h4><p class="mute">' + [...B.sc].map((id) => (B.mappa.get(id) || {}).n).filter(Boolean).sort((x, y) => x.localeCompare(y, 'it')).map(esc).join(', ') + '</p>' + opzioniStampa() + '<p><button class="oro" data-az="besStampaSel">👁 Crea le carte</button> <button data-az="besStampaSelOra">🖨 Stampa</button> <button class="sec" data-az="besScSvuota">Deseleziona tutti</button> <span class="mute">' + (B.stampa || '') + '</span></p><div id="bes-prev"></div></div>' : '<p class="mute" style="margin:.4rem 0">☑ Spunta i mostri nell\'elenco per stampare le loro carte; con ＋ li aggiungi a un\'avventura.</p>')
       + '<div class="bes-griglia"><div class="card"><div id="bes-ris">' + righeRisultati() + '</div></div><div class="card" id="bes-det">' + dettaglio() + '</div></div>';
   };
@@ -373,7 +385,23 @@
         const r = $('#bes-ris'); if (r) r.innerHTML = righeRisultati(); const d = $('#bes-det'); if (d) { d.innerHTML = dettaglio(); if (window.innerWidth < 800) d.scrollIntoView({ behavior: 'smooth' }); } else { render(); }
       },
       async besApriDa(el, e) { if (e) e.preventDefault(); B.sel = Number(el.dataset.id); B.tab = 'cerca'; await leggiImg(B.sel); render(); },
-      besAgg(el, e) { if (e) e.stopPropagation(); aggiungi(Number(el.dataset.id)); },
+      besAgg(el, e) { if (e) e.stopPropagation(); const id = Number(el.dataset.id); if (B.sa.has(id)) B.sa.delete(id); else B.sa.add(id); if (!B.sa.size) B.dlg = ''; ridisegna(); },
+      besSaAvanti() { B.dlg = B.avv.length ? 'esist' : 'nuova'; ridisegna(); },
+      besSaScelta(el) { B.dlg = el.dataset.v; ridisegna(); },
+      besSaSvuota() { B.sa.clear(); B.dlg = ''; ridisegna(); },
+      async besSaConferma() {
+        let a;
+        if (B.dlg === 'nuova') {
+          const nome = ((document.getElementById('bes-sa-nome') || {}).value || '').trim().replace(/\s+/g, ' ');
+          if (!nome) { toast('Scrivi il nome della nuova avventura'); return; }
+          if (nomeEsiste(nome)) { toast('Esiste già un\'avventura chiamata «' + nome + '»: scegli un altro nome'); return; }
+          a = { id: uid(), nome, voci: [] }; B.avv.push(a);
+        } else { const sel = document.getElementById('bes-sa-avv'); a = B.avv.find((x) => x.id === (sel && sel.value)); if (!a) { toast('Scegli un\'avventura'); return; } }
+        B.avvId = a.id; a.voci = a.voci || []; let n = 0;
+        B.sa.forEach((id) => { if (!a.voci.some((v) => v.id === id)) { a.voci.push({ id, q: 1 }); n++; } });
+        await salvaAvv(a).catch((e) => { B.errore = e.message; });
+        B.sa.clear(); B.dlg = ''; toast('✔ ' + n + ' mostri aggiunti a «' + a.nome + '» (' + a.voci.length + ' in tutto)'); ridisegna();
+      },
       besAvvSel(el) { B.avvId = el.value; B.stampa = ''; render(); },
       async besAvvNuova() { const a = await creaAvv(); if (!a) return; toast('✔ Avventura «' + a.nome + '» creata: ora i mostri con ＋ vanno qui'); ridisegna(); },
       async besAvvNome(el) { const a = avvCorr(); if (!a) return; const nv = el.value.trim().replace(/\s+/g, ' '); if (!nv) { window.alert('Il nome non può essere vuoto.'); el.value = a.nome; return; } if (nomeEsiste(nv, a.id)) { window.alert('Esiste già un\'avventura chiamata «' + nv + '»: scegli un nome diverso.'); el.value = a.nome; return; } a.nome = nv; await salvaAvv(a).catch((e) => { B.errore = e.message; }); const y = window.scrollY; render(); window.scrollTo(0, y); },

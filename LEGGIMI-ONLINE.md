@@ -58,7 +58,7 @@ Il pulsante **Bestiario** (nella barra in alto, visibile solo ai gestori) apre i
 
 **Modalità locale** (senza Firebase): dati e immagini restano nel browser (IndexedDB) di quel dispositivo.
 
-**Avventure e immagini**: nella scheda Cerca, sopra l'elenco, c'è la barra «I mostri con ＋ vanno in: [avventura]»: scegli lì la lista di destinazione. Ogni ＋ mostra una conferma e diventa ✔ con la quantità; i nomi delle avventure devono essere tutti diversi. Per le immagini: «🔎 Cerca un'immagine», poi sull'immagine trovata tasto destro → «Copia immagine», clic nella casella tratteggiata della scheda e Ctrl+V (o trascina l'immagine nella scheda): si salva da sola.
+**Avventure e immagini**: nella scheda Cerca, sopra l'elenco, trovi le intestazioni «Selezionare per stampare» (caselle) e «Selezionare per aggiungere ad avventura» (＋). Dopo aver messo ＋ ai mostri premi **Avanti**: il sito chiede se creare una nuova avventura o aggiungere a una esistente (menu a tendina). I nomi delle avventure devono essere tutti diversi.
 
 **Testi dei mostri**: vengono dalla lettura automatica (OCR) dei PDF, quindi possono contenere piccoli refusi; le cifre stampate in modo anomalo sul manuale sono state mantenute come stampate.
 

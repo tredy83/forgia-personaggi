@@ -79,3 +79,5 @@
 #bes-toast.on{opacity:1;transform:translate(-50%,0)}
 
 .bes-riga{position:relative}.bes-ck{position:absolute;left:.35rem;top:.55rem;width:1.05rem;height:1.05rem;cursor:pointer}.bes-riga .bes-r1,.bes-riga .bes-r2{padding-left:1.5rem}
+
+.bes-intest{display:flex;justify-content:space-between;gap:.6rem;font-size:.78rem;padding:.1rem .3rem .3rem;border-bottom:1px solid rgba(0,0,0,.12)}
