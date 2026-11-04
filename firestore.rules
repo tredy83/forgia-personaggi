@@ -25,6 +25,12 @@ service cloud.firestore {
       allow delete: if gestore() || (attivo() && resource.data.owner == request.auth.uid);
     }
 
+    // Bestiario (mostri, immagini, liste d'avventura): solo i gestori
+    match /mostri/{id} { allow read, write: if gestore(); }
+    match /mostriImg/{id} { allow read, write: if gestore(); }
+    match /mostriMeta/{id} { allow read, write: if gestore(); }
+    match /avventure/{id} { allow read, write: if gestore(); }
+
     // Tutto il resto è vietato
     match /{altro=**} { allow read, write: if false; }
   }

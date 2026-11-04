@@ -41,6 +41,35 @@ Finché `firebase-config.js` contiene `null`, l'app funziona come prima, in moda
 - Se un genitore dimentica la password e non ha email: **Authentication → Utenti → ⋮ → Reimposta password** nella console, oppure disattiva l'accesso e creane uno nuovo.
 - Per sicurezza i dati dell'archivio locale di un account vengono cancellati dal dispositivo quando si preme **Esci**.
 
+
+## 5. Bestiario del DM (solo gestori)
+
+Il pulsante **Bestiario** (nella barra in alto, visibile solo ai gestori) apre il bestiario: ricerca per nome, filtri per tipo/taglia/grado di sfida, scheda completa del mostro, **carte da stampare** (fronte = statistiche, retro = immagine per i ragazzi) e **liste d'avventura** (scegli i mostri di un'avventura e stampa tutte le carte in un colpo solo). Il formato della carta (piccola 63×88, media 95×135, grande 190×135, foglio intero) viene scelto in automatico in base alla quantità di testo.
+
+**Prima messa in funzione**
+1. In Firebase → Firestore → **Regole** incolla di nuovo il contenuto aggiornato di `firestore.rules` (ci sono le regole per `mostri`, `mostriImg`, `mostriMeta`, `avventure`: tutte leggibili e scrivibili solo dai gestori) e premi **Pubblica**.
+2. Accedi come gestore → **Bestiario → Dati e immagini → Importa mostri** e scegli il file `mostri-manuale-dei-mostri.json` (si consegna a parte: **non va caricato su GitHub**, così i testi del manuale non diventano pubblici). L'importazione scrive circa 11 blocchi di documenti in Firestore, una volta sola.
+   Poi importa nello stesso modo `mostri-mordenkainen-multiverso.json` (*Mordenkainen presenta: Mostri del Multiverso*, 261 schede, circa 7 blocchi): l'importazione è **additiva**, i mostri già presenti e le avventure restano. Ogni scheda mostra manuale e pagina (carta piccola: «Man. Mostri · p. 168», le altre il titolo intero), e in Cerca c'è il filtro «Ogni manuale». Importare di nuovo lo stesso file aggiorna solo quei mostri.
+   Nella scheda di un mostro che lancia incantesimi compare un avviso giallo «🔮 Questo mostro lancia incantesimi»: cliccandolo si stampano le sue carte incantesimo semplici (bianco e nero, 9 per foglio, senza retro, ritagliabili). Gli incantesimi sono riconosciuti dal testo del mostro: se uno non è tra quelli del programma, l'avviso lo elenca sotto («Non trovati…»).
+3. **Carica immagine** (per singolo mostro) oppure **Carica più immagini**: il nome del file deve assomigliare al nome del mostro (es. `goblin.jpg`, `drago-rosso-antico.png`). Le immagini vengono ridotte nel browser (max 800 px) e salvate in Firestore, visibili solo ai gestori. Senza immagine la carta si può stampare comunque (retro con logo, bianco o nessun retro).
+4. **Elenco senza immagine** dà la lista dei mostri ancora privi di figura, con il link di ricerca immagini per ciascuno.
+
+**Attenzione**: le illustrazioni trovate in rete sono coperte da diritti d'autore. Vanno bene per l'uso privato in sala; non pubblicarle in un repository pubblico.
+
+**Modalità locale** (senza Firebase): dati e immagini restano nel browser (IndexedDB) di quel dispositivo.
+
+**Testi dei mostri**: vengono dalla lettura automatica (OCR) dei PDF, quindi possono contenere piccoli refusi; le cifre stampate in modo anomalo sul manuale sono state mantenute come stampate.
+
+## 6. Campagna e Party Tracker (solo gestori)
+
+- **Campagna**: nella scheda *Identità* di ogni personaggio c'è il campo facoltativo «Campagna». Mentre scrivi propone le campagne già esistenti (basta la «D» per vedere «Discesa nell'Avernus»); se non la compili resta vuoto. Nell'elenco personaggi c'è la colonna Campagna e la ricerca la considera.
+- **Party Tracker** (pulsante nella barra dell'elenco): cerchi per campagna, nome del PG o nome del giocatore, selezioni i personaggi (o «Seleziona tutti quelli in elenco») e il foglio si compila da solo: livello, CA, PF, percezione passiva, attacchi e un unico riquadro **Note** (scurovisione, velocità, iniziativa, tiri salvezza, stile di combattimento, incantesimi con CD, risorse, privilegi e tratti utili al gioco; niente lingue).
+- Le note di ogni PG si possono riscrivere (✎ Note) e si salvano sul personaggio; «Ripristina il testo automatico» le rigenera. Le note del gruppo (riquadro in alto) si ricordano solo su questo dispositivo.
+- **Apri** e **⬆ Livello** portano alla scheda del PG e «← Personaggi» riporta al Party Tracker.
+- Il foglio usa come fondo il party tracker cartaceo fornito dal DM (`party-sfondo.svg`, 8 PG per foglio) e ci scrive sopra i dati. Il nome della campagna compare in grande nel riquadro «Party notes».
+- Stampa: A4 orizzontale, 8 PG per foglio; margini «nessuno» e «Grafica di sfondo» attiva.
+- Nessuna modifica alle regole Firestore: il campo `campagna` viaggia nel documento del personaggio.
+
 ## Cosa NON è stato provato
 
-Il collegamento reale a Firebase non si può provare senza il tuo progetto: la logica dell'app è stata verificata con un Firebase simulato, e le regole di sicurezza vanno provate con tre accessi di prova (gestore, genitore A, genitore B): il genitore B non deve vedere i personaggi del genitore A.
+Il collegamento reale a Firebase non si può provare senza il tuo progetto: la logica dell'app è stata verificata con un Firebase simulato, il Bestiario con Firestore vero non è ancora stato provato; le regole di sicurezza vanno provate con tre accessi di prova (gestore, genitore A, genitore B): il genitore B non deve vedere i personaggi del genitore A.

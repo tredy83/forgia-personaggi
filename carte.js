@@ -45,8 +45,8 @@
     return h + '</p>';
   }
 
-  function creaCarta(s, parte, tot) {
-    const k = scuolaKey(s); const c = COL[k]; const el = document.createElement('div'); el.className = 'carta'; el.style.setProperty('--c', c); el.style.setProperty('--cd', scuri(c));
+  function creaCarta(s, parte, tot, bn) {
+    const k = scuolaKey(s); const c = bn ? '#3a3a3a' : COL[k]; const el = document.createElement('div'); el.className = 'carta' + (bn ? ' bn' : ''); el.style.setProperty('--c', c); el.style.setProperty('--cd', scuri(c));
     const man = String(s.comp || '').replace(/\([^)]*\)/g, ''); const V = /\bV\b/.test(man), So = /\bS\b/.test(man), Ma = /\bM\b/.test(man);
     const band = [s.scuola, s.rituale ? 'Rituale' : '', s.conc ? 'Concentrazione' : ''].filter(Boolean).join(' · ') + (tot > 1 ? ' · carta ' + parte + '/' + tot : '');
     const rif = D.fonteEtichetta(s, true) + (s.sintesi ? ' · sintesi' : '') + (D.TESTO_CARTA && D.TESTO_CARTA[s.id] ? ' · testo ridotto' : '');
@@ -67,13 +67,13 @@
   }
 
   // costruisce le carte (con eventuale divisione dei testi lunghi) dentro il contenitore "stage" già in pagina
-  function costruisci(lista, stage) {
+  function costruisci(lista, stage, bn) {
     const carte = [];
     lista.forEach((s) => {
       const tk = tokens(s); const SIZES = [7, 6.6, 6.2, 5.9, 5.7, 5.5, 5.3];
       const prova = (card, arr, pre, post, size) => { const txt = card.querySelector('.c-txt'); const inn = card.querySelector('.c-in'); txt.style.fontSize = size + 'pt'; inn.innerHTML = tokHtml(arr, pre, post); return inn.offsetHeight <= txt.clientHeight - 5; };
       // quante carte servono? prima prova a stare in una sola
-      let c0 = creaCarta(s, 1, 1); stage.appendChild(c0);
+      let c0 = creaCarta(s, 1, 1, bn); stage.appendChild(c0);
       // il corpo si rimpicciolisce a piccoli passi finché tutto il testo sta nel riquadro
       let ok = false;
       for (let sz = 7; sz >= 3.4; sz = Math.round((sz - 0.1) * 10) / 10) if (prova(c0, tk, false, false, sz)) { ok = true; break; }
@@ -107,11 +107,31 @@
     } finally { stage.remove(); }
   };
 
+  // carte semplici (bianco e nero, senza retro) per una lista di id di incantesimi, ad es. quelli di un mostro
+  X.carteSemplici = async function (ids, cont) {
+    const lista = ids.map((id) => D.incantesimo(id)).filter(Boolean).sort((a, b) => a.liv - b.liv || a.nome.localeCompare(b.nome));
+    cont.innerHTML = ''; if (!lista.length) return 0;
+    const stage = document.createElement('div'); stage.style.cssText = 'position:absolute;left:-9999px;top:0;width:63mm;height:88mm'; document.body.appendChild(stage);
+    try {
+      await Promise.allSettled(['13pt Ringbearer', '9pt MPlantin', 'bold 9pt MPlantin', 'italic 9pt MPlantin'].map((f) => document.fonts.load(f)));
+      const carte = costruisci(lista, stage, true);
+      const doc = document.createElement('div'); doc.className = 'carte-doc';
+      for (let i = 0; i < carte.length; i += 9) {
+        const fr = document.createElement('section'); fr.className = 'cartapag';
+        carte.slice(i, i + 9).forEach((cd, j) => { cd.style.top = 16.5 + Math.floor(j / 3) * 88 + 'mm'; cd.style.left = 10.5 + (j % 3) * 63 + 'mm'; fr.appendChild(cd); });
+        doc.appendChild(fr);
+      }
+      cont.appendChild(doc);
+      carte.forEach((cd) => { const t = cd.querySelector('.c-txt'); let z = parseFloat(t.style.fontSize) || 6.6; while (z > 3 && (t.scrollHeight > t.clientHeight + 1 || t.scrollWidth > t.clientWidth + 1)) { z = Math.round((z - 0.1) * 10) / 10; t.style.fontSize = z + 'pt'; } });
+      return carte.length;
+    } finally { stage.remove(); }
+  };
+
   X.tabCarte = function (ch) {
     const dd = M.derive(ch); if (!dd.incantesimi.classi.length && !dd.incRazza && !dd.incSub) return '';
     const o = opz(ch); const n = X.carteElenco(ch).length;
     const chk = (k, et) => '<label><input type="checkbox" data-az="carteOpt" data-k="' + k + '"' + (o[k] ? ' checked' : '') + '> ' + et + '</label>';
-    return '<div class="card carte-opz"><h3>🃏 Carte incantesimo</h3><p class="mute">Stampa le carte degli incantesimi scelti: 9 per foglio A4, con un foglio di fronti e uno di dorsi (stampa fronte-retro sul lato lungo). Dopo la stampa ritaglia lungo i bordi.</p>'
+    return '<div class="card carte-opz" id="sez-carte"><h3>🃏 Carte incantesimo</h3><p class="mute">Stampa le carte degli incantesimi scelti: 9 per foglio A4, con un foglio di fronti e uno di dorsi (stampa fronte-retro sul lato lungo). Dopo la stampa ritaglia lungo i bordi.</p>'
       + '<p>' + chk('truc', 'Trucchetti') + chk('prep', 'Conosciuti / preparati') + chk('libro', 'Tutti gli incantesimi del libro') + '</p>'
       + '<div class="riga"><label>Dorso <select data-az="carteOpt" data-k="dorso">' + DORSI.map((d) => '<option value="' + d[0] + '"' + (o.dorso === d[0] ? ' selected' : '') + '>' + d[1] + '</option>').join('') + '</select></label></div>'
       + '<p><span class="chip">' + n + ' incantesimi selezionati</span> <button class="oro" data-az="carteAnteprima">👁 Crea anteprima</button> <button data-az="carteStampa">🖨 Stampa carte</button></p>'
@@ -123,6 +143,7 @@
     const { corrente, salvaCorrente, render } = c;
     const costruisciOra = async () => { const ch = corrente(); const cont = document.getElementById('carte-prev'); if (!ch || !cont) return 0; cont.innerHTML = '<p class="mute">Preparo le carte…</p>'; return X.carteDocumento(ch, cont); };
     return {
+      vaiCarte() { const e = document.getElementById('sez-carte'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
       carteOpt(el) { const ch = corrente(); ch.carte = Object.assign({}, OPZ0, ch.carte || {}); ch.carte[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; salvaCorrente(); const y = window.scrollY; render(); window.scrollTo(0, y); },
       async carteAnteprima() { await costruisciOra(); },
       async carteStampa() {

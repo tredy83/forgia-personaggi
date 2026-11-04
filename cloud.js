@@ -97,6 +97,44 @@
   C.aggiornaUtente = (uid, campi) => db.collection('utenti').doc(uid).update(campi).catch((e) => { throw new Error(errore(e)); });
   C.eliminaUtente = (uid) => db.collection('utenti').doc(uid).delete().catch((e) => { throw new Error(errore(e)); });
 
+
+  /* ---- bestiario (solo gestori): mostri in blocchi, immagini, liste d'avventura ---- */
+  const BL = 40; // mostri per documento
+  C.mostriLeggi = async () => {
+    try {
+      const s = await db.collection('mostri').get(); const bl = s.docs.map((d) => d.data()).sort((a, b) => a.n - b.n); const out = [];
+      bl.forEach((b) => { try { JSON.parse(b.dati).forEach((m) => out.push(m)); } catch (e) { /* blocco illeggibile */ } });
+      return out;
+    } catch (e) { throw new Error(errore(e)); }
+  };
+  C.mostriScrivi = async (lista, avanz) => {
+    try {
+      const vecchi = await db.collection('mostri').get(); const n = Math.ceil(lista.length / BL); const nuovi = new Set();
+      for (let i = 0; i < n; i++) {
+        const id = 'b' + String(i).padStart(3, '0'); nuovi.add(id);
+        await db.collection('mostri').doc(id).set({ n: i, dati: JSON.stringify(lista.slice(i * BL, (i + 1) * BL)) }); if (avanz) avanz(i + 1, n);
+      }
+      for (const d of vecchi.docs) if (!nuovi.has(d.id)) await d.ref.delete();
+    } catch (e) { throw new Error(errore(e)); }
+  };
+  C.imgIndice = async () => { try { const d = await db.collection('mostriMeta').doc('immagini').get(); return d.exists ? (d.data().ids || []) : []; } catch (e) { throw new Error(errore(e)); } };
+  C.imgLeggi = async (id) => { try { const d = await db.collection('mostriImg').doc(String(id)).get(); return d.exists ? d.data().d : null; } catch (e) { throw new Error(errore(e)); } };
+  C.imgScrivi = async (id, dataUrl) => {
+    try {
+      await db.collection('mostriImg').doc(String(id)).set({ d: dataUrl });
+      await db.collection('mostriMeta').doc('immagini').set({ ids: fb.firestore.FieldValue.arrayUnion(Number(id)) }, { merge: true });
+    } catch (e) { throw new Error(errore(e)); }
+  };
+  C.imgElimina = async (id) => {
+    try {
+      await db.collection('mostriImg').doc(String(id)).delete();
+      await db.collection('mostriMeta').doc('immagini').set({ ids: fb.firestore.FieldValue.arrayRemove(Number(id)) }, { merge: true });
+    } catch (e) { throw new Error(errore(e)); }
+  };
+  C.avvLeggi = async () => { try { const s = await db.collection('avventure').get(); return s.docs.map((d) => Object.assign({ id: d.id }, d.data())); } catch (e) { throw new Error(errore(e)); } };
+  C.avvScrivi = (a) => db.collection('avventure').doc(a.id).set({ nome: a.nome || '', voci: a.voci || [], aggiornato: a.aggiornato || '' }).catch((e) => { throw new Error(errore(e)); });
+  C.avvElimina = (id) => db.collection('avventure').doc(id).delete().catch((e) => { throw new Error(errore(e)); });
+
   /* ---- il mio profilo ---- */
   C.cambiaPassword = async (vecchia, nuova) => {
     try {

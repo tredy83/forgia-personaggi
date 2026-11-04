@@ -80,7 +80,7 @@
     const man = manuali(ch);
     let h0 = '<div class="card"><h3>Manuali degli incantesimi</h3><p class="mute">Scegli da quali manuali puoi prendere gli incantesimi. Quelli già scelti restano sempre visibili.</p><div class="riga">'
       + D.MANUALI.map((x) => '<label class="chip-check"><input type="checkbox" data-az="manuale" data-id="' + x[0] + '"' + (man[x[0]] ? ' checked' : '') + '> ' + esc(x[1]) + ' <span class="mute">(' + D.INCANTESIMI.filter((s) => (s.fonte || 'mdg') === x[0]).length + ')</span></label>').join('') + '</div></div>';
-    h0 = cardRazza(ch, d, esc) + cardSub(ch, d, esc) + h0;
+    h0 = cardRazza(ch, d, esc) + cardSub(ch, d, esc) + '<p class="vai-carte"><button class="oro" data-az="vaiCarte">🃏 Stampa carte incantesimo ↓</button> <span class="mute">porta alla sezione Carte in fondo alla pagina</span></p>' + h0;
     // --- slot da barrare ---
     let slotHtml = inc.slot.map((n, i) => '<div class="slot-riga"><span>' + (i + 1) + '° livello</span><span><b>' + n + '</b> slot</span></div>').join('');
     inc.classi.filter((k) => k.patto).forEach((k) => { slotHtml += '<div class="slot-riga"><span>Patto (' + k.patto[1] + '° livello)</span><span><b>' + k.patto[0] + '</b> slot</span></div>'; });

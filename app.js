@@ -36,9 +36,10 @@
     if (!C.utente) { el.innerHTML = ''; return; }
     const st = C.stato(); const sinc = st.errore ? '<b title="' + esc(st.errore) + '">⚠ non sincronizzato</b>' : st.inCoda ? 'sincronizzo…' : '☁ sincronizzato';
     el.innerHTML = '<span class="utente-barra">👤 ' + esc(C.utente.nome) + ' <em>(' + (C.utente.ruolo === 'gestore' ? 'gestore' : 'genitore') + ')</em></span> <span class="sync">' + n + ' personaggi · ' + sinc + '</span>'
-      + (C.utente.ruolo === 'gestore' ? ' <button class="pic sec chiaro" data-az="vaiUtenti">Account</button>' : '') + ' <button class="pic sec chiaro" data-az="vaiProfilo">Profilo</button> <button class="pic sec chiaro" data-az="esci">Esci</button>';
+      + (C.utente.ruolo === 'gestore' ? ' <button class="pic sec chiaro" data-az="vaiBestiario">Bestiario</button> <button class="pic sec chiaro" data-az="vaiParty">Party Tracker</button> <button class="pic sec chiaro" data-az="vaiUtenti">Account</button>' : '') + ' <button class="pic sec chiaro" data-az="vaiProfilo">Profilo</button> <button class="pic sec chiaro" data-az="esci">Esci</button>';
   };
 
+  const campagne = () => { const m = new Map(); DB.personaggi.forEach((p) => { const c = String(p.campagna || '').trim(); if (c && !m.has(c.toLowerCase())) m.set(c.toLowerCase(), c); }); return [...m.values()].sort((a, b) => a.localeCompare(b, 'it')); };
   const S = { vista: 'elenco', id: null, tab: 'identita', filtro: '', cestino: false };
   const corrente = () => trova(S.id);
   const salvaCorrente = () => { const c = corrente(); if (c) { c.aggiornato = new Date().toISOString(); scrivi(); } };
@@ -47,7 +48,7 @@
   function vistaElenco() {
     const f = S.filtro.toLowerCase();
     const lista = DB.personaggi.filter((p) => !!p.cestinato === S.cestino)
-      .filter((p) => !f || [p.nome, p.giocatore.nome, p.giocatore.cognome, p.ownerNome || ''].join(' ').toLowerCase().includes(f))
+      .filter((p) => !f || [p.nome, p.giocatore.nome, p.giocatore.cognome, p.ownerNome || '', p.campagna || ''].join(' ').toLowerCase().includes(f))
       .sort((a, b) => (a.giocatore.cognome + a.giocatore.nome).localeCompare(b.giocatore.cognome + b.giocatore.nome) || a.nome.localeCompare(b.nome));
     const nCest = DB.personaggi.filter((p) => p.cestinato).length;
     let righe = lista.map((p) => {
@@ -58,15 +59,16 @@
       const az = S.cestino
         ? '<button class="pic sec" data-az="ripristina" data-id="' + p.id + '">Ripristina</button> <button class="pic pericolo" data-az="elimina" data-id="' + p.id + '">Elimina per sempre</button>'
         : '<button class="pic" data-az="apri" data-id="' + p.id + '">Apri</button> <button class="pic oro" data-az="apriLivelli" data-id="' + p.id + '">⬆ Sali di livello</button> <button class="pic sec" data-az="stampa" title="Stampa la scheda" data-id="' + p.id + '">🖨 Stampa</button> <button class="pic sec" data-az="duplica" data-id="' + p.id + '">Duplica</button> <button class="pic sec" data-az="cestina" title="Sposta nel cestino" data-id="' + p.id + '">🗑 Elimina</button>';
-      return '<tr><td>' + esc(gio) + '</td>' + (gest ? '<td>' + esc(p.ownerNome || '—') + '</td>' : '') + '<td><b>' + esc(p.nome || 'Senza nome') + '</b></td><td>' + esc(r ? r.nome : '') + '</td><td>' + esc(cl) + '</td><td>' + data + '</td><td class="az">' + az + '</td></tr>';
+      return '<tr><td>' + esc(gio) + '</td>' + (gest ? '<td>' + esc(p.ownerNome || '—') + '</td>' : '') + '<td><b>' + esc(p.nome || 'Senza nome') + '</b></td><td>' + esc(p.campagna || '') + '</td><td>' + esc(r ? r.nome : '') + '</td><td>' + esc(cl) + '</td><td>' + data + '</td><td class="az">' + az + '</td></tr>';
     }).join('');
     const tabella = lista.length
-      ? '<table><thead><tr><th>Giocatore</th>' + (C.attivo && C.utente && C.utente.ruolo === 'gestore' ? '<th>Creato da</th>' : '') + '<th>Personaggio</th><th>Razza</th><th>Classe / livello</th><th>Modificato</th><th></th></tr></thead><tbody>' + righe + '</tbody></table>'
+      ? '<table><thead><tr><th>Giocatore</th>' + (C.attivo && C.utente && C.utente.ruolo === 'gestore' ? '<th>Creato da</th>' : '') + '<th>Personaggio</th><th>Campagna</th><th>Razza</th><th>Classe / livello</th><th>Modificato</th><th></th></tr></thead><tbody>' + righe + '</tbody></table>'
       : '<div class="vuoto">' + (S.cestino ? 'Il cestino è vuoto.' : 'Nessun personaggio ancora. Premi <b>＋ Nuovo personaggio</b> per cominciare.') + '</div>';
     return '<div class="barra-elenco">'
       + '<button data-az="nuovo">＋ Nuovo personaggio</button>'
-      + '<input type="search" placeholder="Cerca per nome o cognome…" value="' + esc(S.filtro) + '" data-az="filtro">'
+      + '<input type="search" placeholder="Cerca per nome, cognome o campagna…" value="' + esc(S.filtro) + '" data-az="filtro">'
       + '<button class="sec" data-az="toggleCestino">' + (S.cestino ? '← Torna ai personaggi' : '🗑 Cestino (' + nCest + ')') + '</button>'
+      + (!C.attivo ? '<button class="sec" data-az="vaiBestiario">📖 Bestiario</button><button class="sec" data-az="vaiParty">🧭 Party Tracker</button>' : '')
       + '<button class="sec" data-az="esporta">⬇ Esporta archivio</button>'
       + '<button class="sec" data-az="importa">⬆ Importa archivio</button>'
       + '</div><div class="card">' + tabella + '</div>'
@@ -168,7 +170,8 @@
     return '<div class="card"><h3>Chi gioca e chi è il personaggio</h3><div class="riga">'
       + '<div class="col"><label>Nome del giocatore</label><input data-bind="giocatore.nome" value="' + esc(ch.giocatore.nome) + '"></div>'
       + '<div class="col"><label>Cognome del giocatore</label><input data-bind="giocatore.cognome" value="' + esc(ch.giocatore.cognome) + '"></div>'
-      + '<div class="col"><label>Nome del personaggio</label><input data-bind="nome" value="' + esc(ch.nome) + '"></div></div></div>'
+      + '<div class="col"><label>Nome del personaggio</label><input data-bind="nome" value="' + esc(ch.nome) + '"></div>'
+      + '<div class="col"><label>Campagna <span class="mute">(facoltativa)</span></label><input data-bind="campagna" list="elenco-campagne" autocomplete="off" placeholder="Es. Discesa nell\'Avernus" value="' + esc(ch.campagna || '') + '"><datalist id="elenco-campagne">' + campagne().map((c) => '<option value="' + esc(c) + '">').join('') + '</datalist></div></div></div>'
       + '<div class="card"><h3>Razza, background, allineamento</h3><div class="riga">'
       + '<div class="col"><label>Razza</label><select data-az="razza">' + D.RAZZE.map((x) => opt(x.id, x.nome, x.id === ch.razza)).join('') + '</select></div>'
       + (r.sub ? '<div class="col"><label>Sottorazza</label><select data-bind="sub">' + r.sub.map((x) => opt(x.id, x.nome, x.id === ch.sub)).join('') + '</select></div>' : '')
@@ -380,6 +383,8 @@
     const app = $('#app');
     if (C.attivo && !C.utente) app.innerHTML = S.avvio ? '<p class="mute centro">Verifico l\'accesso…</p>' : vistaLogin();
     else if (S.vista === 'utenti' && C.attivo && C.utente.ruolo === 'gestore') app.innerHTML = vistaUtenti();
+    else if (S.vista === 'bestiario' && (!C.attivo || C.utente.ruolo === 'gestore')) app.innerHTML = window.FORGIA_X.vistaBestiario();
+    else if (S.vista === 'party' && (!C.attivo || C.utente.ruolo === 'gestore')) { app.innerHTML = window.FORGIA_X.vistaParty(); window.FORGIA_X.partyDopoRender(); }
     else if (S.vista === 'profilo' && C.attivo) app.innerHTML = vistaProfilo();
     else if (S.vista === 'elenco') app.innerHTML = vistaElenco();
     else if (corrente()) app.innerHTML = vistaEditor();
@@ -398,7 +403,7 @@
     nuovo: nuovoPG,
     apri(el) { S.id = el.dataset.id; S.vista = 'editor'; S.tab = 'identita'; render(); },
     apriLivelli(el) { S.id = el.dataset.id; S.vista = 'editor'; S.tab = 'livelli'; render(); },
-    tornaElenco() { S.vista = 'elenco'; S.msgUt = S.msgPw = ''; render(); },
+    tornaElenco() { S.vista = S.torna || 'elenco'; S.torna = null; S.msgUt = S.msgPw = ''; render(); },
     vaiUtenti() { S.vista = 'utenti'; S.msgUt = ''; render(); },
     vaiProfilo() { S.vista = 'profilo'; S.msgPw = ''; render(); },
     login() {
@@ -535,6 +540,8 @@
   };
 
   Object.assign(azioni, window.FORGIA_X.azioni({ S, corrente, salvaCorrente, render }));
+  Object.assign(azioni, window.FORGIA_X.azioniBestiario({ S, render }));
+  Object.assign(azioni, window.FORGIA_X.azioniParty({ S, render, pgs: () => DB.personaggi, scrivi, trova }));
 
   /* ---------- eventi ---------- */
   document.addEventListener('click', (e) => {
@@ -548,6 +555,7 @@
     if (el.dataset && el.dataset.az && ['INPUT', 'SELECT'].includes(el.tagName) && el.dataset.az !== 'filtro') { azioni[el.dataset.az](el, e); return; }
     if (el.dataset && el.dataset.bind) {
       const ch = corrente(); if (!ch) return;
+      if (el.dataset.bind === 'campagna') { const v = el.value.replace(/\s+/g, ' ').trim(); const gia = campagne().find((c) => c.toLowerCase() === v.toLowerCase()); el.value = gia || v; }
       setPath(ch, el.dataset.bind, el.type === 'checkbox' ? el.checked : el.value);
       salvaCorrente(); render();
     }
@@ -594,7 +602,7 @@
     S.avvio = true; C.alSync = infoBarra;
     C.alCambioStato((u, msg) => {
       S.attesa = false; S.avvio = false;
-      if (!u) { if (KEYATT !== KEY) { try { localStorage.removeItem(KEYATT); } catch (e) { /* ignora */ } } DB = { personaggi: [] }; inviati.clear(); KEYATT = KEY; S.vista = 'elenco'; S.id = null; if (msg) S.msgLogin = msg; render(); return; }
+      if (!u) { window.FORGIA_X.bestiarioReset(); if (KEYATT !== KEY) { try { localStorage.removeItem(KEYATT); } catch (e) { /* ignora */ } } DB = { personaggi: [] }; inviati.clear(); KEYATT = KEY; S.vista = 'elenco'; S.id = null; if (msg) S.msgLogin = msg; render(); return; }
       KEYATT = KEY + ':' + u.uid; DB = leggi(KEYATT); DB.personaggi.forEach((p) => inviati.set(p.id, firma(p)));
       S.vista = 'elenco'; S.id = null; S.msgLogin = '';
       C.sottoscrivi(applicaRemoto);

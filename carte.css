@@ -39,3 +39,9 @@
 .carta.dorso.d-bianco .d-t{top:55mm;font-size:21pt;color:#000}
 
 .carta .c-in{display:flow-root}
+
+/* carte semplici: bianco e nero */
+.carta.bn img{filter:grayscale(1) contrast(1.2)}
+.carta.bn .c-cls div.on{color:#000}
+.carta.bn .c-cls div.on::after{background:#000}
+.carta.bn{border-color:#999}

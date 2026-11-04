@@ -1,0 +1,73 @@
+/* ====== Bestiario del DM: schermo + carte dei mostri ====== */
+.bes-tabs{margin:.6rem 0}
+.bes-filtri{align-items:center;gap:.5rem}
+.bes-filtri input[type=search]{flex:2 1 14rem}
+.bes-filtri select{flex:1 1 8rem}
+.bes-griglia{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:1rem;align-items:start;margin-top:1rem}
+@media(max-width:800px){.bes-griglia{grid-template-columns:1fr}}
+.bes-riga{display:grid;grid-template-columns:1fr auto;column-gap:.5rem;align-items:center;cursor:pointer;padding:.35rem .5rem;border-bottom:1px solid var(--linea,#ddd);border-radius:10px}
+.bes-riga:hover{background:var(--lav-soft,#f3ecff)}
+.bes-riga.sel{background:var(--lav,#dcc6ff)}
+.bes-r2{grid-column:1;font-size:.8rem;color:var(--grigio,#555)}
+.bes-riga button{grid-column:2;grid-row:1/3}
+.bes-az{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.7rem}
+.bes-az a.pic{display:inline-block;text-decoration:none;border-radius:999px;border:2px solid var(--deep,#45306f);color:var(--deep,#45306f);padding:.2rem .8rem;font-size:.85rem;font-weight:700}
+.bes-foto{display:block;max-width:100%;max-height:260px;margin:0 auto .7rem;border-radius:12px;border:2px solid #8a1c1c}
+.bes-tab{width:100%;border-collapse:collapse;margin:.6rem 0}
+.bes-tab th,.bes-tab td{padding:.3rem .4rem;border-bottom:1px solid var(--linea,#ddd);text-align:left}
+.bes-tab td.q{white-space:nowrap}
+.bes-stampa{background:var(--lav-soft,#f3ecff);margin:.8rem 0}
+.bes-senza{columns:2;font-size:.9rem}
+@media(max-width:600px){.bes-senza{columns:1}}
+
+/* scheda a schermo e testo delle carte */
+.mb{font-family:"MPlantin",Georgia,serif;color:#1d1d1d;line-height:1.14}
+.mb p{margin:0 0 .45em}
+.mb b.et{color:#8a1c1c}
+.mb h5{margin:.7em 0 .3em;font-size:1.22em;font-weight:400;font-variant:small-caps;color:#8a1c1c;border-bottom:.25mm solid #8a1c1c;break-after:avoid;letter-spacing:.02em}
+.mb .mb-hr{border:0;height:.3mm;background:linear-gradient(90deg,#8a1c1c,rgba(138,28,28,.15));margin:.4em 0}
+.mb-ab{display:grid;grid-template-columns:repeat(6,1fr);text-align:center;border-top:.25mm solid #8a1c1c;border-bottom:.25mm solid #8a1c1c;margin:.4em 0 .5em;padding:.25em 0;font-size:.92em}
+.mb-ab div{white-space:nowrap}
+.mb-ab b{display:block;color:#8a1c1c;font-size:.95em}
+.mb-sch{background:#fdf6e3;border:2px solid #8a1c1c;border-radius:10px;padding:.8rem 1rem;font-size:1.02rem;color:#1d1d1d}
+.mb-sch h4{margin:0;font-family:"Ringbearer",serif;font-size:1.5rem;font-weight:400;color:#8a1c1c}
+.mb-sch .mb-t{font-style:italic;margin-bottom:.2rem}
+.mb-sch p{color:#1d1d1d;font-weight:400}
+
+/* carte */
+.mcard{position:absolute;box-sizing:border-box;background:#fff;border:.1mm solid #c8c8c8;overflow:hidden;font-family:"MPlantin",Georgia,serif;color:#1d1d1d}
+.mcard .mc-in{position:absolute;left:1.3mm;top:1.3mm;right:1.3mm;bottom:1.3mm;border:.8mm solid #8a1c1c;border-radius:1.8mm;display:flex;flex-direction:column;padding:1.3mm 1.8mm .8mm;overflow:hidden}
+.mcard.f-M .mc-in,.mcard.f-L .mc-in,.mcard.f-XL .mc-in{padding:2mm 3mm 1.2mm}
+.mcard .mc-head{flex:none;border-bottom:.3mm solid #8a1c1c;margin-bottom:.8mm;padding-bottom:.5mm}
+.mcard .mc-nome{font-family:"Ringbearer",serif;color:#8a1c1c;white-space:nowrap;overflow:hidden;line-height:1.15}
+.mcard .mc-tipo{font-style:italic;font-size:6.2pt;line-height:1.1}
+.mcard.f-M .mc-tipo{font-size:7.4pt}
+.mcard.f-L .mc-tipo,.mcard.f-XL .mc-tipo{font-size:8.6pt}
+.mcard .mc-body{flex:1 1 0;min-height:0;overflow:hidden}
+.mcard .mc-body.due{column-count:2;column-gap:4mm;column-fill:balance}
+.mcard .mc-fit p{orphans:2;widows:2}
+.mcard .mc-foot{flex:none;display:flex;justify-content:space-between;font-size:5pt;color:#777;border-top:.2mm solid #ccc;padding-top:.4mm;margin-top:.5mm}
+.mcard.f-L .mc-foot,.mcard.f-XL .mc-foot{font-size:6.4pt}
+.mcard.dorso .mc-in{padding:0}
+.mcard .mc-img img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.mcard .mc-cap{position:absolute;left:0;right:0;bottom:0;background:rgba(138,28,28,.9);color:#fff;font-family:"Ringbearer",serif;text-align:center;padding:1mm 2mm;font-size:10pt;line-height:1.2}
+.mcard.f-S .mc-cap{font-size:8pt}.mcard.f-XL .mc-cap{font-size:14pt}
+.mcard .mc-logo,.mcard .mc-vuoto{align-items:center;justify-content:center;text-align:center;background:#fff}
+.mcard .mc-logo img{width:55%;max-width:55mm;height:auto;opacity:.9}
+.mcard .mc-cap2{font-family:"Ringbearer",serif;color:#8a1c1c;font-size:12pt;margin-top:3mm;padding:0 2mm}
+.mcard.f-S .mc-cap2{font-size:9.5pt}.mcard.f-XL .mc-cap2{font-size:17pt}
+.mpag{page:carte}
+/* il tema a schermo non deve cambiare peso/colore del testo delle schede e delle carte */
+.mb p,.mb li,.mb div,.mb span,.mcard .mc-body *{font-weight:400!important;color:#1d1d1d}
+.mb b,.mb b i,.mb i{font-weight:700!important}
+.mb i:not(b i){font-weight:400!important}
+.mb b.et{color:#8a1c1c!important}
+.mb h5,.mb-sch h4{color:#8a1c1c!important;font-weight:400!important}
+.mb-ab b{color:#8a1c1c!important;font-weight:700!important}
+.mb-ab span{font-weight:400!important}
+.bes-riga.sel{background:#fff;outline:2px solid var(--red,#c63a43)}
+
+.bes-alert{margin:.5rem 0;padding:.5rem .7rem;border:2px solid #b8860b;border-radius:8px;background:#fff8e1}
+.bes-alert-b{background:none;border:0;padding:0;font:inherit;font-weight:700;color:#7a5200;cursor:pointer;text-align:left}
+.bes-alert-b:hover{text-decoration:underline}
+.bes-alert-b[disabled]{opacity:.6;cursor:default}

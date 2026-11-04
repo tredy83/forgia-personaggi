@@ -13,7 +13,7 @@
   M.nuovo = function () {
     const ora = new Date().toISOString();
     return {
-      id: M.uid(), v: 1, giocatore: { nome: '', cognome: '' }, nome: '', razza: 'umano', sub: '',
+      id: M.uid(), v: 1, giocatore: { nome: '', cognome: '' }, nome: '', campagna: '', razza: 'umano', sub: '',
       scelteRazza: { bonusLiberi: [], drago: 'Rosso', abilita: [] }, sfondo: 'soldato', allineamento: 'Neutrale', lingue: [],
       metodo: 'array', tiri: [], punteggi: { for: 8, des: 8, cos: 8, int: 8, sag: 8, car: 8 }, variante: '',
       livelli: ['guerriero'], sottoclassi: {}, abilita: [], maestrie: [], stile: '', discipline: [], manovre: [], scelte: {}, asi: {},
