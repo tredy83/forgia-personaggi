@@ -15,7 +15,7 @@
   // incantesimi da stampare, in base alle scelte del personaggio
   X.carteElenco = function (ch) {
     const o = opz(ch); const ids = []; const add = (id) => { if (id && !ids.includes(id)) ids.push(id); };
-    Object.keys(ch.inc || {}).forEach((k) => {
+    Object.keys(ch.inc || {}).filter((k) => (ch.livelli || []).includes(k)).forEach((k) => {
       const s = ch.inc[k]; if (!s) return;
       if (o.truc) (s.truc || []).forEach(add);
       if (o.prep) [].concat(s.conos || [], s.prep || []).forEach(add);
