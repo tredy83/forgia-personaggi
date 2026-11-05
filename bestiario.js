@@ -317,10 +317,10 @@
       + '<p><button class="oro" data-az="besImgBlocco">⬆ Carica immagini (più file)</button> <button class="sec" data-az="besSenzaImgTutti">📋 Elenco di tutti i mostri senza immagine (' + senza.length + ')</button></p><div id="bes-senza"></div><div class="mute">' + esc(B.msgImg || '') + '</div></div>';
   };
   X.vistaBestiario = function () {
-    if (!B.carico) { if (!B.prep) { B.prep = true; carica(); } return '<div class="barra-elenco"><button class="sec" data-az="tornaElenco">← Personaggi</button></div><p class="mute centro">Carico il bestiario…</p>'; }
+    if (!B.carico) { if (!B.prep) { B.prep = true; carica(); } return '<p class="mute centro">Carico il bestiario…</p>'; }
     const vuoto = !(B.mostri || []).length;
     const tabs = [['cerca', '🔎 Cerca'], ['avv', '📜 Avventure'], ['dati', '⚙ Dati e immagini']].map(([id, l]) => '<button class="' + (B.tab === id ? 'attiva' : '') + '" data-az="besTab" data-t="' + id + '">' + l + '</button>').join('');
-    return '<div class="barra-elenco"><button class="sec" data-az="tornaElenco">← Personaggi</button><b style="font-size:1.1rem">' + (B.modo === 'inc' ? '⚔ Incontri e iniziativa' : '📖 Bestiario del Dungeon Master') + '</b>' + (B.modo === 'inc' ? ' <button class="sec" data-az="vaiBestiario">📖 Bestiario</button>' : ' <button class="sec" data-az="vaiIncontri">⚔ Incontri</button>') + '</div>'
+    return '<div class="barra-elenco"><b style="font-size:1.1rem">' + (B.modo === 'inc' ? '⚔ Incontri e iniziativa' : '📖 Bestiario del Dungeon Master') + '</b>' + '</div>'
       + (B.errore ? '<div class="avviso">⚠ ' + esc(B.errore) + '</div>' : '')
       + (vuoto && B.tab !== 'dati' && B.modo !== 'inc' ? '<div class="avviso">Il bestiario è vuoto: importa il file dei mostri dalla scheda <b>Dati e immagini</b>. <button class="pic oro" data-az="besTab" data-t="dati">Vai</button></div>' : '')
       + (B.modo === 'inc' ? X.tabIncontri() : '<div class="tabs bes-tabs">' + tabs + '</div>' + (B.tab === 'cerca' ? tabCerca() : B.tab === 'avv' ? tabAvv() : tabDati()))

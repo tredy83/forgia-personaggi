@@ -125,7 +125,7 @@
   X.vistaParty = function () {
     const cs = campagne(); const o = (v, l, s) => '<option value="' + esc(v) + '"' + (s ? ' selected' : '') + '>' + esc(l) + '</option>';
     const sel = selezionati(); const camp = bannerTesto(sel);
-    return '<div class="barra-elenco"><button class="sec" data-az="tornaElenco">← Personaggi</button><b>🧭 Party Tracker</b><span class="mute">Solo per i gestori</span></div>'
+    return '<div class="barra-elenco"><b>🧭 Party Tracker</b><span class="mute">Solo per i gestori</span></div>'
       + '<div class="card"><div class="riga pt-filtri"><input type="search" id="pt-q" data-az="ptQ" placeholder="Cerca per campagna, personaggio o giocatore…" value="' + esc(P.q) + '">'
       + '<select data-az="ptCamp">' + o('', 'Tutte le campagne', !P.camp) + cs.map((c) => o(c, c, P.camp.toLowerCase() === c.toLowerCase())).join('') + o('__none', 'Senza campagna', P.camp === '__none') + '</select>'
       + '</div>'
