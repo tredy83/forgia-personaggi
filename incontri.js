@@ -123,7 +123,7 @@
       async incTiraTutti() { const { a, inc } = cur(); if (!inc) return; const per = new Map(); inc.righe.forEach((r) => { if (r.mid == null) return; const k = r.g || r.id; if (!per.has(k)) per.set(k, tira(api.B.mappa.get(r.mid))); r.ini = per.get(k); }); await salva(a); api.ridisegna(); },
       async incTogli(el) { const { a, inc } = cur(); if (!inc) return; inc.righe = inc.righe.filter((r) => r.id !== el.dataset.id); await salva(a); api.ridisegna(); },
       async incElimina() { const { a, inc } = cur(); if (!inc || !G.confirm('Eliminare l\'incontro «' + inc.nome + '»?')) return; a.incontri = incontri(a).filter((x) => x.id !== inc.id); I.sel[a.id] = null; await salva(a); api.ridisegna(); },
-      incStampa() { const { a, inc } = cur(); if (!inc) return; if (!inc.righe.length) { api.toast('Aggiungi prima qualcuno all\'incontro'); return; } const st = document.getElementById('stampa'); st.innerHTML = '<div class="ig-print">' + foglio(a, inc) + '</div>'; G.print(); },
+      incStampa() { const { a, inc } = cur(); if (!inc) return; if (!inc.righe.length) { api.toast('Aggiungi prima qualcuno all\'incontro'); return; } const st = document.getElementById('stampa'); st.innerHTML = '<div class="ig-print">' + foglio(a, inc) + '</div>'; (window.FORGIA_X.stampaPronta || G.print.bind(G))(); },
     };
     if (!I.ok) { I.ok = true; document.addEventListener('input', (e) => { const t = e.target; if (t && t.dataset && t.dataset.az === 'incNote' && t.tagName === 'TEXTAREA') az.incNote(t); }); }
     return az;

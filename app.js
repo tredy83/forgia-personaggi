@@ -17,12 +17,13 @@
   let KEYATT = KEY;
   const leggi = (k) => { try { const d = JSON.parse(localStorage.getItem(k) || '{"personaggi":[]}'); if (!d.personaggi) d.personaggi = []; return d; } catch (e) { return { personaggi: [] }; } };
   let DB = C.attivo ? { personaggi: [] } : leggi(KEY); let erroreSalvataggio = '';
-  const scriviLocale = () => { try { localStorage.setItem(KEYATT, JSON.stringify(DB)); erroreSalvataggio = ''; } catch (e) { erroreSalvataggio = 'Impossibile salvare su questo browser!'; } };
+  const scriviLocale = () => { try { localStorage.setItem(KEYATT, JSON.stringify({ ...DB, personaggi: DB.personaggi.filter((p) => !p.bozza) })); erroreSalvataggio = ''; } catch (e) { erroreSalvataggio = 'Impossibile salvare su questo browser!'; } };
   const inviati = new Map(); // id -> firma dell'ultima versione inviata online
   const firma = (p) => (p.aggiornato || '') + '|' + (p.cestinato ? 1 : 0);
   function sincronizza() {
     if (!C.attivo || !C.utente) return;
     DB.personaggi.forEach((p) => {
+      if (p.bozza) return;
       if (!p.owner) { p.owner = C.utente.uid; p.ownerNome = C.utente.nome; }
       if (inviati.get(p.id) !== firma(p)) { inviati.set(p.id, firma(p)); C.salva(p); }
     });
@@ -42,20 +43,22 @@
     if (C.attivo && !C.utente) { nav.innerHTML = ''; return; }
     const g = !C.attivo || C.utente.ruolo === 'gestore'; const cur = sezione();
     const v = [['elenco', 'vaiElenco', 'Personaggi']].concat(g ? [['party', 'vaiParty', 'Party Tracker'], ['bestiario', 'vaiBestiario', 'Bestiario'], ['avventure', 'vaiAvventure', 'Avventure'], ['incontri', 'vaiIncontri', 'Incontri']] : []);
-    nav.innerHTML = v.map(([k, az, t]) => '<button class="nav-v' + (cur === k ? ' on' : '') + '" data-az="' + az + '">' + t + '</button>').join('');
+    const html = v.map(([k, az, t]) => '<button class="nav-v' + (cur === k ? ' on' : '') + '" data-az="' + az + '">' + t + '</button>').join('');
+    if (nav._h !== html) { nav._h = html; nav.innerHTML = html; }
   };
+  const poni = (el, html) => { if (el._h !== html) { el._h = html; el.innerHTML = html; } };
   const infoBarra = () => {
     navBarra();
     const n = DB.personaggi.filter((p) => !p.cestinato).length; const el = $('#barra-info'); if (!el) return;
-    if (!C.attivo) { el.innerHTML = erroreSalvataggio ? '<b>⚠ ' + erroreSalvataggio + '</b>' : n + ' personaggi salvati su questo dispositivo'; return; }
-    if (!C.utente) { el.innerHTML = ''; return; }
+    if (!C.attivo) { poni(el, erroreSalvataggio ? '<b>⚠ ' + erroreSalvataggio + '</b>' : n + ' personaggi salvati su questo dispositivo'); return; }
+    if (!C.utente) { poni(el, ''); return; }
     const st = C.stato(); const sinc = st.errore ? '<b title="' + esc(st.errore) + '">⚠ non sincronizzato</b>' : st.inCoda ? 'sincronizzo…' : '☁ sincronizzato';
-    el.innerHTML = '<div class="ib-riga"><span class="utente-barra">👤 ' + esc(C.utente.nome) + ' <em>(' + (C.utente.ruolo === 'gestore' ? 'gestore' : 'genitore') + ')</em></span> <span class="sync">' + n + ' personaggi · ' + sinc + '</span></div>'
-      + '<div class="ib-riga"><button class="pic sec chiaro" data-az="vaiProfilo">Profilo</button>' + (C.utente.ruolo === 'gestore' ? ' <button class="pic sec chiaro" data-az="vaiUtenti">Account</button>' : '') + ' <button class="pic sec chiaro" data-az="esci">Esci</button></div>';
+    poni(el, '<div class="ib-riga"><span class="utente-barra">👤 ' + esc(C.utente.nome) + ' <em>(' + (C.utente.ruolo === 'gestore' ? 'gestore' : 'genitore') + ')</em></span> <span class="sync">' + n + ' personaggi · ' + sinc + '</span></div>'
+      + '<div class="ib-riga"><button class="pic sec chiaro" data-az="vaiProfilo">Profilo</button>' + (C.utente.ruolo === 'gestore' ? ' <button class="pic sec chiaro" data-az="vaiUtenti">Account</button>' : '') + ' <button class="pic sec chiaro" data-az="esci">Esci</button></div>');
   };
 
   const campagne = () => { const m = new Map(); DB.personaggi.forEach((p) => { const c = String(p.campagna || '').trim(); if (c && !m.has(c.toLowerCase())) m.set(c.toLowerCase(), c); }); return [...m.values()].sort((a, b) => a.localeCompare(b, 'it')); };
-  const S = { vista: 'home', id: null, tab: 'identita', filtro: '', cestino: false };
+  const S = { cesSel: new Set(), vista: 'home', id: null, tab: 'identita', filtro: '', cestino: false };
   const corrente = () => trova(S.id);
   const salvaCorrente = () => { const c = corrente(); if (c) { c.aggiornato = new Date().toISOString(); scrivi(); } };
 
@@ -74,10 +77,10 @@
       const az = S.cestino
         ? '<button class="pic sec" data-az="ripristina" data-id="' + p.id + '">Ripristina</button> <button class="pic pericolo" data-az="elimina" data-id="' + p.id + '">Elimina per sempre</button>'
         : '<button class="pic" data-az="apri" data-id="' + p.id + '">Apri</button> <button class="pic oro" data-az="apriLivelli" data-id="' + p.id + '">⬆ Sali di livello</button> <button class="pic sec" data-az="stampa" title="Stampa la scheda" data-id="' + p.id + '">🖨 Stampa</button> <button class="pic sec" data-az="duplica" data-id="' + p.id + '">Duplica</button> <button class="pic sec" data-az="cestina" title="Sposta nel cestino" data-id="' + p.id + '">🗑 Elimina</button>';
-      return '<tr><td>' + esc(gio) + '</td>' + (gest ? '<td>' + esc(p.ownerNome || '—') + '</td>' : '') + '<td><b>' + esc(p.nome || 'Senza nome') + '</b></td><td>' + esc(p.campagna || '') + '</td><td>' + esc(r ? r.nome : '') + '</td><td>' + esc(cl) + '</td><td>' + data + '</td><td class="az">' + az + '</td></tr>';
+      return '<tr>' + (S.cestino ? '<td><input type="checkbox" data-az="cesSel" data-id="' + p.id + '"' + (S.cesSel.has(p.id) ? ' checked' : '') + '></td>' : '') + '<td data-l="Giocatore">' + esc(gio) + '</td>' + (gest ? '<td data-l="Creato da">' + esc(p.ownerNome || '—') + '</td>' : '') + '<td class="pn" data-l="Personaggio"><b>' + esc(p.nome || 'Senza nome') + '</b></td><td data-l="Campagna">' + esc(p.campagna || '') + '</td><td data-l="Razza">' + esc(r ? r.nome : '') + '</td><td data-l="Classe">' + esc(cl) + '</td><td data-l="Modificato">' + data + '</td><td class="az">' + az + '</td></tr>';
     }).join('');
     const tabella = lista.length
-      ? '<table><thead><tr><th>Giocatore</th>' + (C.attivo && C.utente && C.utente.ruolo === 'gestore' ? '<th>Creato da</th>' : '') + '<th>Personaggio</th><th>Campagna</th><th>Razza</th><th>Classe / livello</th><th>Modificato</th><th></th></tr></thead><tbody>' + righe + '</tbody></table>'
+      ? (S.cestino ? '<div class="barra-elenco"><button class="pic sec" data-az="cesTutti">Seleziona tutti</button><button class="pic sec" data-az="cesNessuno">Nessuno</button><button class="pic pericolo" data-az="cesElimina"' + (S.cesSel.size ? '' : ' disabled') + '>🗑 Elimina selezionati (' + S.cesSel.size + ')</button><button class="pic pericolo" data-az="cesSvuota">Svuota tutto il cestino</button></div>' : '') + '<table><thead><tr>' + (S.cestino ? '<th></th>' : '') + '<th>Giocatore</th>' + (C.attivo && C.utente && C.utente.ruolo === 'gestore' ? '<th>Creato da</th>' : '') + '<th>Personaggio</th><th>Campagna</th><th>Razza</th><th>Classe / livello</th><th>Modificato</th><th></th></tr></thead><tbody>' + righe + '</tbody></table>'
       : '<div class="vuoto">' + (S.cestino ? 'Il cestino è vuoto.' : 'Nessun personaggio ancora. Premi <b>＋ Nuovo personaggio</b> per cominciare.') + '</div>';
     return '<div class="barra-elenco">'
       + '<button data-az="nuovo">＋ Nuovo personaggio</button>'
@@ -136,7 +139,7 @@
   function vistaEditor() {
     const ch = corrente();
     const tabs = TABS.map(([id, l]) => '<button class="' + (S.tab === id ? 'attiva' : '') + '" data-az="tab" data-t="' + id + '">' + l + '</button>').join('');
-    return '<div class="barra-elenco"><button class="sec" data-az="tornaElenco">← Elenco personaggi</button><span class="mute">Si salva da solo ad ogni modifica.</span></div>'
+    return '<div class="barra-elenco"><button class="sec" data-az="tornaElenco">← Elenco personaggi</button>' + (ch.bozza ? '<button class="oro" data-az="salvaBozza">💾 Salva il personaggio</button><span class="mute">Nuovo personaggio: non è ancora salvato.</span>' : '<span class="mute">Si salva da solo ad ogni modifica.</span>') + '</div>'
       + '<div class="editor"><div><div class="tabs">' + tabs + '</div>' + contenutoTab(ch) + '</div><aside class="riepilogo card" id="riepilogo">' + riepilogo(ch) + '</aside></div>';
   }
 
@@ -402,8 +405,26 @@
     return '<section class="home"><h1>Che cosa vuoi fare?</h1><div class="home-griglia">'
       + T.map(([az, ic, t, d, col]) => '<button class="home-tile ' + col + '" data-az="' + az + '"><span class="ht-img">' + ic + '</span><b>' + t + '</b><small>' + d + '</small></button>').join('') + '</div></section>';
   }
+  /* stampa: aspetta che le immagini della scheda siano caricate (sul telefono altrimenti escono pagine bianche) */
+  const stampaPronta = () => {
+    const imgs = [...document.querySelectorAll('#stampa img')].filter((i) => !i.complete);
+    const via = () => requestAnimationFrame(() => setTimeout(() => window.print(), 50));
+    if (!imgs.length) { via(); return; }
+    let fatto = false; const fine = () => { if (!fatto) { fatto = true; via(); } };
+    Promise.all(imgs.map((i) => new Promise((r) => { i.addEventListener('load', r); i.addEventListener('error', r); }))).then(fine); setTimeout(fine, 4000);
+  };
+  window.FORGIA_X.stampaPronta = stampaPronta;
+  ['uff_1.jpg', 'uff_2.jpg', 'uff_3.jpg', 'logo-argini-bn.png'].forEach((u) => { const i = new Image(); i.src = u; });
   /* ---------- rendering ---------- */
+  function risolviBozza() {
+    const id = S.bozzaId; if (!id || (S.vista === 'editor' && S.id === id)) return;
+    S.bozzaId = null; const ch = trova(id); if (!ch || !ch.bozza) return;
+    const vuoto = !(ch.nome || '').trim() && !(ch.giocatore.nome || '').trim() && !(ch.giocatore.cognome || '').trim() && !(ch.campagna || '').trim();
+    if (vuoto || !confirm('Il personaggio «' + (ch.nome || 'Senza nome') + '» non è stato ancora salvato.\n\nOK = salvalo • Annulla = non salvarlo (viene scartato)')) { DB.personaggi = DB.personaggi.filter((x) => x.id !== id); if (S.id === id) S.id = null; return; }
+    delete ch.bozza; ch.aggiornato = new Date().toISOString(); scrivi();
+  }
   function render() {
+    risolviBozza();
     const app = $('#app');
     if (C.attivo && !C.utente) app.innerHTML = S.avvio ? '<p class="mute centro">Verifico l\'accesso…</p>' : vistaLogin();
     else if (S.vista === 'home') app.innerHTML = vistaHome();
@@ -420,7 +441,7 @@
   function nuovoPG() {
     const ch = M.nuovo(); if (C.attivo && C.utente) { ch.owner = C.utente.uid; ch.ownerNome = C.utente.nome; }
     const rc = M.consigliaPunteggi(ch, 'array'); ch.punteggi = rc.punteggi;
-    DB.personaggi.push(ch); scrivi(); S.id = ch.id; S.vista = 'editor'; S.tab = 'identita'; render();
+    ch.bozza = true; DB.personaggi.push(ch); S.bozzaId = ch.id; S.id = ch.id; S.vista = 'editor'; S.tab = 'identita'; render();
   }
 
   /* ---------- azioni ---------- */
@@ -464,7 +485,12 @@
     },
 
     tab(el) { S.tab = el.dataset.t; render(); window.scrollTo(0, 0); },
-    toggleCestino() { S.cestino = !S.cestino; render(); },
+    toggleCestino() { S.cestino = !S.cestino; S.cesSel.clear(); render(); },
+    cesSel(el) { if (el.checked) S.cesSel.add(el.dataset.id); else S.cesSel.delete(el.dataset.id); const y = scrollY; render(); scrollTo(0, y); },
+    cesTutti() { DB.personaggi.filter((p) => p.cestinato).forEach((p) => S.cesSel.add(p.id)); render(); },
+    cesNessuno() { S.cesSel.clear(); render(); },
+    cesElimina() { const n = S.cesSel.size; if (!n || !confirm('Eliminare DEFINITIVAMENTE i ' + n + ' personaggi selezionati? Non si può annullare.')) return; DB.personaggi = DB.personaggi.filter((p) => !(p.cestinato && S.cesSel.has(p.id))); S.cesSel.clear(); scrivi(); render(); },
+    cesSvuota() { const n = DB.personaggi.filter((p) => p.cestinato).length; if (!n || !confirm('Svuotare il cestino ed eliminare DEFINITIVAMENTE tutti i ' + n + ' personaggi che contiene? Non si può annullare.')) return; DB.personaggi = DB.personaggi.filter((p) => !p.cestinato); S.cesSel.clear(); scrivi(); render(); },
     filtro(el) { S.filtro = el.value; const pos = el.selectionStart; render(); const n = $('input[data-az=filtro]'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } },
     duplica(el) {
       const o = trova(el.dataset.id); const c = clone(o); c.id = M.uid(); c.nome = (o.nome || 'Senza nome') + ' (copia)'; c.creato = c.aggiornato = new Date().toISOString(); if (C.attivo && C.utente) { c.owner = C.utente.uid; c.ownerNome = C.utente.nome; }
@@ -478,6 +504,7 @@
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'personaggi-dnd-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     },
     importa() { $('#file-import').click(); },
+    salvaBozza() { const ch = corrente(); if (!ch) return; delete ch.bozza; S.bozzaId = null; ch.aggiornato = new Date().toISOString(); scrivi(); render(); },
     ritrattoSimbolo(el) { const ch = corrente(); ch.ritrattoSimbolo = el.checked; salvaCorrente(); aggiornaRiepilogo(); },
     zoomRitratto(el) {
       const o = document.createElement('div'); o.className = 'zoom-rit no-print';
@@ -489,7 +516,7 @@
     ritrattoScheda(el) { const ch = corrente(); ch.ritrattoScheda = el.checked; salvaCorrente(); aggiornaRiepilogo(); },
     stampa(el) {
       const ch = trova(el.dataset.id || S.id); if (!ch) return;
-      $('#stampa').innerHTML = foglioHTML(ch); window.print();
+      $('#stampa').innerHTML = foglioHTML(ch); stampaPronta();
     },
     razza(el) {
       const ch = corrente(); ch.razza = el.value; const r = D.razza(el.value);
@@ -593,7 +620,9 @@
       const ch = corrente(); if (!ch) return;
       if (el.dataset.bind === 'campagna') { const v = el.value.replace(/\s+/g, ' ').trim(); const gia = campagne().find((c) => c.toLowerCase() === v.toLowerCase()); el.value = gia || v; }
       setPath(ch, el.dataset.bind, el.type === 'checkbox' ? el.checked : el.value);
-      salvaCorrente(); render();
+      salvaCorrente();
+      if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type !== 'checkbox')) { aggiornaRiepilogo(); return; } // già aggiornato mentre si scrive: niente ridisegno (farebbe perdere il click sul pulsante successivo)
+      render();
     }
   });
   document.addEventListener('input', (e) => {

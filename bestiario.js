@@ -354,7 +354,7 @@
       cont.innerHTML = '<p class="mute">Preparo le carte…</p>'; const r = await carteDocumento(voci, B.opz, cont); B.stampa = r.n ? r.n + ' carte: ' + descrFormati(r.stat) : '';
       const sp = $('.bes-stampa .mute:last-of-type'); if (sp) sp.textContent = B.stampa;
     };
-    const stampaOra = async (voci) => { const cont = document.getElementById('bes-prev'); if (!cont) return; if (!cont.querySelector('.cartapag')) await prova(voci); if (!cont.querySelector('.cartapag')) return; document.getElementById('stampa').innerHTML = cont.innerHTML; window.print(); };
+    const stampaOra = async (voci) => { const cont = document.getElementById('bes-prev'); if (!cont) return; if (!cont.querySelector('.cartapag')) await prova(voci); if (!cont.querySelector('.cartapag')) return; document.getElementById('stampa').innerHTML = cont.innerHTML; window.FORGIA_X.stampaPronta(); };
     const imgDa = async (blob) => {
       if (B.sel == null) { toast('Apri prima la scheda di un mostro'); return; }
       const m = B.mappa.get(B.sel); try { await salvaImg(B.sel, await riduciImg(blob)); B.errore = ''; toast('✔ Immagine salvata per ' + (m ? m.n : 'il mostro')); } catch (e) { toast('Immagine non salvata: ' + e.message); } ridisegna();
@@ -420,13 +420,13 @@
         const m = B.mappa.get(Number(el.dataset.id)); if (!m) return;
         const cont = document.createElement('div'); document.body.appendChild(cont); cont.style.cssText = 'position:absolute;left:-9999px;top:0';
         try { const r = await carteDocumento([{ m, n: 1 }], B.opz, cont); if (!r.n) return; document.getElementById('stampa').innerHTML = cont.innerHTML; } finally { cont.remove(); }
-        window.print();
+        window.FORGIA_X.stampaPronta();
       },
       async besCarteInc(el) {
         const m = B.mappa.get(Number(el.dataset.id)); if (!m) return; const r = incantesimiMostro(m); if (!r.ids.length) return;
         const cont = document.createElement('div'); document.body.appendChild(cont); cont.style.cssText = 'position:absolute;left:-9999px;top:0';
         try { const n = await X.carteSemplici(r.ids, cont); if (!n) return; document.getElementById('stampa').innerHTML = cont.innerHTML; } finally { cont.remove(); }
-        window.print();
+        window.FORGIA_X.stampaPronta();
       },
       besImg(el) { B.imgId = Number(el.dataset.id); const f = document.getElementById('bes-file-img'); if (f) f.click(); },
       async besFileImg(el) {

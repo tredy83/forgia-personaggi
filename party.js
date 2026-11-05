@@ -157,7 +157,7 @@
       ptPN(el) { const camp = bannerTesto(selezionati()); try { localStorage.setItem(chiaveNota(camp), el.value); } catch (e) { /* ignora */ } clearTimeout(tmr); tmr = setTimeout(disegnaAnteprima, 350); },
       ptStampa() {
         const sel = selezionati(); if (!sel.length) { alert('Seleziona almeno un personaggio.'); return; }
-        const st = $('#stampa'); st.innerHTML = '<div class="pt-print">' + pagineHTML(sel) + '</div>'; st.style.cssText = 'display:block;position:absolute;left:-99999px;top:0;width:900px;visibility:hidden'; st.querySelectorAll('.pt-print').forEach((e) => { e.style.display = 'block'; }); fit(st); st.style.cssText = ''; G.print();
+        const st = $('#stampa'); st.innerHTML = '<div class="pt-print">' + pagineHTML(sel) + '</div>'; st.style.cssText = 'display:block;position:absolute;left:-99999px;top:0;width:900px;visibility:hidden'; st.querySelectorAll('.pt-print').forEach((e) => { e.style.display = 'block'; }); fit(st); st.style.cssText = ''; (G.FORGIA_X.stampaPronta || G.print.bind(G))();
       },
     };
     G.document.addEventListener('input', (e) => { const t = e.target; if (t.dataset && ['ptQ', 'ptNota', 'ptPN'].includes(t.dataset.az)) az[t.dataset.az](t); });

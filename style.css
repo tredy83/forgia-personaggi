@@ -58,7 +58,7 @@ td.az{white-space:nowrap}
 .sel-lista label.dis{color:#aaa}
 .punti-ctrl{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:.3rem}
 .punti-ctrl b{min-width:1.8rem;display:inline-block}
-@media (max-width:860px){.editor{grid-template-columns:1fr}.riepilogo{position:static;order:-1}}
+@media screen and (max-width:860px){.editor{grid-template-columns:1fr}.riepilogo{position:static;order:-1}}
 /* anteprima scheda */
 .anteprima{overflow:auto;background:#cfc3a4;padding:1rem;border-radius:8px}
 

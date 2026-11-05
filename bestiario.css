@@ -4,7 +4,7 @@
 .bes-filtri input[type=search]{flex:2 1 14rem}
 .bes-filtri select{flex:1 1 8rem}
 .bes-griglia{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:1rem;align-items:start;margin-top:1rem}
-@media(max-width:800px){.bes-griglia{grid-template-columns:1fr}}
+@media screen and (max-width:800px){.bes-griglia{grid-template-columns:1fr}}
 .bes-riga{display:grid;grid-template-columns:1fr auto;column-gap:.5rem;align-items:center;cursor:pointer;padding:.35rem .5rem;border-bottom:1px solid var(--linea,#ddd);border-radius:10px}
 .bes-riga:hover{background:var(--lav-soft,#f3ecff)}
 .bes-riga.sel{background:var(--lav,#dcc6ff)}
@@ -18,7 +18,7 @@
 .bes-tab td.q{white-space:nowrap}
 .bes-stampa{background:var(--lav-soft,#f3ecff);margin:.8rem 0}
 .bes-senza{columns:2;font-size:.9rem}
-@media(max-width:600px){.bes-senza{columns:1}}
+@media screen and (max-width:600px){.bes-senza{columns:1}}
 
 /* scheda a schermo e testo delle carte */
 .mb{font-family:"MPlantin",Georgia,serif;color:#1d1d1d;line-height:1.14}

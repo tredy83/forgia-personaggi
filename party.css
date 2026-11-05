@@ -2,7 +2,7 @@
 @page party{size:297mm 210mm;margin:0}
 .pt-filtri{display:flex;gap:.5rem;flex-wrap:wrap}.pt-filtri input{flex:1 1 260px}
 .pt-griglia{display:grid;grid-template-columns:minmax(300px,1fr) minmax(0,2fr);gap:1rem;align-items:start}
-@media(max-width:900px){.pt-griglia{grid-template-columns:1fr}}
+@media screen and (max-width:900px){.pt-griglia{grid-template-columns:1fr}}
 .pt-riga{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;justify-content:space-between;padding:.45rem .3rem;border-bottom:1px solid #0002}
 .pt-riga.sel{background:#c9a22722}.pt-chk{display:flex;gap:.5rem;align-items:flex-start;cursor:pointer;flex:1 1 200px}
 .pt-bt{display:flex;gap:.25rem;flex-wrap:wrap}.pt-ne{flex-basis:100%}.pt-ne textarea{width:100%;font-size:.85rem}

@@ -25,7 +25,7 @@
 @media print{.ig-print{display:block}.ig-print .ig-pag{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 
 /* telefono: la griglia diventa a schede */
-@media(max-width:640px){
+@media screen and (max-width:640px){
 .inc-tab,.inc-tab tbody{display:block;width:100%}.inc-tab thead{display:none}
 .inc-tab tr{display:grid;grid-template-columns:4.2rem 1fr 1fr 1.3fr;gap:.35rem .4rem;align-items:end;padding:.5rem .3rem;border-bottom:1px solid #0002}
 .inc-tab td{display:block;padding:0;position:relative;min-width:0}

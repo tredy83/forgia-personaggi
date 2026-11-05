@@ -149,7 +149,7 @@
       async carteStampa() {
         const cont = document.getElementById('carte-prev'); if (!cont) return;
         if (!cont.querySelector('.cartapag')) { const n = await costruisciOra(); if (!n) return; }
-        document.getElementById('stampa').innerHTML = cont.innerHTML; window.print();
+        document.getElementById('stampa').innerHTML = cont.innerHTML; (window.FORGIA_X.stampaPronta || window.print.bind(window))();
       },
     };
   };
