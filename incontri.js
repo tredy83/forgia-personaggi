@@ -59,7 +59,7 @@
     const righe = [];
     for (let v = da; v >= fino; v--) { const q = L.filter((r) => r.ini === v); if (!q.length) righe.push({ v }); else q.forEach((r) => righe.push({ v, r })); }
     const sen = inc.righe.filter((r) => r.ini === '' || r.ini == null); sen.forEach((r) => righe.push({ v: '', r }));
-    const h = Math.max(5.2, Math.min(9, 232 / (righe.length + 1))); const fs = Math.min(11, h * 1.15);
+    const h = Math.max(5.2, Math.min(9, 226 / (righe.length + 1))); const fs = Math.min(11, h * 1.15);
     const cel = (x) => '<div class="ig-r"><span class="ig-s">' + (x.r && x.r.sorp ? '✕' : '') + '</span><span class="ig-i">' + x.v + '</span><span class="ig-n">' + (x.r ? esc(x.r.n) : '') + '</span><span class="ig-c">' + (x.r ? esc(x.r.ca) : '') + '</span><span class="ig-p">' + (x.r ? esc(x.r.pf) : '') + '</span></div>';
     return '<section class="ig-pag" style="--rh:' + h.toFixed(2) + 'mm;--fs:' + fs.toFixed(1) + 'pt"><div class="ig-top"><img src="logo-argini-bn.png" alt=""><div class="ig-tit"><b>' + esc(inc.nome) + '</b><span>' + esc(a.nome) + '</span></div>'
       + '<div class="ig-note">' + esc(inc.note || '').replace(/\n/g, '<br>') + '</div></div>'

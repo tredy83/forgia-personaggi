@@ -181,7 +181,7 @@
           const pg = gr.slice(i, i + f.per); const fr = document.createElement('section'); fr.className = 'cartapag mpag'; const rt = document.createElement('section'); rt.className = 'cartapag mpag';
           pg.forEach((x, j) => {
             const col = j % f.nc, riga = Math.floor(j / f.nc); x.c.style.left = f.ox + col * f.w + 'mm'; x.c.style.top = f.oy + riga * f.h + 'mm'; fr.appendChild(x.c);
-            const d = creaRetro(x.m, f, x.img, opz.dorso); const cc = f.spec ? f.nc - 1 - col : col; d.style.left = f.ox + cc * f.w + 'mm'; d.style.top = f.oy + riga * f.h + 'mm'; rt.appendChild(d);
+            const d = creaRetro(x.m, f, x.img, opz.dorso); const cc = f.spec ? f.nc - 1 - col : col; d.style.left = f.ox + cc * f.w + (window.FORGIA_X.dorsoOff ? window.FORGIA_X.dorsoOff().x : 0) + 'mm'; d.style.top = f.oy + riga * f.h + (window.FORGIA_X.dorsoOff ? window.FORGIA_X.dorsoOff().y : 0) + 'mm'; rt.appendChild(d);
           });
           doc.appendChild(fr); if (opz.dorso !== 'nessuno') doc.appendChild(rt);
         }
@@ -307,7 +307,7 @@
   };
   const opzioniStampa = () => '<div class="riga"><label>Retro <select data-az="besOpz" data-k="dorso"><option value="immagine"' + (B.opz.dorso === 'immagine' ? ' selected' : '') + '>Immagine del mostro (se manca: logo)</option><option value="logo"' + (B.opz.dorso === 'logo' ? ' selected' : '') + '>Sempre il logo (adulti)</option><option value="bianco"' + (B.opz.dorso === 'bianco' ? ' selected' : '') + '>Bianco con il nome</option><option value="nessuno"' + (B.opz.dorso === 'nessuno' ? ' selected' : '') + '>Solo fronti (niente retro)</option></select></label>'
     + '<label>Testo <select data-az="besOpz" data-k="leggi"><option value="normale"' + (B.opz.leggi === 'normale' ? ' selected' : '') + '>Normale (carte più piccole)</option><option value="grande"' + (B.opz.leggi === 'grande' ? ' selected' : '') + '>Più grande (carte più grandi)</option></select></label>'
-    + '<label><input type="checkbox" data-az="besOpz" data-k="esemplari"' + (B.opz.esemplari ? ' checked' : '') + '> una carta per ogni esemplare</label></div>';
+    + '<label><input type="checkbox" data-az="besOpz" data-k="esemplari"' + (B.opz.esemplari ? ' checked' : '') + '> una carta per ogni esemplare</label></div>' + (window.FORGIA_X.dorsoUI ? window.FORGIA_X.dorsoUI() : '');
   const tabDati = () => {
     const n = (B.mostri || []).length; const senza = (B.mostri || []).filter((m) => !B.imgIds.has(m.id));
     return '<div class="card"><h3>📥 Dati dei mostri</h3><p>' + (n ? '<b>' + n + ' mostri</b> caricati, <b>' + B.imgIds.size + '</b> con immagine.' : 'Nessun mostro caricato.') + '</p>'

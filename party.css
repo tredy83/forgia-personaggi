@@ -29,6 +29,6 @@
 @media print{
  .pt-print{display:block}
  .pt-print .pt-pagine,.pt-print{--u:.34314mm}
- .pt-print .pt-pag{--u:.34314mm;border:0;margin-left:12.6mm;height:210mm;width:271.8mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .pt-print .pt-pag{--u:.34314mm;border:0;margin-left:12.6mm;top:-2mm;height:209.2mm;overflow:hidden;width:271.8mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 .pf b,.camp b{flex:none}

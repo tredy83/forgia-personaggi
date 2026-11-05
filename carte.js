@@ -7,6 +7,10 @@
   const CLASSI = [['mago', 'Mago'], ['bardo', 'Bardo'], ['chierico', 'Chierico'], ['druido', 'Druido'], ['stregone', 'Stregone'], ['warlock', 'Warlock'], ['ranger', 'Ranger'], ['paladino', 'Paladino']];
   const DORSI = [['pergamena', 'Pergamena (a colori)'], ['nero', 'Nero con drago (molto inchiostro)'], ['bianco', 'Bianco (risparmia inchiostro)']];
   const OPZ0 = { truc: true, prep: true, libro: false, dorso: 'pergamena' };
+  /* correzione di allineamento del retro (mm): dipende dalla stampante; salvata su questo dispositivo */
+  const dorsoOff = () => { let o = {}; try { o = JSON.parse(G.localStorage.getItem('forgia_dorso') || '{}'); } catch (e) { /* niente */ } const n = (v, d) => (Number.isFinite(+v) && v !== '' && v != null ? +v : d); return { x: n(o.x, 2), y: n(o.y, 1) }; };
+  X.dorsoOff = dorsoOff;
+  X.dorsoUI = () => { const o = dorsoOff(); return '<div class="riga dorso-off"><b>Allineamento retro</b> <label>→ destra <input type="text" inputmode="decimal" size="3" data-az="dorsoOff" data-k="x" value="' + o.x + '"> mm</label> <label>↓ basso <input type="text" inputmode="decimal" size="3" data-az="dorsoOff" data-k="y" value="' + o.y + '"> mm</label> <span class="mute" style="font-size:.78rem">sposta il retro nel foglio dei dorsi (valori negativi: sinistra/alto). Se i retri escono ancora sfalsati, correggi di quanto manca e ristampa.</span></div>'; };
   const opz = (ch) => Object.assign({}, OPZ0, ch.carte || {});
   const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const scuolaKey = (s) => { const k = norm(s.scuola); return COL[k] ? k : (ENG[k] || 'abiurazione'); };
@@ -96,7 +100,7 @@
         const fr = document.createElement('section'); fr.className = 'cartapag'; const rt = document.createElement('section'); rt.className = 'cartapag';
         gruppo.forEach((cd, j) => {
           const col = j % 3, riga = Math.floor(j / 3); cd.style.top = 16.5 + riga * 88 + 'mm'; cd.style.left = 10.5 + col * 63 + 'mm'; fr.appendChild(cd);
-          const d = document.createElement('div'); d.className = 'carta dorso d-' + o.dorso; d.innerHTML = '<div class="d-t">Incantesimo</div>'; d.style.backgroundImage = 'url(carte/dorso_' + o.dorso + '.jpg)'; d.style.top = 16.5 + riga * 88 + 'mm'; d.style.left = 10.5 + (2 - col) * 63 + 'mm'; rt.appendChild(d);   // dorso speculare per la stampa fronte-retro
+          const d = document.createElement('div'); d.className = 'carta dorso d-' + o.dorso; d.innerHTML = '<div class="d-t">Incantesimo</div>'; d.style.backgroundImage = 'url(carte/dorso_' + o.dorso + '.jpg)'; d.style.top = 16.5 + riga * 88 + dorsoOff().y + 'mm'; d.style.left = 10.5 + (2 - col) * 63 + dorsoOff().x + 'mm'; rt.appendChild(d);   // dorso speculare per la stampa fronte-retro
         });
         doc.appendChild(fr); doc.appendChild(rt);
       }
@@ -134,6 +138,7 @@
     return '<div class="card carte-opz" id="sez-carte"><h3>🃏 Carte incantesimo</h3><p class="mute">Stampa le carte degli incantesimi scelti: 9 per foglio A4, con un foglio di fronti e uno di dorsi (stampa fronte-retro sul lato lungo). Dopo la stampa ritaglia lungo i bordi.</p>'
       + '<p>' + chk('truc', 'Trucchetti') + chk('prep', 'Conosciuti / preparati') + chk('libro', 'Tutti gli incantesimi del libro') + '</p>'
       + '<div class="riga"><label>Dorso <select data-az="carteOpt" data-k="dorso">' + DORSI.map((d) => '<option value="' + d[0] + '"' + (o.dorso === d[0] ? ' selected' : '') + '>' + d[1] + '</option>').join('') + '</select></label></div>'
+      + X.dorsoUI()
       + '<p><span class="chip">' + n + ' incantesimi selezionati</span> <button class="oro" data-az="carteAnteprima">👁 Crea anteprima</button> <button data-az="carteStampa">🖨 Stampa carte</button></p>'
       + '<div id="carte-prev"></div>'
       + '<p class="mute" style="font-size:.78rem">Ogni incantesimo occupa una sola carta: i testi più lunghi sono in versione ridotta. Per gli incantesimi non SRD il testo è una sintesi. Grafica ispirata a nBeebz\'s 5e Spell Cards (CC BY-NC-SA 4.0, uso non commerciale): vedi carte/CREDITI.txt.</p></div>';
@@ -144,6 +149,7 @@
     const costruisciOra = async () => { const ch = corrente(); const cont = document.getElementById('carte-prev'); if (!ch || !cont) return 0; cont.innerHTML = '<p class="mute">Preparo le carte…</p>'; return X.carteDocumento(ch, cont); };
     return {
       vaiCarte() { const e = document.getElementById('sez-carte'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
+      dorsoOff(el) { let o = {}; try { o = JSON.parse(G.localStorage.getItem('forgia_dorso') || '{}'); } catch (e) { /* niente */ } const v = parseFloat(String(el.value).replace(',', '.')); o[el.dataset.k] = Number.isFinite(v) ? Math.max(-10, Math.min(10, v)) : 0; el.value = o[el.dataset.k]; try { G.localStorage.setItem('forgia_dorso', JSON.stringify(o)); } catch (e) { /* niente */ } G.FORGIA_X.toast && G.FORGIA_X.toast('Allineamento retro salvato'); },
       carteOpt(el) { const ch = corrente(); ch.carte = Object.assign({}, OPZ0, ch.carte || {}); ch.carte[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; salvaCorrente(); const y = window.scrollY; render(); window.scrollTo(0, y); },
       async carteAnteprima() { await costruisciOra(); },
       async carteStampa() {

@@ -42,13 +42,13 @@
         const wmm = w * MM, hmm = h * MM; const land = wmm > hmm * 1.1; const PW = land ? 297 : 210, PH = land ? 210 : 297;
         const lunga = hmm > PH * 1.03 * Math.min(1, PW / wmm); /* pagina "a scorrimento" (più alta di un foglio): si spezza */
         const k = lunga ? Math.min(1, PW / wmm) : Math.min(PW / wmm, PH / hmm); /* altrimenti riempie il foglio */
-        const ox = (PW - wmm * k) / 2; const pxmm = cv.width / wmm; const fetta = lunga ? Math.floor((PH / k) * pxmm) : cv.height;
+        const ox = (PW - wmm * k) / 2; const oy = el.classList.contains('pt-pag') ? -2 : 0; /* Party Tracker: alzato di 2 mm */ const pxmm = cv.width / wmm; const fetta = lunga ? Math.floor((PH / k) * pxmm) : cv.height;
         const parti = Math.max(1, Math.ceil((cv.height - 2) / fetta));
         for (let p = 0; p < parti; p++) {
           const y = p * fetta, hh = Math.min(fetta, cv.height - y); if (hh < 4) continue;
           const c2 = D.createElement('canvas'); c2.width = cv.width; c2.height = hh; const cx = c2.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, c2.width, c2.height); cx.drawImage(cv, 0, y, cv.width, hh, 0, 0, cv.width, hh);
           if (n) pdf.addPage('a4', land ? 'landscape' : 'portrait'); else if (land) { pdf.deletePage(1); pdf.addPage('a4', 'landscape'); }
-          pdf.addImage(c2.toDataURL('image/jpeg', 0.92), 'JPEG', ox, 0, wmm * k, (hh / pxmm) * k, undefined, 'FAST'); n++;
+          pdf.addImage(c2.toDataURL('image/jpeg', 0.92), 'JPEG', ox, oy, wmm * k, (hh / pxmm) * k, undefined, 'FAST'); n++;
         }
       }
       bar.style.width = '100%';

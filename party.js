@@ -48,7 +48,7 @@
   function dati(ch) {
     const d = M.derive(ch);
     return {
-      id: ch.id, nome: ch.nome || 'Senza nome', giocatore: gio(ch), razza: d.razza ? d.razza.nome.replace(/\s*\(.*\)/, '') + (d.sub ? ' (' + d.sub.nome + ')' : '') : '',
+      id: ch.id, nome: ch.nome || '', giocatore: gio(ch), razza: d.razza ? d.razza.nome.replace(/\s*\(.*\)/, '') + (d.sub ? ' (' + d.sub.nome + ')' : '') : '',
       classe: d.classi.map((c) => c.def.nome + ' ' + c.livello).join(' / '), bg: d.sfondo ? d.sfondo.nome : '', all: ch.allineamento || '', liv: d.tot, ca: d.ca, pf: d.pf, pp: d.percezionePassiva,
       att: (d.attacchi || []).slice(0, 4).map((a) => ({ n: a.nome, b: a.bonus, d: a.danno })), campagna: ch.campagna || '',
       note: typeof ch.noteDM === 'string' ? ch.noteDM : noteAuto(ch, d), modificata: typeof ch.noteDM === 'string',

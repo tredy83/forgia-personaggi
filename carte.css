@@ -4,7 +4,7 @@
 @font-face{font-family:"MPlantin";src:url(carte/MPLANTI1.ttf);font-weight:700;font-style:normal}
 @font-face{font-family:"MPlantin";src:url(carte/MPLANTI3.ttf);font-weight:400;font-style:italic}
 .carte-doc{overflow-x:auto}
-.cartapag{position:relative;width:210mm;height:296.5mm;background:#fff;margin:0 auto 1rem;box-shadow:var(--ombra,0 2px 8px #0003);page:carte;overflow:hidden}
+.cartapag{position:relative;width:210mm;height:295.8mm;background:#fff;margin:0 auto 1rem;box-shadow:var(--ombra,0 2px 8px #0003);page:carte;overflow:hidden}
 .carta{position:absolute;width:63mm;height:88mm;box-sizing:border-box;background:#fff center/100% 100% no-repeat;border:.1mm solid #c8c8c8;overflow:hidden;font-family:"MPlantin",Georgia,serif;color:#000}
 .carta>*{position:absolute;margin:0}
 .carta .c-bar{left:5.6mm;top:5.9mm;width:51.8mm;height:7.2mm;background:var(--c)}
