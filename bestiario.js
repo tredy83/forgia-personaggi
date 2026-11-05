@@ -376,6 +376,7 @@
     const az = {
       vaiBestiario() { S.vista = 'bestiario'; B.modo = 'bes'; if (B.tab === 'inc') B.tab = 'cerca'; render(); },
       vaiIncontri() { S.vista = 'bestiario'; B.modo = 'inc'; B.tab = 'inc'; render(); },
+      vaiAvventure() { S.vista = 'bestiario'; B.modo = 'bes'; B.tab = 'avv'; B.stampa = ''; render(); },
       besTab(el) { B.tab = el.dataset.t; B.stampa = ''; render(); },
       besQ(el) { B.q = el.value; B.limite = 40; const r = $('#bes-ris'); if (r) r.innerHTML = righeRisultati(); },
       besF(el) { B[el.dataset.k] = el.value; B.limite = 40; render(); },

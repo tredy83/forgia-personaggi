@@ -49,7 +49,7 @@
 .mcard .mc-foot{flex:none;display:flex;justify-content:space-between;font-size:5pt;color:#777;border-top:.2mm solid #ccc;padding-top:.4mm;margin-top:.5mm}
 .mcard.f-L .mc-foot,.mcard.f-XL .mc-foot{font-size:6.4pt}
 .mcard.dorso .mc-in{padding:0}
-.mcard .mc-img img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.mcard .mc-img{background:#f4ead8}.mcard .mc-img img{display:block;width:100%;height:100%;object-fit:contain;object-position:50% 50%}
 .mcard .mc-cap{position:absolute;left:0;right:0;bottom:0;background:rgba(138,28,28,.9);color:#fff;font-family:"Ringbearer",serif;text-align:center;padding:1mm 2mm;font-size:10pt;line-height:1.2}
 .mcard.f-S .mc-cap{font-size:8pt}.mcard.f-XL .mc-cap{font-size:14pt}
 .mcard .mc-logo,.mcard .mc-vuoto{align-items:center;justify-content:center;text-align:center;background:#fff}

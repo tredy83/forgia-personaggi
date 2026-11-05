@@ -27,7 +27,7 @@
   }
   X.tabIncontri = function () {
     const B = api.B; const a = api.avvCorr(); const esc2 = esc;
-    if (!B.avv.length) return '<div class="card"><h3>⚔ Incontri</h3><p class="mute">Gli incontri si creano dentro un\'avventura. Crea prima l\'avventura e scegli i suoi mostri dalla scheda <b>Cerca</b> (pulsante ＋).</p><p><button class="oro" data-az="besTab" data-t="avv">Vai alle Avventure</button></p></div>';
+    if (!B.avv.length) return '<div class="card"><h3>⚔ Incontri</h3><p class="mute">Gli incontri si creano dentro un\'avventura. Crea prima l\'avventura e scegli i suoi mostri dalla scheda <b>Cerca</b> (pulsante ＋).</p><p><button class="oro" data-az="vaiAvventure">Vai alle Avventure</button></p></div>';
     const sel = '<select data-az="besAvvSel">' + B.avv.map((x) => '<option value="' + x.id + '"' + (x.id === B.avvId ? ' selected' : '') + '>' + esc2(x.nome || 'Senza nome') + '</option>').join('') + '</select>';
     const inc = corr(a);
     let h = '<div class="card"><h3>⚔ Incontri</h3><div class="riga"><label>Avventura</label> ' + sel + '</div><div class="inc-sel">'

@@ -77,3 +77,17 @@ tr.spento{opacity:.55}
 .sel-lista label em{flex-basis:100%;padding-left:1.5rem;margin-top:-.1rem}
 .sel-lista label{flex-wrap:wrap}
 
+
+/* telefono */
+@media(max-width:700px){
+.testata{position:static!important;flex-wrap:wrap;gap:.3rem}.info-salvataggio{font-size:.72rem;flex-basis:100%}
+main{padding:.6rem}.card{padding:.8rem}
+.riepilogo{padding:.7rem}
+}
+
+/* telefono: anteprima della scheda A4 rimpicciolita (la stampa resta a grandezza piena) */
+@media screen and (max-width:700px){
+.editor>*,.editor main,.pannello{min-width:0}
+.pagina{zoom:.44}.pagina-wrap,#anteprima{overflow:hidden}
+}
+@media print{.pagina{zoom:1!important}}
