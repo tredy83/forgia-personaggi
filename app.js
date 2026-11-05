@@ -147,7 +147,7 @@
     const d = M.derive(ch); const man = M.valida(ch).filter((x) => !x.ok);
     const cl = d.classi.map((c) => c.def.nome + ' ' + c.livello).join(' / ');
     const rit = window.FORGIA_X.ritratto(ch);
-    return (rit ? '<div class="ritratto"><img class="rit-img" data-az="zoomRitratto" title="Clicca per ingrandire" src="' + rit + '" alt="Ritratto di ' + esc(d.razza.nome) + ' ' + esc(cl) + '"><label class="rit-usa"><input type="checkbox" data-az="ritrattoScheda"' + (ch.ritrattoScheda ? ' checked' : '') + '> Metti questo disegno nella scheda (pagina 2)</label><label class="rit-usa"><input type="checkbox" data-az="ritrattoSimbolo"' + (ch.ritrattoSimbolo ? ' checked' : '') + '> Metti il mezzo busto nel riquadro Simbolo (pagina 2)</label></div>' : '')
+    return (rit ? '<div class="ritratto"><img class="rit-img" data-az="zoomRitratto" title="Clicca per ingrandire" src="' + rit + '" alt="Ritratto di ' + esc(d.razza.nome) + ' ' + esc(cl) + '"><label class="rit-usa"><input type="checkbox" data-az="ritrattoScheda"' + (ch.ritrattoScheda ? ' checked' : '') + '> Metti questo disegno nella scheda (pagina 2)</label></div>' : '')
       + '<div class="nome">' + esc(ch.nome || 'Senza nome') + '</div><div class="mute">' + esc(d.razza.nome) + (d.sub ? ' (' + esc(d.sub.nome) + ')' : '') + ' · ' + esc(cl) + '</div>'
       + '<div class="stat"><div><b>' + d.ca + '</b><span>CA</span></div><div><b>' + d.pf + '</b><span>PF</span></div><div><b>' + fmt(d.pb) + '</b><span>Competenza</span></div><div><b>' + fmt(d.iniziativa) + '</b><span>Iniziativa</span></div></div>'
       + '<div class="mute">Livello ' + d.tot + ' · Velocità ' + metri(d.velocita) + '</div>'
@@ -389,6 +389,8 @@
         return '<h3 style="margin-top:1rem">Opzioni di stampa</h3><div class="riga">' + sel('modelloScheda', 'Modello di scheda', [['uff', 'Ufficiale D&D 5ª ed. (grafica WotC)'], ['semplice', 'Semplice (solo testo)']], ch.modelloScheda || 'uff') + sel('dett.stampaDesc', 'Pagina con descrizioni degli incantesimi', [['si', 'Sì, includila'], ['no', 'No']], dt.stampaDesc || 'si') + i('xp', 'Punti esperienza') + '</div>'
           + '<h3 style="margin-top:1rem">Personalità (pagina 1 della scheda)</h3><p class="rnd"><button class="oro" data-az="casuale" data-gr="pers">🎲 Compila a caso</button> <button class="sec" data-az="casuale" data-gr="pers" data-tutto="1" title="Sostituisce anche i campi già scritti">🔄 Rigenera tutto</button> <span class="mute">Inventa tratti, ideali, legami e difetti coerenti con background, classe e allineamento. «Compila» riempie solo i campi vuoti.</span></p><div class="riga">' + t('tratti', 'Tratti caratteriali', '48%') + t('ideali', 'Ideali', '48%') + t('legami', 'Legami', '48%') + t('difetti', 'Difetti', '48%') + '</div>'
           + '<h3>Monete</h3><div class="riga">' + m('pr', 'Rame') + m('pa', 'Argento') + m('pe', 'Electrum') + m('po', 'Oro') + m('pp', 'Platino') + '</div>'
+          + '<h3>Simbolo e nome (pagina 2)</h3><div class="simbolo-box">' + (ch.simbolo ? '<div class="sy-prev">' + window.FORGIA_X.simboloSVG(ch.simbolo, 90, 108) + '</div>' : '') + '<div class="sy-ctl"><p><button class="oro" data-az="simboloGenera">🎲 ' + (ch.simbolo ? 'Genera un altro simbolo e nome' : 'Genera simbolo e nome a caso') + '</button></p>'
+            + (ch.simbolo ? '<div class="col"><label>Nome del simbolo (modificabile)</label><input data-bind="simbolo.nome" value="' + esc(ch.simbolo.nome) + '"></div><p><label><input type="checkbox" data-az="simboloScheda"' + (ch.simboloScheda ? ' checked' : '') + '> Metti simbolo e nome nella scheda (riquadro Simbolo, pagina 2)</label></p>' : '<p class="mute">Un emblema e un nome d\'ordine o di compagnia, scelti in base alla classe. Potrai inserirli o no nella scheda.</p>') + '</div></div>'
           + '<h3>Aspetto e storia (pagina 2)</h3><p class="rnd"><button class="oro" data-az="casuale" data-gr="asp">🎲 Compila a caso</button> <button class="sec" data-az="casuale" data-gr="asp" data-tutto="1" title="Sostituisce anche i campi già scritti">🔄 Rigenera tutto</button> <span class="mute">Età, altezza, peso, occhi, pelle, capelli, aspetto, storia, alleati e tesori in base a razza, classe, background e livello.</span></p><div class="riga">' + i('eta', 'Età') + i('altezza', 'Altezza') + i('peso', 'Peso') + i('occhi', 'Occhi') + i('pelle', 'Pelle') + i('capelli', 'Capelli') + '</div>'
           + '<div class="riga">' + t('aspetto', 'Aspetto (disegno/descrizione)') + t('storia', 'Storia del personaggio') + t('alleati', 'Alleati e organizzazioni', '48%') + t('tesoro', 'Tesori', '48%') + '</div>'
           + '<h3>Note libere</h3><textarea data-bind="note" placeholder="Appunti, tratti aggiuntivi…" style="min-height:5rem">' + esc(ch.note) + '</textarea></div>';
@@ -416,11 +418,25 @@
   window.FORGIA_X.stampaPronta = stampaPronta;
   ['uff_1.jpg', 'uff_2.jpg', 'uff_3.jpg', 'logo-argini-bn.png'].forEach((u) => { const i = new Image(); i.src = u; });
   /* ---------- rendering ---------- */
+  const NAV_USCITA = new Set(['vaiHome', 'vaiElenco', 'vaiParty', 'vaiBestiario', 'vaiAvventure', 'vaiIncontri', 'vaiUtenti', 'vaiProfilo', 'tornaElenco', 'esci', 'apri', 'apriLivelli', 'nuovo']);
+  function chiediBozza(ch, prosegui) {
+    const o = document.createElement('div'); o.className = 'zoom-rit no-print'; o.style.cursor = 'default';
+    o.innerHTML = '<div class="dlg-bozza"><h3>Personaggio non salvato</h3><p>«' + esc(ch.nome || 'Senza nome') + '» non è ancora stato salvato. Vuoi salvarlo prima di uscire?</p>'
+      + '<p class="dlg-az"><button class="oro" data-b="salva">💾 Salva ed esci</button><button class="pericolo" data-b="scarta">Non salvare</button><button class="sec chiaro" data-b="resta">← Resta qui</button></p></div>';
+    o.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-b]'); if (!b) return; const v = b.dataset.b; o.remove();
+      if (v === 'resta') return;
+      if (v === 'salva') { delete ch.bozza; ch.aggiornato = new Date().toISOString(); S.bozzaId = null; scrivi(); }
+      else { DB.personaggi = DB.personaggi.filter((x) => x.id !== ch.id); S.bozzaId = null; S.id = null; }
+      prosegui();
+    });
+    document.body.appendChild(o);
+  }
+  window.addEventListener('beforeunload', (e) => { const b = S.bozzaId && trova(S.bozzaId); if (b && b.bozza) { e.preventDefault(); e.returnValue = ''; } });
   function risolviBozza() {
     const id = S.bozzaId; if (!id || (S.vista === 'editor' && S.id === id)) return;
     S.bozzaId = null; const ch = trova(id); if (!ch || !ch.bozza) return;
-    const vuoto = !(ch.nome || '').trim() && !(ch.giocatore.nome || '').trim() && !(ch.giocatore.cognome || '').trim() && !(ch.campagna || '').trim();
-    if (vuoto || !confirm('Il personaggio «' + (ch.nome || 'Senza nome') + '» non è stato ancora salvato.\n\nOK = salvalo • Annulla = non salvarlo (viene scartato)')) { DB.personaggi = DB.personaggi.filter((x) => x.id !== id); if (S.id === id) S.id = null; return; }
+    if (!confirm('Il personaggio «' + (ch.nome || 'Senza nome') + '» non è stato ancora salvato.\n\nOK = salvalo • Annulla = non salvarlo (viene scartato)')) { DB.personaggi = DB.personaggi.filter((x) => x.id !== id); if (S.id === id) S.id = null; return; }
     delete ch.bozza; ch.aggiornato = new Date().toISOString(); scrivi();
   }
   function render() {
@@ -505,7 +521,6 @@
     },
     importa() { $('#file-import').click(); },
     salvaBozza() { const ch = corrente(); if (!ch) return; delete ch.bozza; S.bozzaId = null; ch.aggiornato = new Date().toISOString(); scrivi(); render(); },
-    ritrattoSimbolo(el) { const ch = corrente(); ch.ritrattoSimbolo = el.checked; salvaCorrente(); aggiornaRiepilogo(); },
     zoomRitratto(el) {
       const o = document.createElement('div'); o.className = 'zoom-rit no-print';
       o.innerHTML = '<img src="' + el.getAttribute('src') + '" alt=""><span>✕ Chiudi</span>';
@@ -513,6 +528,8 @@
       const tasto = (e) => { if (e.key === 'Escape') chiudi(); };
       o.addEventListener('click', chiudi); document.addEventListener('keydown', tasto); document.body.appendChild(o);
     },
+    simboloGenera() { const ch = corrente(); if (!ch) return; ch.simbolo = window.FORGIA_X.simboloGenera(ch); salvaCorrente(); render(); },
+    simboloScheda(el) { const ch = corrente(); ch.simboloScheda = el.checked; salvaCorrente(); },
     ritrattoScheda(el) { const ch = corrente(); ch.ritrattoScheda = el.checked; salvaCorrente(); aggiornaRiepilogo(); },
     stampa(el) {
       const ch = trova(el.dataset.id || S.id); if (!ch) return;
@@ -610,6 +627,8 @@
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-az]'); if (!el) return;
     if (['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) return;
+    const bz = S.bozzaId && S.vista === 'editor' ? trova(S.bozzaId) : null;
+    if (bz && bz.bozza && NAV_USCITA.has(el.dataset.az) && azioni[el.dataset.az]) { chiediBozza(bz, () => azioni[el.dataset.az](el, e)); return; }
     if (azioni[el.dataset.az]) azioni[el.dataset.az](el, e);
   });
   document.addEventListener('change', (e) => {

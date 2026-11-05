@@ -85,3 +85,5 @@ Il collegamento reale a Firebase non si può provare senza il tuo progetto: la l
 **Menu e Home**: in alto, al centro, le sezioni Personaggi · Party Tracker · Bestiario · Avventure · Incontri; a destra utente, Profilo, Account, Esci. Dopo il login si apre la Home «Che cosa vuoi fare?» (cliccando il logo ci torni).
 
 **Ritratti**: scelta Genere (Maschio/Femmina) nella scheda Identità; con razza+classe+genere compare il disegno nel riepilogo e, spuntando «Metti questo disegno nella scheda», nello spazio Aspetto (pagina 2). Al momento: solo Umani (cartella ritratti/).
+
+**Simbolo**: scheda Scheda → «Simbolo e nome»: genera uno stemma e un nome d'ordine a caso (coerente con la classe); la casella lo inserisce nel riquadro Simbolo (pagina 2).
