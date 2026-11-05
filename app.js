@@ -143,7 +143,9 @@
   function riepilogo(ch) {
     const d = M.derive(ch); const man = M.valida(ch).filter((x) => !x.ok);
     const cl = d.classi.map((c) => c.def.nome + ' ' + c.livello).join(' / ');
-    return '<div class="nome">' + esc(ch.nome || 'Senza nome') + '</div><div class="mute">' + esc(d.razza.nome) + (d.sub ? ' (' + esc(d.sub.nome) + ')' : '') + ' · ' + esc(cl) + '</div>'
+    const rit = window.FORGIA_X.ritratto(ch);
+    return (rit ? '<div class="ritratto"><img src="' + rit + '" alt="Ritratto di ' + esc(d.razza.nome) + ' ' + esc(cl) + '"><label class="rit-usa"><input type="checkbox" data-az="ritrattoScheda"' + (ch.ritrattoScheda ? ' checked' : '') + '> Metti questo disegno nella scheda (pagina 2)</label></div>' : '')
+      + '<div class="nome">' + esc(ch.nome || 'Senza nome') + '</div><div class="mute">' + esc(d.razza.nome) + (d.sub ? ' (' + esc(d.sub.nome) + ')' : '') + ' · ' + esc(cl) + '</div>'
       + '<div class="stat"><div><b>' + d.ca + '</b><span>CA</span></div><div><b>' + d.pf + '</b><span>PF</span></div><div><b>' + fmt(d.pb) + '</b><span>Competenza</span></div><div><b>' + fmt(d.iniziativa) + '</b><span>Iniziativa</span></div></div>'
       + '<div class="mute">Livello ' + d.tot + ' · Velocità ' + metri(d.velocita) + '</div>'
       + (man.length ? '<h4>Da completare</h4><ul style="padding-left:1.1rem;margin:.2rem 0">' + man.map((x) => '<li class="ko">' + esc(x.t) + '</li>').join('') + '</ul>' : '<p class="ok">✔ Scheda completa</p>')
@@ -189,6 +191,7 @@
       + '<div class="card"><h3>Razza, background, allineamento</h3><div class="riga">'
       + '<div class="col"><label>Razza</label><select data-az="razza">' + D.RAZZE.map((x) => opt(x.id, x.nome, x.id === ch.razza)).join('') + '</select></div>'
       + (r.sub ? '<div class="col"><label>Sottorazza</label><select data-bind="sub">' + r.sub.map((x) => opt(x.id, x.nome, x.id === ch.sub)).join('') + '</select></div>' : '')
+      + '<div class="col"><label>Genere</label><select data-bind="genere"><option value="M"' + (ch.genere !== 'F' ? ' selected' : '') + '>Maschio</option><option value="F"' + (ch.genere === 'F' ? ' selected' : '') + '>Femmina</option></select></div>'
       + '<div class="col"><label>Background</label><select data-bind="sfondo">' + D.SFONDI.map((x) => opt(x.id, x.nome, x.id === ch.sfondo)).join('') + '</select></div>'
       + '<div class="col"><label>Allineamento</label><select data-bind="allineamento">' + D.ALLINEAMENTI.map((x) => opt(x, x, x === ch.allineamento)).join('') + '</select></div>'
       + razzaExtra + '</div>'
@@ -475,6 +478,7 @@
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'personaggi-dnd-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     },
     importa() { $('#file-import').click(); },
+    ritrattoScheda(el) { const ch = corrente(); ch.ritrattoScheda = el.checked; salvaCorrente(); aggiornaRiepilogo(); },
     stampa(el) {
       const ch = trova(el.dataset.id || S.id); if (!ch) return;
       $('#stampa').innerHTML = foglioHTML(ch); window.print();

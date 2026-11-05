@@ -3,6 +3,14 @@
 (function (G) {
   const D = G.DND, M = D.M;
   const X = (G.FORGIA_X = G.FORGIA_X || {});
+  // ritratti disponibili: razza-classe-genere (file in ritratti/). Si aggiungono qui nuove combinazioni.
+  const RITRATTI = new Set(['umano']);
+  X.ritratto = (ch) => {
+    const g = ch.genere === 'F' ? 'femmina' : 'maschio';
+    const f = ch.razza + '-' + (ch.livelli && ch.livelli[0]) + '-' + g;
+    return RITRATTI.has(ch.razza) && ch.livelli && ch.livelli[0] && !(X.ritrattiMancanti || []).includes(f) ? 'ritratti/' + f + '.webp' : '';
+  };
+  X.ritrattiMancanti = [];
   const ESC = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   // logo Argini Ludici in bianco e nero (pagine della scheda ufficiale e pagine di testo)
@@ -114,7 +122,8 @@
     h = C(143, 64, ch.nome || '', (ch.nome || '').length > 18 ? 11.5 : 15, 185);
     h += T(256, 44, dt.eta || '', { s: FS(dt.eta, 9, 100), w: 100 }) + T(369, 44, dt.altezza || '', { s: FS(dt.altezza, 9, 92), w: 92 }) + T(466, 44, dt.peso || '', { s: FS(dt.peso, 9, 92), w: 92 });
     h += T(256, 70, dt.occhi || '', { s: FS(dt.occhi, 9, 100), w: 100 }) + T(369, 70, dt.pelle || '', { s: FS(dt.pelle, 9, 92), w: 92 }) + T(466, 70, dt.capelli || '', { s: FS(dt.capelli, 9, 92), w: 92 });
-    h += B(29, 125, 161, 215, dt.aspetto || '', 8, 11);
+    const rit = ch.ritrattoScheda && X.ritratto(ch);
+    h += rit ? '<img src="' + rit + '" alt="" style="position:absolute;left:29pt;top:125pt;width:161pt;height:215pt;object-fit:contain">' : B(29, 125, 161, 215, dt.aspetto || '', 8, 11);
     h += B(218, 119, 170, 218, dt.alleati || '', 7.5, 12.1);
     h += B(28, 372.6, 164, 372, dt.storia || '', 7.5, 11);
     h += B(218, 360, 350, 205, ch.note || '', 7.5, 12.1);
