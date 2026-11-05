@@ -123,6 +123,8 @@
     h += T(256, 44, dt.eta || '', { s: FS(dt.eta, 9, 100), w: 100 }) + T(369, 44, dt.altezza || '', { s: FS(dt.altezza, 9, 92), w: 92 }) + T(466, 44, dt.peso || '', { s: FS(dt.peso, 9, 92), w: 92 });
     h += T(256, 70, dt.occhi || '', { s: FS(dt.occhi, 9, 100), w: 100 }) + T(369, 70, dt.pelle || '', { s: FS(dt.pelle, 9, 92), w: 92 }) + T(466, 70, dt.capelli || '', { s: FS(dt.capelli, 9, 92), w: 92 });
     const rit = ch.ritrattoScheda && X.ritratto(ch);
+    const ritS = ch.ritrattoSimbolo && X.ritratto(ch);
+    if (ritS) h += '<div style="position:absolute;left:412pt;top:134pt;width:140pt;height:140pt;overflow:hidden"><img src="' + ritS + '" alt="" style="position:absolute;width:149pt;height:223.5pt;left:-4.5pt;top:-4.5pt"></div>';
     h += rit ? '<img src="' + rit + '" alt="" style="position:absolute;left:29pt;top:125pt;width:161pt;height:215pt;object-fit:contain">' : B(29, 125, 161, 215, dt.aspetto || '', 8, 11);
     h += B(218, 119, 170, 218, dt.alleati || '', 7.5, 12.1);
     h += B(28, 372.6, 164, 372, dt.storia || '', 7.5, 11);

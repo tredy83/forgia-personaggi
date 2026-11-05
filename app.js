@@ -144,7 +144,7 @@
     const d = M.derive(ch); const man = M.valida(ch).filter((x) => !x.ok);
     const cl = d.classi.map((c) => c.def.nome + ' ' + c.livello).join(' / ');
     const rit = window.FORGIA_X.ritratto(ch);
-    return (rit ? '<div class="ritratto"><img src="' + rit + '" alt="Ritratto di ' + esc(d.razza.nome) + ' ' + esc(cl) + '"><label class="rit-usa"><input type="checkbox" data-az="ritrattoScheda"' + (ch.ritrattoScheda ? ' checked' : '') + '> Metti questo disegno nella scheda (pagina 2)</label></div>' : '')
+    return (rit ? '<div class="ritratto"><img class="rit-img" data-az="zoomRitratto" title="Clicca per ingrandire" src="' + rit + '" alt="Ritratto di ' + esc(d.razza.nome) + ' ' + esc(cl) + '"><label class="rit-usa"><input type="checkbox" data-az="ritrattoScheda"' + (ch.ritrattoScheda ? ' checked' : '') + '> Metti questo disegno nella scheda (pagina 2)</label><label class="rit-usa"><input type="checkbox" data-az="ritrattoSimbolo"' + (ch.ritrattoSimbolo ? ' checked' : '') + '> Metti il mezzo busto nel riquadro Simbolo (pagina 2)</label></div>' : '')
       + '<div class="nome">' + esc(ch.nome || 'Senza nome') + '</div><div class="mute">' + esc(d.razza.nome) + (d.sub ? ' (' + esc(d.sub.nome) + ')' : '') + ' · ' + esc(cl) + '</div>'
       + '<div class="stat"><div><b>' + d.ca + '</b><span>CA</span></div><div><b>' + d.pf + '</b><span>PF</span></div><div><b>' + fmt(d.pb) + '</b><span>Competenza</span></div><div><b>' + fmt(d.iniziativa) + '</b><span>Iniziativa</span></div></div>'
       + '<div class="mute">Livello ' + d.tot + ' · Velocità ' + metri(d.velocita) + '</div>'
@@ -478,6 +478,14 @@
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'personaggi-dnd-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     },
     importa() { $('#file-import').click(); },
+    ritrattoSimbolo(el) { const ch = corrente(); ch.ritrattoSimbolo = el.checked; salvaCorrente(); aggiornaRiepilogo(); },
+    zoomRitratto(el) {
+      const o = document.createElement('div'); o.className = 'zoom-rit no-print';
+      o.innerHTML = '<img src="' + el.getAttribute('src') + '" alt=""><span>✕ Chiudi</span>';
+      const chiudi = () => { o.remove(); document.removeEventListener('keydown', tasto); };
+      const tasto = (e) => { if (e.key === 'Escape') chiudi(); };
+      o.addEventListener('click', chiudi); document.addEventListener('keydown', tasto); document.body.appendChild(o);
+    },
     ritrattoScheda(el) { const ch = corrente(); ch.ritrattoScheda = el.checked; salvaCorrente(); aggiornaRiepilogo(); },
     stampa(el) {
       const ch = trova(el.dataset.id || S.id); if (!ch) return;
