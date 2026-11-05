@@ -91,3 +91,34 @@ main{padding:.6rem}.card{padding:.8rem}
 .pagina{zoom:.44}.pagina-wrap,#anteprima{overflow:hidden}
 }
 @media print{.pagina{zoom:1!important}}
+
+/* menu in alto: sezioni al centro, utente a destra */
+.testata{display:grid!important;grid-template-columns:auto 1fr auto;align-items:center;gap:.8rem 1rem}
+.testata .logo{cursor:pointer}
+.barra-nav{display:flex;justify-content:center;gap:.4rem;flex-wrap:wrap}
+.barra-nav .nav-v{background:transparent;color:var(--lav);border:2px solid transparent;padding:.35rem .9rem;text-transform:uppercase;letter-spacing:.04em;font-size:.82rem}
+.barra-nav .nav-v:hover{background:rgba(220,198,255,.15);border-color:rgba(220,198,255,.4);transform:none}
+.barra-nav .nav-v.on{background:var(--lav);color:var(--deep);border-color:var(--lav)}
+.info-salvataggio{flex-direction:column;align-items:flex-end;gap:.25rem}
+.ib-riga{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;justify-content:flex-end;font-size:.82rem}
+@media(max-width:1250px){.logo small{display:none}}
+@media(max-width:980px){.testata{grid-template-columns:1fr auto}.barra-nav{grid-column:1/-1;grid-row:3;justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}.barra-nav .nav-v{flex:none}.info-salvataggio{grid-row:1;grid-column:2}}
+
+/* home */
+.home{max-width:980px;margin:1rem auto;text-align:center}
+.home h1{color:var(--lav);font-family:'Bowlby One',sans-serif;text-transform:uppercase;font-size:1.8rem;margin:.5rem 0 1.4rem}
+.home-griglia{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
+.home-tile{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:1.4rem 1rem;border-radius:26px;border:3px solid transparent;color:#fff;text-align:center;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.28);transition:transform .15s}
+.home-tile:hover{transform:translateY(-4px) scale(1.02);filter:brightness(1.07)}
+.home-tile b{font-family:'Bowlby One',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.04em;font-size:1.15rem}
+.home-tile small{font-size:.9rem;font-weight:600;opacity:.92;max-width:20ch}
+.ht-img{display:flex;align-items:center;justify-content:center;width:112px;height:112px;border-radius:50%;background:rgba(255,255,255,.22);border:4px solid rgba(255,255,255,.55);font-size:3.6rem;line-height:1;margin-bottom:.3rem}
+.home-tile.viola{background:linear-gradient(145deg,#7a4fc4,#45306f)}.home-tile.blu{background:linear-gradient(145deg,#4b79d6,#2c3f8c)}
+.home-tile.verde{background:linear-gradient(145deg,#3fa070,#1f5e46)}.home-tile.rosso{background:linear-gradient(145deg,#d84852,#8e1d27)}
+.home-tile.oro{background:linear-gradient(145deg,#e0a63a,#9a6a12)}.home-tile.rosa{background:linear-gradient(145deg,#c85fb0,#74306a)}
+.barra-nav{flex-wrap:nowrap}.barra-nav .nav-v{padding:.35rem .65rem;font-size:.78rem;white-space:nowrap}
+@media(max-width:700px){
+.testata .logo span{font-size:.85rem}.info-salvataggio{font-size:.7rem}
+.home h1{font-size:1.3rem}.home-griglia{grid-template-columns:1fr 1fr;gap:.6rem}
+.home-tile{padding:.9rem .5rem;border-radius:20px}.ht-img{width:70px;height:70px;font-size:2.2rem}.home-tile b{font-size:.85rem}.home-tile small{font-size:.72rem}
+}

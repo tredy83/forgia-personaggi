@@ -30,17 +30,32 @@
   }
   const scrivi = () => { scriviLocale(); sincronizza(); infoBarra(); };
   const trova = (id) => DB.personaggi.find((p) => p.id === id);
+  const sezione = () => {
+    if (S.vista === 'home') return 'home';
+    if (S.vista === 'party') return 'party';
+    if (S.vista === 'bestiario') { const B = window.FORGIA_X.statoBestiario ? window.FORGIA_X.statoBestiario() : {}; return B.modo === 'inc' ? 'incontri' : (B.tab === 'avv' ? 'avventure' : 'bestiario'); }
+    if (S.vista === 'elenco' || S.vista === 'editor') return 'elenco';
+    return '';
+  };
+  const navBarra = () => {
+    const nav = $('#barra-nav'); if (!nav) return;
+    if (C.attivo && !C.utente) { nav.innerHTML = ''; return; }
+    const g = !C.attivo || C.utente.ruolo === 'gestore'; const cur = sezione();
+    const v = [['elenco', 'vaiElenco', 'Personaggi']].concat(g ? [['party', 'vaiParty', 'Party Tracker'], ['bestiario', 'vaiBestiario', 'Bestiario'], ['avventure', 'vaiAvventure', 'Avventure'], ['incontri', 'vaiIncontri', 'Incontri']] : []);
+    nav.innerHTML = v.map(([k, az, t]) => '<button class="nav-v' + (cur === k ? ' on' : '') + '" data-az="' + az + '">' + t + '</button>').join('');
+  };
   const infoBarra = () => {
+    navBarra();
     const n = DB.personaggi.filter((p) => !p.cestinato).length; const el = $('#barra-info'); if (!el) return;
     if (!C.attivo) { el.innerHTML = erroreSalvataggio ? '<b>⚠ ' + erroreSalvataggio + '</b>' : n + ' personaggi salvati su questo dispositivo'; return; }
     if (!C.utente) { el.innerHTML = ''; return; }
     const st = C.stato(); const sinc = st.errore ? '<b title="' + esc(st.errore) + '">⚠ non sincronizzato</b>' : st.inCoda ? 'sincronizzo…' : '☁ sincronizzato';
-    el.innerHTML = '<span class="utente-barra">👤 ' + esc(C.utente.nome) + ' <em>(' + (C.utente.ruolo === 'gestore' ? 'gestore' : 'genitore') + ')</em></span> <span class="sync">' + n + ' personaggi · ' + sinc + '</span>'
-      + (C.utente.ruolo === 'gestore' ? ' <button class="pic sec chiaro" data-az="vaiBestiario">Bestiario</button> <button class="pic sec chiaro" data-az="vaiParty">Party Tracker</button> <button class="pic sec chiaro" data-az="vaiIncontri">Incontri</button> <button class="pic sec chiaro" data-az="vaiUtenti">Account</button>' : '') + ' <button class="pic sec chiaro" data-az="vaiProfilo">Profilo</button> <button class="pic sec chiaro" data-az="esci">Esci</button>';
+    el.innerHTML = '<div class="ib-riga"><span class="utente-barra">👤 ' + esc(C.utente.nome) + ' <em>(' + (C.utente.ruolo === 'gestore' ? 'gestore' : 'genitore') + ')</em></span> <span class="sync">' + n + ' personaggi · ' + sinc + '</span></div>'
+      + '<div class="ib-riga"><button class="pic sec chiaro" data-az="vaiProfilo">Profilo</button>' + (C.utente.ruolo === 'gestore' ? ' <button class="pic sec chiaro" data-az="vaiUtenti">Account</button>' : '') + ' <button class="pic sec chiaro" data-az="esci">Esci</button></div>';
   };
 
   const campagne = () => { const m = new Map(); DB.personaggi.forEach((p) => { const c = String(p.campagna || '').trim(); if (c && !m.has(c.toLowerCase())) m.set(c.toLowerCase(), c); }); return [...m.values()].sort((a, b) => a.localeCompare(b, 'it')); };
-  const S = { vista: 'elenco', id: null, tab: 'identita', filtro: '', cestino: false };
+  const S = { vista: 'home', id: null, tab: 'identita', filtro: '', cestino: false };
   const corrente = () => trova(S.id);
   const salvaCorrente = () => { const c = corrente(); if (c) { c.aggiornato = new Date().toISOString(); scrivi(); } };
 
@@ -68,7 +83,6 @@
       + '<button data-az="nuovo">＋ Nuovo personaggio</button>'
       + '<input type="search" placeholder="Cerca per nome, cognome o campagna…" value="' + esc(S.filtro) + '" data-az="filtro">'
       + '<button class="sec" data-az="toggleCestino">' + (S.cestino ? '← Torna ai personaggi' : '🗑 Cestino (' + nCest + ')') + '</button>'
-      + (!C.attivo ? '<button class="sec" data-az="vaiBestiario">📖 Bestiario</button><button class="sec" data-az="vaiParty">🧭 Party Tracker</button><button class="sec" data-az="vaiIncontri">⚔ Incontri</button>' : '')
       + '<button class="sec" data-az="esporta">⬇ Esporta archivio</button>'
       + '<button class="sec" data-az="importa">⬆ Importa archivio</button>'
       + '</div><div class="card">' + tabella + '</div>'
@@ -378,10 +392,18 @@
 
   /* ---------- LA SCHEDA STAMPABILE ---------- */
   function foglioHTML(ch) { return window.FORGIA_X.foglio(ch, { esc, fmt, metri }); }
+  function vistaHome() {
+    const g = !C.attivo || C.utente.ruolo === 'gestore';
+    const T = [['nuovo', '🧙', 'Nuovo personaggio', 'Crea un eroe passo dopo passo', 'viola']].concat([['vaiElenco', '🛡️', 'Personaggi', 'Le schede dei giocatori: apri, modifica, stampa', 'blu']])
+      .concat(g ? [['vaiParty', '🧭', 'Party Tracker', 'Il foglio del gruppo da tenere al tavolo', 'verde'], ['vaiBestiario', '🐉', 'Bestiario', 'Cerca i mostri e stampa le loro carte', 'rosso'], ['vaiAvventure', '📜', 'Avventure', 'Raggruppa i mostri di ogni avventura', 'oro'], ['vaiIncontri', '⚔️', 'Incontri', 'Iniziativa, PF e carte dei mostri dell\'incontro', 'rosa']] : []);
+    return '<section class="home"><h1>Che cosa vuoi fare?</h1><div class="home-griglia">'
+      + T.map(([az, ic, t, d, col]) => '<button class="home-tile ' + col + '" data-az="' + az + '"><span class="ht-img">' + ic + '</span><b>' + t + '</b><small>' + d + '</small></button>').join('') + '</div></section>';
+  }
   /* ---------- rendering ---------- */
   function render() {
     const app = $('#app');
     if (C.attivo && !C.utente) app.innerHTML = S.avvio ? '<p class="mute centro">Verifico l\'accesso…</p>' : vistaLogin();
+    else if (S.vista === 'home') app.innerHTML = vistaHome();
     else if (S.vista === 'utenti' && C.attivo && C.utente.ruolo === 'gestore') app.innerHTML = vistaUtenti();
     else if (S.vista === 'bestiario' && (!C.attivo || C.utente.ruolo === 'gestore')) app.innerHTML = window.FORGIA_X.vistaBestiario();
     else if (S.vista === 'party' && (!C.attivo || C.utente.ruolo === 'gestore')) { app.innerHTML = window.FORGIA_X.vistaParty(); window.FORGIA_X.partyDopoRender(); }
@@ -404,6 +426,8 @@
     apri(el) { S.id = el.dataset.id; S.vista = 'editor'; S.tab = 'identita'; render(); },
     apriLivelli(el) { S.id = el.dataset.id; S.vista = 'editor'; S.tab = 'livelli'; render(); },
     tornaElenco() { S.vista = S.torna || 'elenco'; S.torna = null; S.msgUt = S.msgPw = ''; render(); },
+    vaiHome() { S.vista = 'home'; S.id = null; render(); },
+    vaiElenco() { S.vista = 'elenco'; S.id = null; S.cestino = false; render(); },
     vaiUtenti() { S.vista = 'utenti'; S.msgUt = ''; render(); },
     vaiProfilo() { S.vista = 'profilo'; S.msgPw = ''; render(); },
     login() {
@@ -602,9 +626,9 @@
     S.avvio = true; C.alSync = infoBarra;
     C.alCambioStato((u, msg) => {
       S.attesa = false; S.avvio = false;
-      if (!u) { window.FORGIA_X.bestiarioReset(); if (KEYATT !== KEY) { try { localStorage.removeItem(KEYATT); } catch (e) { /* ignora */ } } DB = { personaggi: [] }; inviati.clear(); KEYATT = KEY; S.vista = 'elenco'; S.id = null; if (msg) S.msgLogin = msg; render(); return; }
+      if (!u) { window.FORGIA_X.bestiarioReset(); if (KEYATT !== KEY) { try { localStorage.removeItem(KEYATT); } catch (e) { /* ignora */ } } DB = { personaggi: [] }; inviati.clear(); KEYATT = KEY; S.vista = 'home'; S.id = null; if (msg) S.msgLogin = msg; render(); return; }
       KEYATT = KEY + ':' + u.uid; DB = leggi(KEYATT); DB.personaggi.forEach((p) => inviati.set(p.id, firma(p)));
-      S.vista = 'elenco'; S.id = null; S.msgLogin = '';
+      S.vista = 'home'; S.id = null; S.msgLogin = '';
       C.sottoscrivi(applicaRemoto);
       if (u.ruolo === 'gestore') C.sottoscriviUtenti((l) => { S.utenti = l; if (S.vista === 'utenti') render(); });
       render();

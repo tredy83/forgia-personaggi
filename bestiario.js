@@ -466,6 +466,7 @@
     Object.assign(az, X.azioniIncontri({ B, avvCorr, salva: salvaAvv, opzioniStampa, prova, stampaOra, ridisegna: () => ridisegna(), toast, pgs: () => (c.pgs ? c.pgs() : []) }));
     return az;
   };
+  X.statoBestiario = () => ({ modo: B.modo, tab: B.tab });
   X.bestiarioReset = () => { B.mostri = null; B.mappa = null; B.carico = false; B.prep = false; B.imgIds = new Set(); B.imgMem.clear(); B.avv = []; B.avvId = null; B.sel = null; };
   function mostraSenza(L) {
     const box = document.getElementById('bes-senza'); if (!box) return;

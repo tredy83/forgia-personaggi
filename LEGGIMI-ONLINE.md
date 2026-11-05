@@ -81,3 +81,5 @@ Nel **Bestiario → Cerca** puoi anche spuntare dei mostri e stampare direttamen
 ## Cosa NON è stato provato
 
 Il collegamento reale a Firebase non si può provare senza il tuo progetto: la logica dell'app è stata verificata con un Firebase simulato, il Bestiario con Firestore vero non è ancora stato provato; le regole di sicurezza vanno provate con tre accessi di prova (gestore, genitore A, genitore B): il genitore B non deve vedere i personaggi del genitore A.
+
+**Menu e Home**: in alto, al centro, le sezioni Personaggi · Party Tracker · Bestiario · Avventure · Incontri; a destra utente, Profilo, Account, Esci. Dopo il login si apre la Home «Che cosa vuoi fare?» (cliccando il logo ci torni).
