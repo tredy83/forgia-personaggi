@@ -87,3 +87,6 @@ Il collegamento reale a Firebase non si può provare senza il tuo progetto: la l
 **Ritratti**: scelta Genere (Maschio/Femmina) nella scheda Identità; con razza+classe+genere compare il disegno nel riepilogo e, spuntando «Metti questo disegno nella scheda», nello spazio Aspetto (pagina 2). Al momento: solo Umani (cartella ritratti/).
 
 **Simbolo**: scheda Scheda → «Simbolo e nome»: genera uno stemma e un nome d'ordine a caso (coerente con la classe); la casella lo inserisce nel riquadro Simbolo (pagina 2).
+
+## Stampa da iPad / iPhone
+Su iPad e iPhone il tasto Stampa crea un **PDF A4** (pagine fedeli, senza tagli): si apre con «Apri PDF», poi *Condividi → Stampa* e si sceglie la stampante. Sugli altri dispositivi si apre il normale dialogo di stampa. Per forzare un metodo: aggiungere `?pdf=1` (PDF) o `?pdf=0` (stampa diretta) all'indirizzo. Le librerie (cartella `lib/`) vanno caricate insieme al resto.

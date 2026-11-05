@@ -108,13 +108,13 @@ td.az{white-space:nowrap}
 .due-col h4{break-after:avoid}
 .privilegio{break-inside:avoid;margin-bottom:1mm}
 
-@page{size:A4;margin:8mm}
+@page{size:A4;margin:0}
 #stampa{display:none}
 @media print{
   html,body{background:#fff!important}
   .no-print,.testata,#app{display:none!important}
   #stampa{display:block!important}
-  .pagina{box-shadow:none;margin:0;width:auto;min-height:281mm;page-break-after:always;break-after:page;padding:0}
+  .pagina{box-shadow:none;margin:0;width:auto;min-height:280mm;page-break-after:always;break-after:page;padding:8mm;box-sizing:border-box}
   .pagina:last-child{page-break-after:auto;break-after:auto}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
@@ -144,6 +144,7 @@ td.az{white-space:nowrap}
 .uf-bg{position:absolute;left:0;top:0;width:594pt;height:783pt}
 .uf-t,.uf-b{position:absolute;color:#14246b;font-family:"Segoe Print","Bradley Hand","Comic Sans MS","Georgia",serif;white-space:nowrap;overflow:hidden;line-height:1.1}
 .uf-b{white-space:pre-wrap;overflow:hidden}
+.uf-b b{font-weight:900;background:none;text-decoration:none;-webkit-text-stroke:.45pt #14246b;color:#0b1550}
 .uf-dot{position:absolute;width:6.4pt;height:6.4pt;border-radius:50%;background:#14246b}
 .uf-ring{position:absolute;width:8pt;height:8pt;border-radius:50%;border:1.2pt solid #14246b;box-sizing:border-box}
 .pag-inc .inc-col{columns:2;column-gap:6mm}
@@ -155,3 +156,19 @@ td.az{white-space:nowrap}
 
 .pagina{position:relative}.pagina .logo-pag{position:absolute;top:5mm;right:6mm;width:13mm;height:13mm}.pagina .logo-pag+h2{padding-right:15mm;min-height:13mm;box-sizing:border-box}
 @media print{.pagina .logo-pag{top:0;right:0}}
+
+/* ====== Esporta PDF (iPad/iPhone): le pagine di #stampa vengono composte qui fuori vista ====== */
+.pdfstage{position:fixed;left:0;top:0;z-index:-1;width:max-content;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pdfstage .pagina{box-shadow:none;margin:0;width:210mm;min-height:296mm;padding:8mm;box-sizing:border-box}
+.pdfstage .uffpag,.pdfstage .cartapag{margin:0;box-shadow:none}
+.pdfstage .ig-print,.pdfstage .pt-print{display:block}
+.pdfstage .pt-print,.pdfstage .pt-print .pt-pagine{--u:.34314mm}
+.pdfstage .pt-print .pt-pag{--u:.34314mm;border:0;margin:0;height:210mm;width:271.8mm}
+.pdf-ov{position:fixed;inset:0;z-index:99999;background:rgba(20,15,10,.82);display:flex;align-items:center;justify-content:center;padding:16px}
+.pdf-box{background:#fffaf0;border-radius:14px;padding:20px 22px;max-width:420px;width:100%;text-align:center;box-shadow:0 8px 30px #0008;color:#2b1d12}
+.pdf-t{font-size:1.15rem;font-weight:700;margin-bottom:.6rem}
+.pdf-bar{height:10px;background:#e6d9c3;border-radius:6px;overflow:hidden}.pdf-bar i{display:block;height:100%;width:3%;background:#8a1c1c;transition:width .2s}
+.pdf-s{margin:.7rem 0;font-size:.95rem}
+.pdf-az{display:flex;flex-direction:column;gap:.5rem;margin-top:.8rem}
+.pdf-b{display:block;padding:.8rem 1rem;border-radius:10px;border:0;background:#8a1c1c;color:#fff;font-size:1.05rem;font-weight:700;text-decoration:none;cursor:pointer}
+.pdf-b.sec{background:#e6d9c3;color:#2b1d12}

@@ -154,7 +154,7 @@
       + (man.length ? '<h4>Da completare</h4><ul style="padding-left:1.1rem;margin:.2rem 0">' + man.map((x) => '<li class="ko">' + esc(x.t) + '</li>').join('') + '</ul>' : '<p class="ok">✔ Scheda completa</p>')
       + '<button class="oro" style="width:100%;margin-top:.5rem" data-az="stampa" data-id="' + ch.id + '">🖨 Stampa / PDF</button>';
   }
-  const aggiornaRiepilogo = () => { const ch = corrente(); const e = $('#riepilogo'); if (ch && e) e.innerHTML = riepilogo(ch); };
+  const aggiornaRiepilogo = () => { const ch = corrente(); const e = $('#riepilogo'); if (!ch || !e) return; const h = riepilogo(ch); if (e._h !== h) { e._h = h; e.innerHTML = h; } }; // se identico non si tocca il DOM (altrimenti si perde il click sul pulsante)
 
   function contenutoTab(ch) {
     switch (S.tab) {
@@ -409,6 +409,7 @@
   }
   /* stampa: aspetta che le immagini della scheda siano caricate (sul telefono altrimenti escono pagine bianche) */
   const stampaPronta = () => {
+    if (window.FORGIA_X.usaPdf && window.FORGIA_X.usaPdf()) { window.FORGIA_X.pdfStampa(); return; }
     const imgs = [...document.querySelectorAll('#stampa img')].filter((i) => !i.complete);
     const via = () => requestAnimationFrame(() => setTimeout(() => window.print(), 50));
     if (!imgs.length) { via(); return; }
@@ -640,7 +641,7 @@
       if (el.dataset.bind === 'campagna') { const v = el.value.replace(/\s+/g, ' ').trim(); const gia = campagne().find((c) => c.toLowerCase() === v.toLowerCase()); el.value = gia || v; }
       setPath(ch, el.dataset.bind, el.type === 'checkbox' ? el.checked : el.value);
       salvaCorrente();
-      if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type !== 'checkbox')) { aggiornaRiepilogo(); return; } // già aggiornato mentre si scrive: niente ridisegno (farebbe perdere il click sul pulsante successivo)
+      if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type !== 'checkbox')) { return; } // già aggiornato mentre si scrive: niente ridisegno (farebbe perdere il click sul pulsante successivo)
       render();
     }
   });

@@ -151,3 +151,5 @@ table:not(.inc-tab) td:empty{display:none}
 .simbolo-box{display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;margin:.3rem 0 1rem}.sy-prev{background:#fff;border-radius:12px;padding:.5rem;box-shadow:var(--ombra)}.sy-ctl{flex:1 1 260px}
 
 .dlg-bozza{background:#dcc6ff;color:#2a2142;border-radius:20px;padding:1.2rem 1.4rem;max-width:420px;width:92vw;box-shadow:0 10px 40px #000;text-align:left}.dlg-bozza h3{margin:0 0 .4rem}.dlg-az{display:flex;flex-wrap:wrap;gap:.5rem}.dlg-bozza .chiaro{color:#2a2142;border-color:#2a2142}
+.ver-app{text-align:center;font-size:.78rem;color:#7a6a58;padding:1rem 0 1.2rem}
+@media print{.ver-app{display:none!important}}
