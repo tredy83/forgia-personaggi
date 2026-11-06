@@ -4,7 +4,7 @@
   const D = G.DND, M = D.M;
   const X = (G.FORGIA_X = G.FORGIA_X || {});
   // ritratti disponibili: razza-classe-genere (file in ritratti/). Si aggiungono qui nuove combinazioni.
-  const RITRATTI = new Set(['umano', 'elfo']);
+  const RITRATTI = new Set(['umano', 'elfo', 'nano']);
   X.ritratto = (ch) => {
     const g = ch.genere === 'F' ? 'femmina' : 'maschio';
     const f = ch.razza + '-' + (ch.livelli && ch.livelli[0]) + '-' + g;
