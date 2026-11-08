@@ -90,3 +90,11 @@ Il collegamento reale a Firebase non si può provare senza il tuo progetto: la l
 
 ## Stampa da iPad / iPhone
 Su iPad e iPhone il tasto Stampa crea un **PDF A4** (pagine fedeli, senza tagli): si apre con «Apri PDF», poi *Condividi → Stampa* e si sceglie la stampante. Sugli altri dispositivi si apre il normale dialogo di stampa. Per forzare un metodo: aggiungere `?pdf=1` (PDF) o `?pdf=0` (stampa diretta) all'indirizzo. Le librerie (cartella `lib/`) vanno caricate insieme al resto.
+
+## Crea mostro (mostri personalizzati)
+Nel **Bestiario** c'è la scheda **✚ Crea mostro**: serve per i mostri unici di un'avventura. Si compila la maschera (nome, tipo, taglia, CA, PF, velocità, caratteristiche, sfida, tratti, azioni, reazioni…), si può partire da un mostro esistente («Copia i suoi dati»), si vede l'**anteprima della carta** e con **Salva** il mostro entra nell'elenco, con la sua carta pronta da stampare (fronte statistiche, retro con immagine facoltativa). I mostri creati sono visibili e modificabili da **tutti i gestori**, si trovano nella ricerca (filtro «Mostro personalizzato») e si aggiungono alle avventure come gli altri.
+**Una volta sola:** in Firebase → Firestore → **Regole** incolla di nuovo il contenuto di `firestore.rules` (c'è la nuova raccolta `mostriPers`) e premi **Pubblica**; senza questo passaggio il salvataggio online dà «permessi insufficienti».
+
+## Correggere un mostro del manuale (errori di lettura)
+Nella scheda di un mostro, in **Cerca**, il pulsante **✎ Correggi i dati** apre la stessa maschera di «Crea mostro» con i dati del mostro. Prima di aprirla l'app chiede **due conferme** («stai modificando un mostro esistente, vale per tutti i gestori…» e «procedo con la modifica? sarà definitiva»). Salvando, la correzione vale per tutti i gestori; la scheda riporta «scheda corretta a mano». I dati originali del manuale non vengono cancellati: nella maschera c'è **↩ Ripristina i dati originali**. Le correzioni restano anche se si reimportano i file dei mostri.
+**Una volta sola:** ripubblica `firestore.rules` in Firebase → Firestore → Regole (nuova raccolta `mostriMod`).

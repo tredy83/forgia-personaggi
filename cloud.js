@@ -131,6 +131,14 @@
       await db.collection('mostriMeta').doc('immagini').set({ ids: fb.firestore.FieldValue.arrayRemove(Number(id)) }, { merge: true });
     } catch (e) { throw new Error(errore(e)); }
   };
+  /* mostri creati a mano dai gestori: un documento ciascuno */
+  C.persLeggi = async () => { try { const s = await db.collection('mostriPers').get(); const out = []; s.docs.forEach((d) => { try { out.push(JSON.parse(d.data().dati)); } catch (e) { /* illeggibile */ } }); return out; } catch (e) { throw new Error(errore(e)); } };
+  C.persScrivi = (m) => db.collection('mostriPers').doc(String(m.id)).set({ dati: JSON.stringify(m), aggiornato: m.aggiornato || '' }).catch((e) => { throw new Error(errore(e)); });
+  C.persElimina = (id) => db.collection('mostriPers').doc(String(id)).delete().catch((e) => { throw new Error(errore(e)); });
+  /* correzioni ai mostri del manuale: un documento per mostro, sovrascrive i dati originali */
+  C.modLeggi = async () => { try { const s = await db.collection('mostriMod').get(); const out = []; s.docs.forEach((d) => { try { out.push(JSON.parse(d.data().dati)); } catch (e) { /* illeggibile */ } }); return out; } catch (e) { throw new Error(errore(e)); } };
+  C.modScrivi = (m) => db.collection('mostriMod').doc(String(m.id)).set({ dati: JSON.stringify(m), aggiornato: m.aggiornato || '' }).catch((e) => { throw new Error(errore(e)); });
+  C.modElimina = (id) => db.collection('mostriMod').doc(String(id)).delete().catch((e) => { throw new Error(errore(e)); });
   C.avvLeggi = async () => { try { const s = await db.collection('avventure').get(); return s.docs.map((d) => Object.assign({ id: d.id }, d.data())); } catch (e) { throw new Error(errore(e)); } };
   C.avvScrivi = (a) => db.collection('avventure').doc(a.id).set({ nome: a.nome || '', voci: a.voci || [], incontri: a.incontri || [], aggiornato: a.aggiornato || '' }).catch((e) => { throw new Error(errore(e)); });
   C.avvElimina = (id) => db.collection('avventure').doc(id).delete().catch((e) => { throw new Error(errore(e)); });

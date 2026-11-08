@@ -30,7 +30,8 @@
   const nomeEsiste = (n, escludiId) => B.avv.some((a) => a.id !== escludiId && nomeNorm(a.nome) === nomeNorm(n));
   const toast = (txt) => { let t = document.getElementById('bes-toast'); if (!t) { t = document.createElement('div'); t.id = 'bes-toast'; document.body.appendChild(t); } t.textContent = txt; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 3200); };
   const inAvv = (id) => { const a = B.avv.find((x) => x.id === B.avvId); const v = a && (a.voci || []).find((x) => x.id === id); return v ? 1 : 0; };
-  const FONTI = { mm: { n: 'Manuale dei Mostri', s: 'Man. Mostri' }, mtm: { n: 'Mordenkainen presenta: Mostri del Multiverso', s: 'Mostri Multiverso' } };
+  const FONTI = { mm: { n: 'Manuale dei Mostri', s: 'Man. Mostri' }, mtm: { n: 'Mordenkainen presenta: Mostri del Multiverso', s: 'Mostri Multiverso' }, pers: { n: 'Mostro personalizzato', s: 'Pers.' } };
+  const origine = (m, breve) => (m.fo === 'pers' ? (m.av || (breve ? 'Pers.' : 'Mostro personalizzato')) : (breve ? fonte(m).s : fonte(m).n) + ' · p. ' + m.pg);
   const fonte = (m) => FONTI[m.fo || 'mm'] || { n: String(m.fo), s: String(m.fo) };
   const gsT = (m) => (m.gs === '' || m.gs == null ? '—' : m.gs);
   const GSV = (g) => { const s = String(g || '0'); if (s.includes('/')) { const [a, b] = s.split('/'); return Number(a) / Number(b); } return Number(s) || 0; };
@@ -43,6 +44,13 @@
       let lista = null;
       if (cloud()) { try { lista = await C.mostriLeggi(); if (lista.length) await kv.set('mostri', lista); } catch (e) { B.errore = e.message; } }
       if (!lista || !lista.length) lista = (await kv.get('mostri')) || [];
+      lista = lista.filter((m) => m.fo !== 'pers');
+      let pers = [];
+      if (cloud()) { try { pers = await C.persLeggi(); await kv.set('pers', pers); } catch (e) { B.errore = B.errore || e.message; pers = (await kv.get('pers')) || []; } } else pers = (await kv.get('pers')) || [];
+      let mods = [];
+      if (cloud()) { try { mods = await C.modLeggi(); await kv.set('mod', mods); } catch (e) { B.errore = B.errore || e.message; mods = (await kv.get('mod')) || []; } } else mods = (await kv.get('mod')) || [];
+      const mm = new Map(mods.map((x) => [x.id, x])); lista = lista.map((m) => (mm.has(m.id) ? Object.assign({}, mm.get(m.id), { mod: true }) : m));
+      pers.forEach((m) => { m.fo = 'pers'; }); lista = lista.concat(pers);
       lista.forEach((m) => { if (TIPI_FIX[m.tipo]) m.tipo = TIPI_FIX[m.tipo]; });
       B.mostri = lista.slice().sort((a, b) => a.n.localeCompare(b.n, 'it') || (a.id - b.id));
       B.mappa = new Map(B.mostri.map((m) => [m.id, m]));
@@ -131,7 +139,7 @@
     const el = document.createElement('div'); el.className = 'mcard f-' + f.k; el.style.width = f.w + 'mm'; el.style.height = f.h + 'mm';
     el.innerHTML = '<div class="mc-in"><div class="mc-head"><div class="mc-nome">' + esc(m.n) + '</div><div class="mc-tipo">' + tipoRiga(m) + '</div></div>'
       + '<div class="mc-body"><div class="mc-fit mb">' + corpoHTML(m) + '</div></div>'
-      + '<div class="mc-foot"><span>Sfida ' + esc(gsT(m)) + '</span><span>' + esc(f.k === 'S' ? fonte(m).s : fonte(m).n) + ' · p. ' + esc(m.pg) + '</span></div></div>';
+      + '<div class="mc-foot"><span>Sfida ' + esc(gsT(m)) + '</span><span>' + esc(origine(m, f.k === 'S')) + '</span></div></div>';
     return el;
   }
   function entra(el, f, minPt) {
@@ -200,7 +208,7 @@
   }
   function righeRisultati() {
     const L = filtra(); const mostra = L.slice(0, B.limite);
-    const hr = mostra.map((m) => '<div class="bes-riga' + (B.sel === m.id ? ' sel' : '') + '" data-az="besApri" data-id="' + m.id + '"><input type="checkbox" class="bes-ck" data-az="besCk" data-id="' + m.id + '"' + (B.sc.has(m.id) ? ' checked' : '') + ' title="Seleziona per stampare le carte"><div class="bes-r1"><b>' + esc(m.n) + '</b> <span class="mute">' + tipoRiga(m).split(',')[0] + '</span></div><div class="bes-r2">' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + ' · GS ' + esc(gsT(m)) + ' · CA ' + esc(m.ca) + ' · PF ' + esc(m.pf) + (B.imgIds.has(m.id) ? ' · 🖼' : '') + '</div><button class="pic ' + (B.sa.has(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '" title="Seleziona per aggiungere a un\'avventura">' + (B.sa.has(m.id) ? '✔' : '＋') + '</button></div>').join('');
+    const hr = mostra.map((m) => '<div class="bes-riga' + (B.sel === m.id ? ' sel' : '') + '" data-az="besApri" data-id="' + m.id + '"><input type="checkbox" class="bes-ck" data-az="besCk" data-id="' + m.id + '"' + (B.sc.has(m.id) ? ' checked' : '') + ' title="Seleziona per stampare le carte"><div class="bes-r1"><b>' + esc(m.n) + '</b> <span class="mute">' + tipoRiga(m).split(',')[0] + '</span></div><div class="bes-r2">' + esc(origine(m, true).replace(' · p. ', ' p. ')) + ' · GS ' + esc(gsT(m)) + ' · CA ' + esc(m.ca) + ' · PF ' + esc(m.pf) + (B.imgIds.has(m.id) ? ' · 🖼' : '') + '</div><button class="pic ' + (B.sa.has(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '" title="Seleziona per aggiungere a un\'avventura">' + (B.sa.has(m.id) ? '✔' : '＋') + '</button></div>').join('');
     return '<div class="bes-intest"><span>☑ Selezionare per <b>stampare</b></span><span><b>＋ Selezionare</b> per aggiungere ad avventura</span></div><div class="mute" style="margin:.3rem 0">' + L.length + ' mostri' + (L.length > mostra.length ? ' (ne mostro ' + mostra.length + ')' : '') + '</div>' + (hr || '<div class="vuoto">Nessun mostro trovato.</div>') + (L.length > mostra.length ? '<p><button class="sec" data-az="besAltri">Mostra altri…</button></p>' : '');
   }
   /* ---------- incantesimi del mostro ---------- */
@@ -256,9 +264,9 @@
   function dettaglio() {
     const m = B.mappa && B.mappa.get(B.sel); if (!m) return '<div class="vuoto">Scegli un mostro dall\'elenco per vederne la scheda.</div>';
     const img = B.imgMem.get(m.id);
-    return '<div class="bes-det"><div class="bes-az"><button class="oro" data-az="besStampa1" data-id="' + m.id + '">🖨 Stampa la carta</button> <button class="' + (B.sa.has(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '">' + (B.sa.has(m.id) ? '✔ Selezionato per l\'avventura (clicca per togliere)' : '＋ Seleziona per aggiungere a un\'avventura') + '</button> <button class="sec" data-az="besImg" data-id="' + m.id + '">🖼 ' + (B.imgIds.has(m.id) ? 'Cambia immagine' : 'Carica immagine') + '</button>' + (B.imgIds.has(m.id) ? ' <button class="sec" data-az="besImgTogli" data-id="' + m.id + '">Rimuovi immagine</button>' : '') + ' <a class="pic sec" target="_blank" rel="noopener" href="' + esc(ricercaImg(m)) + '">🔎 Cerca un\'immagine</a></div>'
+    return '<div class="bes-det"><div class="bes-az"><button class="oro" data-az="besStampa1" data-id="' + m.id + '">🖨 Stampa la carta</button> <button class="' + (B.sa.has(m.id) ? 'oro' : 'sec') + '" data-az="besAgg" data-id="' + m.id + '">' + (B.sa.has(m.id) ? '✔ Selezionato per l\'avventura (clicca per togliere)' : '＋ Seleziona per aggiungere a un\'avventura') + '</button> <button class="sec" data-az="besModIn" data-id="' + m.id + '">✎ Correggi i dati</button> <button class="sec" data-az="besImg" data-id="' + m.id + '">🖼 ' + (B.imgIds.has(m.id) ? 'Cambia immagine' : 'Carica immagine') + '</button>' + (B.imgIds.has(m.id) ? ' <button class="sec" data-az="besImgTogli" data-id="' + m.id + '">Rimuovi immagine</button>' : '') + ' <a class="pic sec" target="_blank" rel="noopener" href="' + esc(ricercaImg(m)) + '">🔎 Cerca un\'immagine</a></div>'
       + '<div class="bes-paste" id="bes-paste" tabindex="0">📋 <b>Trovata l\'immagine?</b> Tasto destro → «Copia immagine», poi clicca qui e premi <b>Ctrl+V</b> (oppure trascinala qui sopra). Si salva da sola su ' + esc(m.n) + '.</div>'
-      + avvisoInc(m) + (img ? '<img class="bes-foto" src="' + img + '" alt="">' : '') + '<div class="mb mb-sch"><h4>' + esc(m.n) + '</h4><div class="mb-t">' + tipoRiga(m) + '</div><hr class="mb-hr">' + corpoHTML(m) + '</div><p class="mute" style="font-size:.78rem">' + esc(fonte(m).n) + ', p. ' + esc(m.pg) + (m.inc ? ' · ⚠ scheda forse incompleta (azioni non trovate nella lettura del PDF): controlla sul manuale.' : '') + '</p></div>';
+      + avvisoInc(m) + (img ? '<img class="bes-foto" src="' + img + '" alt="">' : '') + '<div class="mb mb-sch"><h4>' + esc(m.n) + '</h4><div class="mb-t">' + tipoRiga(m) + '</div><hr class="mb-hr">' + corpoHTML(m) + '</div><p class="mute" style="font-size:.78rem">' + esc(m.fo === 'pers' ? origine(m) : fonte(m).n + ', p. ' + m.pg) + (m.mod && m.fo !== 'pers' ? ' · ✎ scheda corretta a mano' : '') + (m.inc ? ' · ⚠ scheda forse incompleta (azioni non trovate nella lettura del PDF): controlla sul manuale.' : '') + '</p></div>';
   }
   const barraAvv = () => {
     if (!B.avv.length) return '<b>📜 Avventura:</b> <span class="mute">non ne hai ancora una.</span> <button class="oro" data-az="besAvvNuova">＋ Crea la tua prima avventura</button> <span class="mute">Dai un nome alla tua avventura, poi con il pulsante ＋ accanto a ogni mostro lo aggiungi alla lista.</span>';
@@ -295,7 +303,7 @@
     const a = avvCorr(); const sel = '<select data-az="besAvvSel">' + (B.avv.length ? '' : '<option value="">— nessuna avventura —</option>') + B.avv.map((x) => '<option value="' + x.id + '"' + (x.id === B.avvId ? ' selected' : '') + '>' + esc(x.nome || 'Senza nome') + ' (' + conteggiAvv(x) + ')</option>').join('') + '</select>';
     let corpo = '<p class="mute">Crea una lista per ogni avventura (ogni avventura deve avere un nome diverso), poi aggiungi i mostri dalla scheda <b>Cerca</b> con il pulsante ＋.</p>';
     if (a) {
-      const righe = (a.voci || []).slice().sort((x, y) => String((B.mappa.get(x.id) || {}).n || '').localeCompare(String((B.mappa.get(y.id) || {}).n || ''), 'it')).map((v) => { const m = B.mappa.get(v.id); if (!m) return ''; return '<tr><td><a href="#" data-az="besApriDa" data-id="' + m.id + '">' + esc(m.n) + '</a> <span class="mute">GS ' + esc(gsT(m)) + ' · ' + esc(fonte(m).s) + ' p. ' + esc(m.pg) + '</span>' + (B.imgIds.has(m.id) ? ' 🖼' : '') + '</td><td><button class="pic sec" data-az="besTogliVoce" data-id="' + m.id + '" title="Togli">✕</button></td></tr>'; }).join('');
+      const righe = (a.voci || []).slice().sort((x, y) => String((B.mappa.get(x.id) || {}).n || '').localeCompare(String((B.mappa.get(y.id) || {}).n || ''), 'it')).map((v) => { const m = B.mappa.get(v.id); if (!m) return ''; return '<tr><td><a href="#" data-az="besApriDa" data-id="' + m.id + '">' + esc(m.n) + '</a> <span class="mute">GS ' + esc(gsT(m)) + ' · ' + esc(origine(m, true).replace(' · p. ', ' p. ')) + '</span>' + (B.imgIds.has(m.id) ? ' 🖼' : '') + '</td><td><button class="pic sec" data-az="besTogliVoce" data-id="' + m.id + '" title="Togli">✕</button></td></tr>'; }).join('');
       const senza = (a.voci || []).map((v) => B.mappa.get(v.id)).filter((m) => m && !B.imgIds.has(m.id));
       corpo = '<div class="riga"><div class="col"><label>Nome dell\'avventura</label><input type="text" data-az="besAvvNome" value="' + esc(a.nome) + '"></div></div>'
         + ((a.voci || []).length ? '<table class="bes-tab"><thead><tr><th>Mostro</th><th></th></tr></thead><tbody>' + righe + '</tbody></table>' : '<div class="vuoto">La lista è vuota: aggiungi dei mostri dalla scheda Cerca.</div>')
@@ -316,14 +324,69 @@
       + '<div class="card"><h3>🖼 Immagini</h3><p class="mute">Carica più immagini in una volta: il nome del file deve essere quello del mostro (es. <code>goblin.jpg</code>, <code>drago-rosso-antico.png</code>). Le immagini vengono ridotte e salvate' + (cloud() ? ' online, nell\'archivio privato dei gestori' : ' su questo dispositivo') + '. <b>Usa solo immagini che hai il diritto di usare</b> (tue, libere, o per uso privato al tavolo).</p>'
       + '<p><button class="oro" data-az="besImgBlocco">⬆ Carica immagini (più file)</button> <button class="sec" data-az="besSenzaImgTutti">📋 Elenco di tutti i mostri senza immagine (' + senza.length + ')</button></p><div id="bes-senza"></div><div class="mute">' + esc(B.msgImg || '') + '</div></div>';
   };
+  /* ---------- mostri personalizzati (creati a mano dai gestori) ---------- */
+  const TIPI_BASE = ['Aberrazione', 'Bestia', 'Celestiale', 'Costrutto', 'Drago', 'Elementale', 'Folletto', 'Gigante', 'Immondo', 'Melma', 'Mostruosità', 'Non morto', 'Sciame', 'Umanoide', 'Vegetale'];
+  const TAGLIE = ['Minuscolo', 'Piccolo', 'Medio', 'Grande', 'Enorme', 'Mastodontico'];
+  const PE_GS = { 0: 10, '1/8': 25, '1/4': 50, '1/2': 100, 1: 200, 2: 450, 3: 700, 4: 1100, 5: 1800, 6: 2300, 7: 2900, 8: 3900, 9: 5000, 10: 5900, 11: 7200, 12: 8400, 13: 10000, 14: 11500, 15: 13000, 16: 15000, 17: 18000, 18: 20000, 19: 22000, 20: 25000, 21: 33000, 22: 41000, 23: 50000, 24: 62000, 25: 75000, 26: 90000, 27: 105000, 28: 120000, 29: 135000, 30: 155000 };
+  const SEZ = [
+    ['tr', 'Tratti', 'Capacità sempre attive (es. Vista Acuta, Resistenza alla Magia).', 'Vista Acuta', 'Il mostro dispone di vantaggio alle prove di Saggezza (Percezione) basate sulla vista.'],
+    ['az', 'Azioni', 'Gli attacchi e le azioni del mostro. Usa «＋ Modello di attacco» per partire da una frase già pronta.', 'Morso', 'Attacco con Arma da Mischia: +4 al tiro per colpire, portata 1,5 m, un bersaglio. Colpito: 5 (1d6 + 2) danni perforanti.'],
+    ['bz', 'Azioni bonus', '', '', ''], ['re', 'Reazioni', '', '', ''], ['le', 'Azioni leggendarie', 'Per i mostri più potenti: scrivi anche l\'introduzione nella prima riga (es. «Il mostro può effettuare 3 azioni leggendarie…»).', '', ''],
+  ];
+  const formVuoto = () => ({ id: null, n: '', tipo: 'Umanoide', tg: 'Medio', sub: '', al: 'senza allineamento', ca: '12', caN: '', pf: '20', dadi: '', vel: '9 m', car: ['10', '10', '10', '10', '10', '10'], ts: '', ab: '', vu: '', rs: '', im: '', ic: '', se: 'Percezione passiva 10', li: '', gs: '1', av: '', tr: [], az: [{ n: '', t: '' }], bz: [], re: [], le: [], imgData: null });
+  const formDa = (m) => { const f = formVuoto(); Object.keys(f).forEach((k) => { if (m[k] != null && k !== 'imgData' && k !== 'id') f[k] = JSON.parse(JSON.stringify(m[k])); }); f.mod = !!m.mod; f.fo = m.fo || 'mm'; f.pg = m.pg == null ? '' : m.pg; f.bp = m.bp || ''; f.gsOrig = String(m.gs == null ? '' : m.gs); f.peOrig = m.pe; f.car = (m.car || f.car).map(String); f.ca = String(m.ca); f.pf = String(m.pf); f.gs = String(m.gs == null ? '1' : m.gs); ['tr', 'az', 'bz', 're', 'le'].forEach((k) => { f[k] = (m[k] || []).map((v) => ({ n: v.n || '', t: v.t || '' })); }); if (!f.az.length) f.az = [{ n: '', t: '' }]; return f; };
+  function leggiForm() {
+    const f = B.f, root = document.getElementById('bes-form'); if (!f || !root) return;
+    root.querySelectorAll('[data-f]').forEach((e) => { const k = e.dataset.f; if (k.slice(0, 3) === 'car') f.car[Number(k.slice(3))] = e.value; else f[k] = e.value; });
+    SEZ.forEach(([k]) => { f[k] = [...root.querySelectorAll('.fm-row[data-sec="' + k + '"]')].map((r) => ({ n: r.querySelector('[data-r="n"]').value, t: r.querySelector('[data-r="t"]').value })); });
+  }
+  function costruisci(f) {
+    const num = (v, d) => { const n = Number(String(v).replace(',', '.')); return Number.isFinite(n) ? n : d; };
+    const gs = String(f.gs).trim(); const car = f.car.map((v) => Math.max(1, Math.min(30, Math.round(num(v, 10)))));
+    const pulisci = (l) => (l || []).map((v) => ({ n: String(v.n || '').trim(), t: String(v.t || '').trim() })).filter((v) => v.n || v.t);
+    const m = { id: f.id, n: String(f.n || '').trim().replace(/\s+/g, ' '), tipo: f.tipo, tg: f.tg, sub: String(f.sub || '').trim(), al: String(f.al || '').trim(), ca: Math.round(num(f.ca, 10)), caN: String(f.caN || '').trim(), pf: Math.round(num(f.pf, 1)), dadi: String(f.dadi || '').trim(), vel: String(f.vel || '').trim(), car, ts: String(f.ts || '').trim(), ab: String(f.ab || '').trim(), vu: String(f.vu || '').trim(), rs: String(f.rs || '').trim(), im: String(f.im || '').trim(), ic: String(f.ic || '').trim(), se: String(f.se || '').trim(), li: String(f.li || '').trim(), gs, pe: f.fo && f.fo !== 'pers' && gs === f.gsOrig ? f.peOrig : (PE_GS[gs] != null ? PE_GS[gs] : 0), pg: f.fo && f.fo !== 'pers' ? f.pg : '', fo: f.fo || 'pers', av: f.fo && f.fo !== 'pers' ? '' : String(f.av || '').trim(), tr: pulisci(f.tr), az: pulisci(f.az), bz: pulisci(f.bz), re: pulisci(f.re), le: pulisci(f.le) };
+    if (f.bp) m.bp = f.bp; if (m.fo !== 'pers') m.mod = true;
+    m.tp = [m.tipo, m.tg].filter(Boolean).join(' ') + (m.sub ? ' (' + m.sub + ')' : '') + (m.al ? ', ' + m.al : '');
+    return m;
+  }
+  const tabNuovo = () => {
+    const pers = (B.mostri || []).filter((m) => m.fo === 'pers');
+    const opt = (v, l, s) => '<option value="' + esc(v) + '"' + (s ? ' selected' : '') + '>' + esc(l) + '</option>';
+    const lista = '<div class="card"><h3>👹 I miei mostri (' + pers.length + ')</h3>'
+      + (pers.length ? '<div class="fm-lista">' + pers.map((m) => '<div class="fm-voce"><div><b>' + esc(m.n) + '</b> <span class="mute">' + tipoRiga(m).split(',')[0] + ' · GS ' + esc(gsT(m)) + (m.av ? ' · ' + esc(m.av) : '') + (B.imgIds.has(m.id) ? ' · 🖼' : '') + '</span></div><div class="fm-bt"><button class="pic sec" data-az="besFmCarta" data-id="' + m.id + '">👁 Carta</button><button class="pic sec" data-az="besFmModifica" data-id="' + m.id + '">✎ Modifica</button><button class="pic sec" data-az="besFmDuplica" data-id="' + m.id + '">⧉ Duplica</button><button class="pic sec" data-az="besFmElimina" data-id="' + m.id + '">🗑</button></div></div>').join('') + '</div>' : '<p class="mute">Nessun mostro personalizzato: creane uno qui sotto. I mostri creati sono visibili a tutti i gestori, compaiono nella ricerca del Bestiario (filtro «Mostro personalizzato») e si possono aggiungere alle avventure come tutti gli altri.</p>') + '</div>';
+    const prev = '<div class="card bes-stampa" id="fm-risultato"' + (B.nuovoDone ? '' : ' hidden') + '><h4>' + (B.nuovoDone ? '✔ Mostro salvato: ecco la carta' : '') + '</h4><p><button class="oro" data-az="besFmStampa">🖨 Stampa la carta</button> <button class="sec" data-az="besFmAggAvv">＋ Aggiungi a un\'avventura</button> <button class="sec" data-az="besFmChiudi">Chiudi</button> ' + opzioniStampaCorta() + '</p><div id="bes-prev"></div></div>';
+    if (!B.f) return prev + lista + '<div class="card"><h3>✚ Nuovo mostro</h3><p class="mute">Crea un mostro speciale per la tua avventura: compili la scheda, premi Salva e il mostro entra nell\'elenco con la sua carta (fronte con le statistiche, retro con l\'immagine).</p><p><button class="oro" data-az="besFmNuovo">✚ Crea un mostro da zero</button></p>'
+      + '<p><b>Oppure parti da un mostro esistente</b> (utile per un «Goblin capo» o un «Drago» con qualche modifica):</p><p><input type="text" id="fm-base" list="fm-base-l" placeholder="Scrivi il nome del mostro di partenza…" style="max-width:22rem"><datalist id="fm-base-l">' + (B.mostri || []).filter((m) => m.fo !== 'pers').map((m) => '<option value="' + esc(m.n) + '">').join('') + '</datalist> <button class="sec" data-az="besFmDaBase">Copia i suoi dati</button></p></div>';
+    const f = B.f; const tipi = [...new Set(TIPI_BASE.concat(f.tipo ? [f.tipo] : []))];
+    const inp = (k, lbl, ph, cl) => '<label class="fm-c ' + (cl || '') + '"><span>' + lbl + '</span><input type="text" data-f="' + k + '" value="' + esc(f[k]) + '" placeholder="' + esc(ph || '') + '"></label>';
+    const gsOpt = Object.keys(PE_GS).sort((a, b) => GSV(a) - GSV(b)); if (f.gs !== '' && !(f.gs in PE_GS)) gsOpt.push(String(f.gs));
+    const sezioni = SEZ.map(([k, tit, aiuto, exn, ext]) => '<div class="fm-sez"><h4>' + tit + '</h4>' + (aiuto ? '<p class="mute" style="font-size:.8rem">' + aiuto + '</p>' : '')
+      + (f[k] || []).map((v, i) => '<div class="fm-row" data-sec="' + k + '" data-i="' + i + '"><input type="text" data-r="n" placeholder="Nome (es. ' + esc(exn || 'Nome') + ')" value="' + esc(v.n) + '"><textarea data-r="t" rows="3" placeholder="Testo (es. ' + esc((ext || '').slice(0, 70)) + '…)">' + esc(v.t) + '</textarea><button class="pic sec" data-az="besFmTogli" data-sec="' + k + '" data-i="' + i + '" title="Togli questa voce">✕</button></div>').join('')
+      + '<p><button class="pic sec" data-az="besFmRiga" data-sec="' + k + '">＋ Aggiungi</button>' + (k === 'az' ? ' <button class="pic sec" data-az="besFmRiga" data-sec="az" data-tpl="mischia">＋ Modello di attacco in mischia</button> <button class="pic sec" data-az="besFmRiga" data-sec="az" data-tpl="distanza">＋ Modello di attacco a distanza</button>' : '') + '</p></div>').join('');
+    return prev + '<div class="card" id="bes-form"><h3>' + (f.id ? '✎ Modifica: ' + esc(f.n) : '✚ Nuovo mostro') + '</h3>' + (f.fo !== 'pers' ? '<div class="avviso">⚠ <b>Stai correggendo un mostro del manuale</b> (' + esc(FONTI[f.fo] ? FONTI[f.fo].n : f.fo) + ', p. ' + esc(f.pg) + '). Quando salvi, le nuove statistiche valgono per <b>tutti i gestori</b>.</div>' : '')
+      + '<div class="fm-g">' + inp('n', 'Nome del mostro *', 'es. Goblin Capo di Valdoria', 'fm-w2')
+      + '<label class="fm-c"><span>Tipo</span><select data-f="tipo">' + tipi.map((t) => opt(t, t, t === f.tipo)).join('') + '</select></label>'
+      + '<label class="fm-c"><span>Taglia</span><select data-f="tg">' + [...new Set(TAGLIE.concat([f.tg]))].map((t) => opt(t, t, t === f.tg)).join('') + '</select></label>'
+      + inp('sub', 'Sottotipo (facoltativo)', 'es. goblinoide') + inp('al', 'Allineamento', 'es. neutrale malvagio')
+      + (f.fo === 'pers' ? inp('av', 'Avventura / origine (appare sulla carta)', 'es. La Torre delle Lucciole', 'fm-w2') : '') + '</div>'
+      + '<div class="fm-g">' + inp('ca', 'Classe Armatura', '15') + inp('caN', 'Tipo di armatura', 'es. armatura di cuoio, scudo') + inp('pf', 'Punti Ferita', '7') + inp('dadi', 'Dadi vita', 'es. 2d6') + inp('vel', 'Velocità', 'es. 9 m, volare 18 m', 'fm-w2') + '</div>'
+      + '<div class="fm-ab">' + ['FOR', 'DES', 'COS', 'INT', 'SAG', 'CAR'].map((a, i) => '<label class="fm-c"><span>' + a + '</span><input type="text" inputmode="numeric" data-f="car' + i + '" value="' + esc(f.car[i]) + '"></label>').join('') + '</div>'
+      + '<div class="fm-g">' + inp('ts', 'Tiri salvezza', 'es. Cos +4, Sag +2', 'fm-w2') + inp('ab', 'Abilità', 'es. Furtività +6, Percezione +3', 'fm-w2') + inp('vu', 'Vulnerabilità ai danni', '') + inp('rs', 'Resistenze ai danni', 'es. fuoco') + inp('im', 'Immunità ai danni', '') + inp('ic', 'Immunità alle condizioni', 'es. spaventato')
+      + inp('se', 'Sensi', 'es. scurovisione 18 m, Percezione passiva 9', 'fm-w2') + inp('li', 'Linguaggi', 'es. Comune, Goblin', 'fm-w2')
+      + '<label class="fm-c"><span>Grado di Sfida</span><select data-f="gs">' + gsOpt.map((g) => opt(g, g + (PE_GS[g] != null ? ' (' + PE_GS[g].toLocaleString('it-IT') + ' PE)' : ''), String(f.gs) === g)).join('') + '</select></label></div>'
+      + sezioni
+      + '<div class="fm-sez"><h4>🖼 Immagine per il retro della carta (facoltativa)</h4><p class="mute" style="font-size:.8rem">Senza immagine la carta ha il retro con il logo. Puoi aggiungerla anche dopo, dalla scheda del mostro.</p><p>' + (f.imgData ? '<img class="fm-thumb" src="' + f.imgData + '" alt=""> ' : '') + '<button class="sec" data-az="besFmImg">' + (f.imgData ? 'Cambia immagine' : 'Scegli un\'immagine') + '</button>' + (f.imgData ? ' <button class="sec" data-az="besFmImgTogli">Togli</button>' : '') + '<input type="file" id="fm-file" accept="image/*" hidden data-az="besFmFile"></p></div>'
+      + '<p class="fm-azioni"><button class="oro" data-az="besFmSalva">💾 Salva il mostro e crea la carta</button> <button class="sec" data-az="besFmAnteprima">👁 Anteprima della carta</button> <button class="sec" data-az="besFmAnnulla">Annulla</button>' + (f.fo !== 'pers' && f.mod ? ' <button class="sec" data-az="besFmRipristina">↩ Ripristina i dati originali del manuale</button>' : '') + ' <span class="mute" id="fm-msg">' + esc(B.fmMsg || '') + '</span></p></div>';
+  };
+  const opzioniStampaCorta = () => '<label>Retro <select data-az="besOpz" data-k="dorso"><option value="immagine"' + (B.opz.dorso === 'immagine' ? ' selected' : '') + '>immagine</option><option value="logo"' + (B.opz.dorso === 'logo' ? ' selected' : '') + '>logo</option><option value="bianco"' + (B.opz.dorso === 'bianco' ? ' selected' : '') + '>bianco</option><option value="nessuno"' + (B.opz.dorso === 'nessuno' ? ' selected' : '') + '>nessuno</option></select></label>';
   X.vistaBestiario = function () {
     if (!B.carico) { if (!B.prep) { B.prep = true; carica(); } return '<p class="mute centro">Carico il bestiario…</p>'; }
     const vuoto = !(B.mostri || []).length;
-    const tabs = [['cerca', '🔎 Cerca'], ['avv', '📜 Avventure'], ['dati', '⚙ Dati e immagini']].map(([id, l]) => '<button class="' + (B.tab === id ? 'attiva' : '') + '" data-az="besTab" data-t="' + id + '">' + l + '</button>').join('');
+    const tabs = [['cerca', '🔎 Cerca'], ['avv', '📜 Avventure'], ['nuovo', '✚ Crea mostro'], ['dati', '⚙ Dati e immagini']].map(([id, l]) => '<button class="' + (B.tab === id ? 'attiva' : '') + '" data-az="besTab" data-t="' + id + '">' + l + '</button>').join('');
     return '<div class="barra-elenco"><b style="font-size:1.1rem">' + (B.modo === 'inc' ? '⚔ Incontri e iniziativa' : '📖 Bestiario del Dungeon Master') + '</b>' + '</div>'
       + (B.errore ? '<div class="avviso">⚠ ' + esc(B.errore) + '</div>' : '')
       + (vuoto && B.tab !== 'dati' && B.modo !== 'inc' ? '<div class="avviso">Il bestiario è vuoto: importa il file dei mostri dalla scheda <b>Dati e immagini</b>. <button class="pic oro" data-az="besTab" data-t="dati">Vai</button></div>' : '')
-      + (B.modo === 'inc' ? X.tabIncontri() : '<div class="tabs bes-tabs">' + tabs + '</div>' + (B.tab === 'cerca' ? tabCerca() : B.tab === 'avv' ? tabAvv() : tabDati()))
+      + (B.modo === 'inc' ? X.tabIncontri() : '<div class="tabs bes-tabs">' + tabs + '</div>' + (B.tab === 'cerca' ? tabCerca() : B.tab === 'avv' ? tabAvv() : B.tab === 'nuovo' ? tabNuovo() : tabDati()))
       + '<input type="file" id="bes-file-json" accept=".json,application/json" hidden data-az="besFileJson"><input type="file" id="bes-file-img" accept="image/*" hidden data-az="besFileImg"><input type="file" id="bes-file-imgs" accept="image/*" multiple hidden data-az="besFileImgs">';
   };
 
@@ -377,7 +440,63 @@
       vaiBestiario() { S.vista = 'bestiario'; B.modo = 'bes'; if (B.tab === 'inc') B.tab = 'cerca'; render(); },
       vaiIncontri() { S.vista = 'bestiario'; B.modo = 'inc'; B.tab = 'inc'; render(); },
       vaiAvventure() { S.vista = 'bestiario'; B.modo = 'bes'; B.tab = 'avv'; B.stampa = ''; render(); },
-      besTab(el) { B.tab = el.dataset.t; B.stampa = ''; render(); },
+      besTab(el) { leggiForm(); B.tab = el.dataset.t; B.stampa = ''; render(); },
+
+      besFmNuovo() { B.f = formVuoto(); B.nuovoDone = null; B.fmMsg = ''; render(); },
+      besFmDaBase() { const nome = (document.getElementById('fm-base') || {}).value; const m = (B.mostri || []).find((x) => nomeNorm(x.n) === nomeNorm(nome)); if (!m) { toast('Non trovo un mostro con questo nome: scegli dall\'elenco che compare mentre scrivi'); return; } B.f = formDa(m); B.f.n = m.n + ' (copia)'; B.f.av = ''; B.nuovoDone = null; B.fmMsg = 'Dati copiati da «' + m.n + '»: modificali e salva.'; render(); },
+      besFmDuplica(el) { const m = B.mappa.get(Number(el.dataset.id)); if (!m) return; B.f = formDa(m); B.f.n = m.n + ' (copia)'; B.nuovoDone = null; B.fmMsg = 'Copia di «' + m.n + '»: cambia il nome e salva.'; render(); },
+      async besFmModifica(el) { const m = B.mappa.get(Number(el.dataset.id)); if (!m) return; B.f = formDa(m); B.f.id = m.id; B.f.imgData = await leggiImg(m.id); B.nuovoDone = null; B.fmMsg = ''; render(); window.scrollTo(0, 0); },
+      besFmRiga(el) { leggiForm(); const tpl = { mischia: { n: 'Colpo', t: 'Attacco con Arma da Mischia: +4 al tiro per colpire, portata 1,5 m, un bersaglio. Colpito: 5 (1d6 + 2) danni taglienti.' }, distanza: { n: 'Arco', t: 'Attacco con Arma a Distanza: +4 al tiro per colpire, gittata 24/96 m, un bersaglio. Colpito: 5 (1d6 + 2) danni perforanti.' } }[el.dataset.tpl] || { n: '', t: '' }; B.f[el.dataset.sec].push(Object.assign({}, tpl)); render(); },
+      besFmTogli(el) { leggiForm(); B.f[el.dataset.sec].splice(Number(el.dataset.i), 1); render(); },
+      besFmImg() { leggiForm(); const i = document.getElementById('fm-file'); if (i) i.click(); },
+      async besFmFile(el) { const file = el.files[0]; el.value = ''; if (!file) return; leggiForm(); try { B.f.imgData = await riduciImg(file); B.f.imgNuova = true; B.f.imgTolta = false; } catch (e) { toast('Immagine non leggibile'); } render(); },
+      besFmImgTogli() { leggiForm(); B.f.imgData = null; B.f.imgNuova = false; B.f.imgTolta = true; render(); },
+      besFmAnnulla() { B.f = null; B.fmMsg = ''; render(); },
+      async besFmAnteprima() {
+        leggiForm(); const m = costruisci(B.f); if (!m.n) { toast('Scrivi prima il nome del mostro'); return; }
+        m.id = B.f.id || -1; if (B.f.imgData) B.imgMem.set(m.id, B.f.imgData); else if (m.id === -1) B.imgMem.delete(-1);
+        const r = document.getElementById('fm-risultato'); if (r) { r.hidden = false; r.querySelector('h4').textContent = '👁 Anteprima della carta (non ancora salvata)'; r.querySelector('[data-az="besFmStampa"]').hidden = true; r.querySelector('[data-az="besFmAggAvv"]').hidden = true; }
+        await prova([{ m, n: 1 }]); if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      },
+      async besFmSalva() {
+        leggiForm(); const f = B.f; const m = costruisci(f);
+        if (!m.n) { toast('Scrivi il nome del mostro'); return; }
+        if ((B.mostri || []).some((x) => x.id !== f.id && nomeNorm(x.n) === nomeNorm(m.n))) { toast('Esiste già un mostro chiamato «' + m.n + '»: scegli un altro nome'); return; }
+        if (!f.id) m.id = Math.max(99999, ...(B.mostri || []).filter((x) => x.fo === 'pers').map((x) => x.id)) + 1;
+        m.aggiornato = new Date().toISOString();
+        const pers = m.fo === 'pers';
+        try { if (cloud()) await (pers ? C.persScrivi(m) : C.modScrivi(m)); } catch (e) { B.errore = e.message; toast('Salvataggio online non riuscito: ' + e.message); render(); return; }
+        B.mostri = (B.mostri || []).filter((x) => x.id !== m.id).concat([m]).sort((a, c) => a.n.localeCompare(c.n, 'it') || (a.id - c.id)); B.mappa = new Map(B.mostri.map((x) => [x.id, x]));
+        if (pers) await kv.set('pers', B.mostri.filter((x) => x.fo === 'pers')); else await kv.set('mod', ((await kv.get('mod')) || []).filter((x) => x.id !== m.id).concat([m]));
+        try { if (f.imgNuova && f.imgData) await salvaImg(m.id, f.imgData); else if (f.imgTolta && B.imgIds.has(m.id)) await togliImg(m.id); } catch (e) { B.errore = e.message; toast('Mostro salvato, ma l\'immagine no: ' + e.message); }
+        B.imgMem.delete(-1); B.f = null; B.nuovoDone = pers ? m.id : null; B.sel = m.id; if (!pers) B.tab = 'cerca'; B.fmMsg = ''; await leggiImg(m.id); render();
+        toast(pers ? '✔ «' + m.n + '» salvato tra i mostri' : '✔ «' + m.n + '» corretto per tutti i gestori'); await prova([{ m, n: 1 }]); const r = document.getElementById('fm-risultato'); if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      },
+      async besFmCarta(el) { const id = Number(el.dataset.id); const m = B.mappa.get(id); if (!m) return; B.nuovoDone = id; await leggiImg(id); render(); await prova([{ m, n: 1 }]); const r = document.getElementById('fm-risultato'); if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
+      async besFmStampa() { const m = B.mappa.get(B.nuovoDone); if (m) await stampaOra([{ m, n: 1 }]); },
+      async besModIn(el) {
+        const m = B.mappa.get(Number(el.dataset.id)); if (!m) return;
+        if (m.fo !== 'pers') {
+          if (!window.confirm('⚠ ATTENZIONE\n\nStai modificando un mostro esistente: «' + m.n + '» (' + (FONTI[m.fo || 'mm'] ? FONTI[m.fo || 'mm'].n : m.fo) + ', p. ' + m.pg + ').\n\nQuesta modifica cambierà le statistiche di questo mostro PER TUTTI I GESTORI.\n\nSei sicuro di voler modificare?')) return;
+          if (!window.confirm('ULTIMA CONFERMA\n\nProcedo quindi con la procedura di modifica del mostro «' + m.n + '»?\n\nQuesta operazione sarà definitiva.')) return;
+        }
+        B.f = formDa(m); B.f.id = m.id; B.f.imgData = await leggiImg(m.id); B.nuovoDone = null; B.fmMsg = ''; B.tab = 'nuovo'; render(); window.scrollTo(0, 0);
+      },
+      async besFmRipristina() {
+        const f = B.f; if (!f || !f.id || !window.confirm('Ripristinare i dati originali del manuale per «' + f.n + '»? Le tue correzioni andranno perse, per tutti i gestori.')) return;
+        try { if (cloud()) await C.modElimina(f.id); } catch (e) { toast('Ripristino non riuscito: ' + e.message); return; }
+        await kv.set('mod', ((await kv.get('mod')) || []).filter((x) => x.id !== f.id)); const id = f.id; B.f = null; B.carico = false; B.prep = false; await carica(true); B.sel = id; B.tab = 'cerca'; render(); toast('Dati originali ripristinati');
+      },
+      besFmChiudi() { B.nuovoDone = null; render(); },
+      async besFmAggAvv() { const id = B.nuovoDone; const a = avvCorr(); if (id != null && a && (a.voci || []).some((v) => v.id === id)) { toast('È già in «' + a.nome + '»'); return; } if (id != null) await aggiungi(id); },
+      async besFmElimina(el) {
+        const id = Number(el.dataset.id); const m = B.mappa.get(id); if (!m || !window.confirm('Eliminare il mostro «' + m.n + '»? Sparisce dall\'elenco e dalle avventure per tutti i gestori.')) return;
+        try { if (cloud()) await C.persElimina(id); } catch (e) { toast('Eliminazione non riuscita: ' + e.message); return; }
+        B.mostri = B.mostri.filter((x) => x.id !== id); B.mappa = new Map(B.mostri.map((x) => [x.id, x])); await kv.set('pers', B.mostri.filter((x) => x.fo === 'pers'));
+        if (B.imgIds.has(id)) await togliImg(id).catch(() => {});
+        for (const a of B.avv) { if ((a.voci || []).some((v) => v.id === id)) { a.voci = a.voci.filter((v) => v.id !== id); await salvaAvv(a).catch(() => {}); } }
+        B.sa.delete(id); B.sc.delete(id); if (B.sel === id) B.sel = null; if (B.nuovoDone === id) B.nuovoDone = null; toast('Mostro eliminato'); render();
+      },
       besQ(el) { B.q = el.value; B.limite = 40; const r = $('#bes-ris'); if (r) r.innerHTML = righeRisultati(); },
       besF(el) { B[el.dataset.k] = el.value; B.limite = 40; render(); },
       besAltri() { B.limite += 60; const r = $('#bes-ris'); if (r) r.innerHTML = righeRisultati(); },
@@ -409,7 +528,7 @@
       async besAvvElimina() { const a = avvCorr(); if (!a || !window.confirm('Eliminare l\'avventura «' + a.nome + '»?')) return; B.avv = B.avv.filter((x) => x.id !== a.id); B.avvId = B.avv[0] ? B.avv[0].id : null; if (cloud()) await C.avvElimina(a.id).catch((e) => { B.errore = e.message; }); await kv.set('avv', B.avv); render(); },
       async besQta(el) { const a = avvCorr(); const v = a && a.voci.find((x) => x.id === Number(el.dataset.id)); if (!v) return; v.q = Math.max(1, v.q + Number(el.dataset.d)); await salvaAvv(a).catch((e) => { B.errore = e.message; }); ridisegna(); },
       async besTogliVoce(el) { const a = avvCorr(); if (!a) return; a.voci = a.voci.filter((x) => x.id !== Number(el.dataset.id)); await salvaAvv(a).catch((e) => { B.errore = e.message; }); ridisegna(); },
-      besOpz(el) { B.opz[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; B.stampa = ''; ridisegna(); },
+      besOpz(el) { leggiForm(); B.opz[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; B.stampa = ''; ridisegna(); },
       besCk(el, e) { const id = Number(el.dataset.id); if (el.checked) B.sc.add(id); else B.sc.delete(id); B.stampa = ''; ridisegna(); },
       besScSvuota() { B.sc.clear(); B.stampa = ''; ridisegna(); },
       async besStampaSel() { await prova(vociSel()); },
@@ -455,7 +574,7 @@
         try {
           const dati = JSON.parse(await file.text()); if (!Array.isArray(dati) || !dati.length || !dati[0].n || !dati[0].car) throw new Error('file non valido');
           B.imp = 'Importazione di ' + dati.length + ' mostri…'; ridisegna();
-          let ex = []; if (cloud()) { try { ex = await C.mostriLeggi(); } catch (e) { ex = []; } } if (!ex.length) ex = (await kv.get('mostri')) || B.mostri || []; const nuovi = new Set(dati.map((m) => m.id)); const tutti = ex.filter((m) => !nuovi.has(m.id)).concat(dati).sort((a, b) => a.id - b.id);
+          let ex = []; if (cloud()) { try { ex = await C.mostriLeggi(); } catch (e) { ex = []; } } if (!ex.length) ex = ((await kv.get('mostri')) || B.mostri || []).filter((m) => m.fo !== 'pers'); const nuovi = new Set(dati.map((m) => m.id)); const tutti = ex.filter((m) => !nuovi.has(m.id)).concat(dati).sort((a, b) => a.id - b.id);
           if (cloud()) await C.mostriScrivi(tutti, (i, n) => { B.imp = 'Scrivo ' + i + '/' + n + '…'; });
           await kv.set('mostri', tutti); B.carico = false; B.prep = false; await carica(true); B.imp = 'Importati ' + dati.length + ' mostri (totale ' + tutti.length + ').';
         } catch (e) { B.imp = 'Importazione non riuscita: ' + (e.message || e); }
