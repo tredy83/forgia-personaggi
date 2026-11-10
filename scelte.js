@@ -108,7 +108,9 @@
   /* opzioni selezionabili adesso (livello e patto) */
   D.opzioniScelta = function (g, k, ch) {
     const patto = ((ch.scelte || {}).patto || [])[0];
-    return g.opz.map((o) => ({ id: o[0], nome: o[1], desc: o[2], liv: o[3] || 0, patto: o[4] || '', truc: o[5] || '' }))
+    const gia = ((ch.scelte || {})[g.id]) || [];
+    return g.opz.filter((o) => { const f = D.OPZ_FONTE && D.OPZ_FONTE[g.id + '/' + o[0]]; return !f || D.fonteOk(ch, f) || gia.includes(o[0]); })
+      .map((o) => ({ id: o[0], nome: o[1], desc: o[2], liv: o[3] || 0, patto: o[4] || '', truc: o[5] || '' }))
       .map((o) => Object.assign(o, { ok: k.livello >= o.liv && (!o.patto || patto === o.patto) && (!o.truc || (((ch.inc || {})[k.id] || {}).truc || []).includes(o.truc)) }));
   };
 })(typeof window !== 'undefined' ? window : globalThis);

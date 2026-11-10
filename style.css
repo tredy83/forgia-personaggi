@@ -172,3 +172,7 @@ td.az{white-space:nowrap}
 .pdf-az{display:flex;flex-direction:column;gap:.5rem;margin-top:.8rem}
 .pdf-b{display:block;padding:.8rem 1rem;border-radius:10px;border:0;background:#8a1c1c;color:#fff;font-size:1.05rem;font-weight:700;text-decoration:none;cursor:pointer}
 .pdf-b.sec{background:#e6d9c3;color:#2b1d12}
+.usi{display:block;margin:1mm 0 2mm}.usi .cerchio{margin:0 1.4mm 1mm 0;width:3.6mm;height:3.6mm}
+@media screen and (min-width:801px){td.az{white-space:normal;min-width:15rem;text-align:right}td.az button{margin:.15rem .1rem}.card:has(> table){overflow-x:auto}}
+
+.tasha-flag{border-left:4px solid var(--oro,#b8860b)}.tasha-lab{display:flex;gap:.5rem;align-items:center;font-size:1.05rem;cursor:pointer}.tasha-flag p{margin:.4rem 0 0}

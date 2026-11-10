@@ -98,3 +98,23 @@ Nel **Bestiario** c'è la scheda **✚ Crea mostro**: serve per i mostri unici d
 ## Correggere un mostro del manuale (errori di lettura)
 Nella scheda di un mostro, in **Cerca**, il pulsante **✎ Correggi i dati** apre la stessa maschera di «Crea mostro» con i dati del mostro. Prima di aprirla l'app chiede **due conferme** («stai modificando un mostro esistente, vale per tutti i gestori…» e «procedo con la modifica? sarà definitiva»). Salvando, la correzione vale per tutti i gestori; la scheda riporta «scheda corretta a mano». I dati originali del manuale non vengono cancellati: nella maschera c'è **↩ Ripristina i dati originali**. Le correzioni restano anche se si reimportano i file dei mostri.
 **Una volta sola:** ripubblica `firestore.rules` in Firebase → Firestore → Regole (nuova raccolta `mostriMod`).
+
+## Risorse con cerchietti da annerire
+Nella pagina «Privilegi e tratti» (e nella scheda semplice) le risorse a usi limitati hanno i cerchietti da annerire quando si consumano, come gli slot incantesimo: Ki del Monaco, Punti Stregoneria, Ira, Ispirazione Bardica, Incanalare Divinità, Forma Selvatica, Recuperare Energie, Azione Impetuosa, Indomito, Recupero Arcano.
+
+## Manuali opzionali (Xanathar, Tasha e futuri)
+All'inizio della creazione (scheda «Razza») c'è la card **«Manuali opzionali»**, con un interruttore per ogni manuale aggiuntivo. Spenti, la Forgia usa solo il Manuale del Giocatore. Per ora ci sono la **Guida Omnicomprensiva di Xanathar** (testo italiano con l'errata 2020) e il **Calderone Omnicomprensivo di Tasha** (errata 08/2022).
+
+**Xanathar**, acceso: compaiono le **31 sottoclassi** del capitolo 1 (segnate «Xanathar»), con incantesimi di sottoclasse, scelte vere (**Opzioni di Tiro Arcano** dell'Arciere Arcano, **Affinità** dell'Anima Divina) e cerchietti per i privilegi a usi limitati; le **14 nuove Suppliche Occulte**; i **15 Talenti Razziali**. Gli incantesimi di Xanathar hanno l'errata applicata (Arma Sacra, Spirito Guaritore, Trasferimento di Vita). Le scelte di abilità/linguaggi/strumenti di alcune sottoclassi (es. Competenza Bonus del Samurai, armi da kensei) restano a testo, da annotare a mano.
+
+**Tasha**, acceso:
+- compare la classe **Artefice** (Infusioni scelte una a una, con le repliche di oggetti magici; Alchimista, Armaiolo, Artigliere, Fabbro da Battaglia) e le **26 nuove sottoclassi** delle altre classi (segnate «Tasha»), con incantesimi di sottoclasse, scelte (Rune, Tipo di Genio, Modello di Armatura) e cerchietti per i privilegi a usi limitati;
+- si attivano i nuovi **stili di combattimento**, le **manovre**, le **Metamagie**, il **Patto del Talismano** e le nuove **Suppliche Occulte**, i **talenti** (con il testo) e gli **incantesimi aggiuntivi** di ogni classe;
+- nella scheda Classe compare la card **«Privilegi di classe opzionali»** (da attivare se il DM li permette; quelli che sostituiscono un privilegio nascondono l'originale, compreso il Compagno Primordiale del Signore delle Bestie).
+Un personaggio con elementi di un manuale già scelti li mantiene anche se si spegne l'interruttore. I testi sono sintesi nostre; i numeri vanno confrontati col libro.
+
+### Come aggiungere un nuovo manuale (per chi mantiene il programma)
+1. Registrarlo: `D.registraManuale('id', { nome, sigla, desc })` (vedi `manuali.js`).
+2. Creare un file di dati (come `tasha.js`, `tasha_sub.js`, `tasha_extra.js`) e caricarlo in `index.html` dopo `manuali.js`.
+3. Marcare ogni elemento con `fonte: 'id'`: classi, sottoclassi, razze, stili e manovre (4° elemento della riga), opzioni dentro un gruppo di scelta (`D.OPZ_FONTE['gruppo/opzione'] = 'id'`), talenti (`D.TALENTI_FONTE`, `D.TALENTI_DESC`), incantesimi aggiuntivi per classe (`D.INC_FONTE.id`), privilegi opzionali (`D.OPZIONALI.push({..., fonte:'id'})`), cerchietti dei privilegi (`D.RIS_PRIV['classe/Nome']`).
+4. Gli incantesimi del manuale vanno nell'elenco incantesimi con `man: 'id'`. La casella compare da sola.

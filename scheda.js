@@ -46,9 +46,9 @@
       + '<div class="box"><small>Difetti</small><div class="righe sm">' + X('difetti') + '</div></div>'
       + '</div></div></section>';
 
-    const priv = d.privilegi.filter((x) => !x.nascosto).map((p) => '<div class="privilegio"><h4>' + esc(p.nome) + ' <small>' + esc(p.fonte) + '</small></h4><p>' + esc(p.desc) + '</p></div>').join('');
+    const priv = d.privilegi.filter((x) => !x.nascosto).map((p) => '<div class="privilegio"><h4>' + esc(p.nome) + ' <small>' + esc(p.fonte) + '</small></h4><p>' + esc(p.desc) + '</p>' + (p.usi ? '<span class="usi">' + '<i class="cerchio"></i>'.repeat(p.usi) + '</span>' : '') + '</div>').join('');
     const trat = d.tratti.filter((x) => !x.nascosto).map((t) => '<div class="privilegio"><h4>' + esc(t.nome) + '</h4><p>' + esc(t.desc) + '</p></div>').join('');
-    const tal = d.talenti.map((t) => '<div class="privilegio"><h4>' + esc(t.nome) + ' <small>livello ' + t.liv + '</small></h4></div>').join('');
+    const tal = d.talenti.map((t) => '<div class="privilegio"><h4>' + esc(t.nome) + ' <small>livello ' + t.liv + '</small></h4>' + (t.desc ? '<p>' + esc(t.desc) + '</p>' : '') + '</div>').join('');
     const p2 = '<section class="pagina"><h2>' + esc(ch.nome || 'Personaggio') + ' · privilegi e tratti</h2>'
       + (risorse ? '<h3>Risorse</h3>' + risorse : '')
       + '<h3>Privilegi di classe</h3><div class="due-col">' + priv + '</div>'

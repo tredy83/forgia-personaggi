@@ -29,6 +29,8 @@ service cloud.firestore {
     match /mostri/{id} { allow read, write: if gestore(); }
     match /mostriImg/{id} { allow read, write: if gestore(); }
     match /mostriMeta/{id} { allow read, write: if gestore(); }
+    match /mostriPers/{id} { allow read, write: if gestore(); }
+    match /mostriMod/{id} { allow read, write: if gestore(); }
     match /avventure/{id} { allow read, write: if gestore(); }
 
     // Tutto il resto è vietato

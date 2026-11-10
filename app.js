@@ -175,24 +175,29 @@
     let razzaExtra = '';
     if (r.bonusLiberi) {
       const rec = M.consigliaBonusLiberi(ch);
-      razzaExtra += '<div class="col" style="flex-basis:100%"><label>Bonus +' + r.bonusLiberi.valore + ' a ' + r.bonusLiberi.n + ' caratteristiche (diverse da Carisma) <span class="mute">– consigliate per la tua classe: ' + rec.map((a) => D.ABIL_NOME[a]).join(', ') + '</span></label><div class="sel-lista">'
+      razzaExtra += '<div class="col" style="flex-basis:100%"><label>Bonus +' + r.bonusLiberi.valore + ' a ' + r.bonusLiberi.n + (r.bonusLiberi.n > 1 ? ' caratteristiche' : ' caratteristica') + (r.bonusLiberi.escludi.length ? ' (diverse da Carisma)' : '') + ' <span class="mute">– consigliate per la tua classe: ' + rec.map((a) => D.ABIL_NOME[a]).join(', ') + '</span></label><div class="sel-lista">'
         + D.ABIL.filter((a) => !r.bonusLiberi.escludi.includes(a)).map((a) => '<label><input type="checkbox" data-az="toggleArr" data-path="scelteRazza.bonusLiberi" data-val="' + a + '" data-max="' + r.bonusLiberi.n + '"' + ((ch.scelteRazza.bonusLiberi || []).includes(a) ? ' checked' : '') + '> ' + D.ABIL_NOME[a] + '</label>').join('') + '</div></div>';
     }
     if (r.abilitaLibere) {
-      razzaExtra += '<div class="col" style="flex-basis:100%"><label>Competenza in ' + r.abilitaLibere + ' abilità a scelta (Versatilità)</label><div class="sel-lista">'
+      razzaExtra += '<div class="col" style="flex-basis:100%"><label>Competenza in ' + r.abilitaLibere + (r.abilitaLibere > 1 ? ' abilità a scelta' : ' abilità a scelta') + (r.fonte ? '' : ' (Versatilità)') + '</label><div class="sel-lista">'
         + D.ABILITA.map((s) => '<label><input type="checkbox" data-az="toggleArr" data-path="scelteRazza.abilita" data-val="' + s.id + '" data-max="' + r.abilitaLibere + '"' + ((ch.scelteRazza.abilita || []).includes(s.id) ? ' checked' : '') + '> ' + s.nome + '</label>').join('') + '</div></div>';
+    }
+    if (r.talentoLibero) {
+      razzaExtra += '<div class="col"><label>Talento d\'origine <span class="mute">(a scelta, di cui soddisfi i prerequisiti)</span></label><input data-bind="scelteRazza.talento" list="talenti" value="' + esc((ch.scelteRazza || {}).talento || '') + '" autocomplete="off"></div>';
     }
     if (r.drago) {
       razzaExtra += '<div class="col"><label>Discendenza draconica</label><select data-bind="scelteRazza.drago">' + D.DRAGHI.map((x) => opt(x[0], x[0] + ' (' + x[1] + ')', ch.scelteRazza.drago === x[0])).join('') + '</select></div>';
     }
     const sf = D.sfondo(ch.sfondo);
-    return '<div class="card"><h3>Chi gioca e chi è il personaggio</h3><div class="riga">'
+    const flagTasha = '<div class="card tasha-flag"><h3>Manuali opzionali</h3><p class="mute">Il programma usa sempre il Manuale del Giocatore. Attiva qui i manuali aggiuntivi che il tuo gruppo usa: compaiono classi, sottoclassi, opzioni e incantesimi che ne fanno parte. Se li lasci spenti il personaggio usa solo le regole base.</p>'
+      + D.manualiLista().map((m) => '<label class="tasha-lab"><input type="checkbox" data-az="fonte" data-id="' + m.id + '"' + (D.fonteOk(ch, m.id) ? ' checked' : '') + '> <span><b>' + esc(m.nome) + '</b><br><span class="mute">' + esc(m.desc) + '</span></span></label>').join('') + '</div>';
+    return flagTasha + '<div class="card"><h3>Chi gioca e chi è il personaggio</h3><div class="riga">'
       + '<div class="col"><label>Nome del giocatore</label><input data-bind="giocatore.nome" value="' + esc(ch.giocatore.nome) + '"></div>'
       + '<div class="col"><label>Cognome del giocatore</label><input data-bind="giocatore.cognome" value="' + esc(ch.giocatore.cognome) + '"></div>'
       + '<div class="col"><label>Nome del personaggio</label><input data-bind="nome" value="' + esc(ch.nome) + '"></div>'
       + '<div class="col"><label>Campagna <span class="mute">(facoltativa)</span></label><input data-bind="campagna" list="elenco-campagne" autocomplete="off" placeholder="Es. Discesa nell\'Avernus" value="' + esc(ch.campagna || '') + '"><datalist id="elenco-campagne">' + campagne().map((c) => '<option value="' + esc(c) + '">').join('') + '</datalist></div></div></div>'
       + '<div class="card"><h3>Razza, background, allineamento</h3><div class="riga">'
-      + '<div class="col"><label>Razza</label><select data-az="razza">' + D.RAZZE.map((x) => opt(x.id, x.nome, x.id === ch.razza)).join('') + '</select></div>'
+      + '<div class="col"><label>Razza</label><select data-az="razza">' + D.RAZZE.filter((x) => D.fonteOk(ch, x.fonte) || x.id === ch.razza).map((x) => opt(x.id, x.nome + (x.fonte ? ' (' + D.fonteSigla(x.fonte) + ')' : ''), x.id === ch.razza)).join('') + '</select></div>'
       + (r.sub ? '<div class="col"><label>Sottorazza</label><select data-bind="sub">' + r.sub.map((x) => opt(x.id, x.nome, x.id === ch.sub)).join('') + '</select></div>' : '')
       + '<div class="col"><label>Genere</label><select data-bind="genere"><option value="M"' + (ch.genere !== 'F' ? ' selected' : '') + '>Maschio</option><option value="F"' + (ch.genere === 'F' ? ' selected' : '') + '>Femmina</option></select></div>'
       + '<div class="col"><label>Background</label><select data-bind="sfondo">' + D.SFONDI.map((x) => opt(x.id, x.nome, x.id === ch.sfondo)).join('') + '</select></div>'
@@ -262,12 +267,12 @@
   }
 
   /* --- 3. classe --- */
-  const PREREQ = { barbaro: { tutte: ['for'] }, bardo: { tutte: ['car'] }, chierico: { tutte: ['sag'] }, druido: { tutte: ['sag'] }, guerriero: { una: ['for', 'des'] }, ladro: { tutte: ['des'] }, mago: { tutte: ['int'] }, monaco: { tutte: ['des', 'sag'] }, paladino: { tutte: ['for', 'car'] }, ranger: { tutte: ['des', 'sag'] }, stregone: { tutte: ['car'] }, warlock: { tutte: ['car'] } };
+  const PREREQ = { barbaro: { tutte: ['for'] }, bardo: { tutte: ['car'] }, chierico: { tutte: ['sag'] }, druido: { tutte: ['sag'] }, guerriero: { una: ['for', 'des'] }, ladro: { tutte: ['des'] }, mago: { tutte: ['int'] }, monaco: { tutte: ['des', 'sag'] }, paladino: { tutte: ['for', 'car'] }, ranger: { tutte: ['des', 'sag'] }, stregone: { tutte: ['car'] }, warlock: { tutte: ['car'] }, artefice: { tutte: ['int'] } };
 
   function tabClasse(ch) {
     const c = D.classe(ch.livelli[0]); const d = M.derive(ch); const gia = M.abilitaGia(ch); const opz = M.abilitaOpzioni(ch);
     const scelta = (ch.livelli.length === 1)
-      ? '<div class="col"><label>Classe</label><select data-az="classe1">' + D.CLASSI.map((x) => opt(x.id, x.nome, x.id === ch.livelli[0])).join('') + '</select></div>'
+      ? '<div class="col"><label>Classe</label><select data-az="classe1">' + D.CLASSI.filter((x) => D.fonteOk(ch, x.fonte) || x.id === ch.livelli[0]).map((x) => opt(x.id, x.nome, x.id === ch.livelli[0])).join('') + '</select></div>'
       : '<div class="col"><label>Classe iniziale</label><b>' + c.nome + '</b> <span class="mute">(si cambia solo al livello 1)</span></div>';
     const abil = opz.map((id) => {
       const s = D.abilita(id); const g = gia.has(id); const sel = (ch.abilita || []).includes(id);
@@ -279,7 +284,9 @@
         + [...d.compAbilita].map((id) => { const sel = (ch.maestrie || []).includes(id); return '<label><input type="checkbox" data-az="toggleArr" data-path="maestrie" data-scambia="1" data-val="' + id + '" data-max="' + md + '"' + (sel ? ' checked' : '') + '> ' + D.abilita(id).nome + '</label>'; }).join('') + '</div></div>';
     }
     const haStile = d.classi.some((k) => k.def.stile && k.livello >= (k.def.stileDa || 1));
-    const stile = haStile ? '<div class="card"><h3>Stile di Combattimento</h3><select data-bind="stile">' + opt('', '— scegli —', !ch.stile) + D.STILI.map((s) => opt(s[0], s[1] + ' – ' + s[2], ch.stile === s[0])).join('') + '</select></div>' : '';
+    const optT = (D.OPZIONALI && D.OPZIONALI.length) ? (() => { const lst = D.OPZIONALI.filter((o) => D.fonteOk(ch, o.fonte) && d.classi.some((k) => k.id === o.cl && k.livello >= o.liv && (!o.sub || (k.sub && k.sub.id === o.sub)))); if (!lst.length) return ''; return '<div class="card"><h3>Privilegi di classe opzionali</h3><p class="mute">Privilegi facoltativi dei manuali attivi: attivali solo se il DM li permette. Quelli che sostituiscono un privilegio nascondono l\'originale.</p><div class="sel-lista">' + lst.map((o) => '<label><input type="checkbox" data-az="optTasha" data-val="' + o.id + '"' + ((ch.opt || {})[o.id] ? ' checked' : '') + '> <b>' + esc(o.nome) + '</b> <span class="mute">(' + esc(D.fonteSigla(o.fonte)) + ' · ' + o.liv + '° · ' + esc(o.desc) + ')</span></label>').join('') + '</div></div>'; })() : '';
+    const stile = haStile ? '<div class="card"><h3>Stile di Combattimento</h3><select data-bind="stile">' + opt('', '— scegli —', !ch.stile) + D.STILI.filter((s) => (D.fonteOk(ch, s[3]) || ch.stile === s[0]) && (!s[4] || ch.stile === s[0] || d.classi.some((k) => k.def.stile && s[4].includes(k.id)) )).map((s) => opt(s[0], s[1] + (s[3] ? ' (' + D.fonteSigla(s[3]) + ')' : '') + ' – ' + s[2], ch.stile === s[0])).join('') + '</select></div>' : '';
+    const stileTutto = stile + optT;
     const kd = d.classi.find((k) => k.id === 'monaco' && k.sottoclasseAttiva && k.sub && k.sub.id === 'elementi');
     let disc = '';
     if (kd) {
@@ -292,7 +299,7 @@
     if (km) {
       const nm = D.manovreMax(km.livello); const sm = (ch.manovre || []).length;
       man = '<div class="card"><h3>Manovre * (' + Math.min(sm, nm) + '/' + nm + ')</h3><p class="mute">Ogni manovra si usa spendendo un dado di superiorità (D = il dado speso). Una sola manovra per attacco. Scegli ' + nm + ' manovre.</p><div class="sel-lista">'
-        + D.MANOVRE.map((x) => { const sel = (ch.manovre || []).includes(x[0]); const piena = sm >= nm && !sel; return '<label class="' + (piena ? 'dis' : '') + '"><input type="checkbox" data-az="toggleArr" data-path="manovre" data-val="' + x[0] + '" data-max="' + nm + '"' + (sel ? ' checked' : '') + '> <b>' + esc(x[1]) + '</b> – ' + esc(x[2]) + '</label>'; }).join('') + '</div><p class="mute">* ' + esc(D.AVVISO_CAMBIO) + '</p>' + libera(ch) + '</div>';
+        + D.MANOVRE.filter((x) => D.fonteOk(ch, x[3]) || (ch.manovre || []).includes(x[0])).map((x) => { const sel = (ch.manovre || []).includes(x[0]); const piena = sm >= nm && !sel; return '<label class="' + (piena ? 'dis' : '') + '"><input type="checkbox" data-az="toggleArr" data-path="manovre" data-val="' + x[0] + '" data-max="' + nm + '"' + (sel ? ' checked' : '') + '> <b>' + esc(x[1]) + '</b> – ' + esc(x[2]) + '</label>'; }).join('') + '</div><p class="mute">* ' + esc(D.AVVISO_CAMBIO) + '</p>' + libera(ch) + '</div>';
     }
     let sg = '';
     d.classi.forEach((k) => D.scelteDi(k).forEach((g) => {
@@ -308,14 +315,14 @@
     }));
     const subs = d.classi.filter((k) => k.sottoclasseAttiva).map((k) => {
       const sc = k.def.sottoclasse;
-      return '<div class="col"><label>' + k.def.nome + ' · ' + sc.titolo + '</label><select data-az="sottoclasse" data-cl="' + k.id + '">' + opt('', '— scegli —', !k.sub) + sc.opzioni.map((o) => opt(o.id, o.nome, k.sub && k.sub.id === o.id)).join('') + '</select></div>' + (k.sub ? '<div class="col" style="flex-basis:100%">' + D.descBox(D.DESC.sottoclasse[k.id + '/' + k.sub.id], k.sub.nome + '.') + '</div>' : '');
+      return '<div class="col"><label>' + k.def.nome + ' · ' + sc.titolo + '</label><select data-az="sottoclasse" data-cl="' + k.id + '">' + opt('', '— scegli —', !k.sub) + sc.opzioni.filter((o) => D.fonteOk(ch, o.fonte) || (k.sub && k.sub.id === o.id)).map((o) => opt(o.id, o.nome + (o.fonte ? ' (' + D.fonteSigla(o.fonte) + ')' : ''), k.sub && k.sub.id === o.id)).join('') + '</select></div>' + (k.sub ? '<div class="col" style="flex-basis:100%">' + D.descBox(D.DESC.sottoclasse[k.id + '/' + k.sub.id], k.sub.nome + '.') + '</div>' : '');
     }).join('');
     return '<div class="card"><h3>Classe di partenza</h3><div class="riga">' + scelta + '</div>'
       + D.descBox(D.DESC.classe[c.id], 'Cosa diventi: ' + c.nome + '.') + '<p>' + esc(c.consiglio) + '</p>'
       + '<p class="mute">Dado Vita d' + c.dado + ' · Tiri salvezza: ' + c.salvezze.map((a) => D.ABIL_NOME[a]).join(', ') + ' · Armature: ' + (c.armature.length ? c.armature.join(', ') : 'nessuna') + ' · Armi: ' + c.armi.map((x) => x === 'semplice' ? 'semplici' : x === 'da guerra' ? 'da guerra' : x).join(', ') + '</p></div>'
       + '<div class="card"><h3>Abilità di classe (' + (ch.abilita || []).length + '/' + c.nAbilita + ')</h3><div class="sel-lista">' + abil + '</div>'
       + '<p><button class="oro" data-az="consigliaAbilita">✨ Scegli per me le più utili</button> <span class="mute">Evita quelle che hai già da razza e background.</span></p></div>'
-      + mae + stile + disc + man + sg
+      + mae + stileTutto + disc + man + sg
       + (subs ? '<div class="card"><h3>Sottoclasse</h3><div class="riga">' + subs + '</div></div>' : '');
   }
 
@@ -324,7 +331,7 @@
     const d = M.derive(ch); const tot = ch.livelli.length;
     const ultima = ch.livelli[tot - 1];
     const ok = (id) => { const f = M.finali(ch); const p = PREREQ[id]; if (id === ch.livelli[0] || ch.livelli.includes(id)) return true; return p.tutte ? p.tutte.every((a) => f[a] >= 13) : p.una.some((a) => f[a] >= 13); };
-    const selCl = '<select id="nuova-classe">' + D.CLASSI.map((x) => opt(x.id, x.nome + (ok(x.id) ? '' : ' (requisiti non soddisfatti)'), x.id === ultima)).join('') + '</select>';
+    const selCl = '<select id="nuova-classe">' + D.CLASSI.filter((x) => D.fonteOk(ch, x.fonte) || ch.livelli.includes(x.id)).map((x) => opt(x.id, x.nome + (ok(x.id) ? '' : ' (requisiti non soddisfatti)'), x.id === ultima)).join('') + '</select>';
     const cnt = {}; const righe = ch.livelli.map((cid, i) => {
       cnt[cid] = (cnt[cid] || 0) + 1; const cd = D.classe(cid); const cl = cnt[cid];
       const nov = cd.tratti.filter((t) => t[0] === cl).map((t) => t[1]);
@@ -349,7 +356,7 @@
         return '<div class="riga" style="margin-bottom:.5rem;border-bottom:1px solid var(--linea);padding-bottom:.5rem"><div style="min-width:9rem"><b>Livello ' + s.liv + '</b><br><span class="mute">' + D.classe(s.classe).nome + ' ' + s.livClasse + '</span></div>'
           + '<div class="col"><select data-az="setAsi" data-liv="' + s.liv + '" data-campo="tipo">' + opt('asi', 'Aumenta i punteggi', e.tipo !== 'talento') + opt('talento', 'Scegli un talento', e.tipo === 'talento') + '</select> ' + corpo
           + '<div class="mute">💡 Consiglio: ' + (cons.a ? '+1 ' + D.ABIL_NOME[cons.a] + (cons.b ? ' e +1 ' + D.ABIL_NOME[cons.b] : '') + ' – ' : '') + esc(cons.perche) + ' <button class="pic sec" data-az="applicaAsi" data-liv="' + s.liv + '">Applica</button></div></div></div>';
-      }).join('') + '<datalist id="talenti">' + D.TALENTI.map((t) => '<option value="' + esc(t) + '">').join('') + '</datalist></div>';
+      }).join('') + '<datalist id="talenti">' + D.TALENTI.concat(Object.keys(D.TALENTI_FONTE || {}).filter((t) => D.fonteOk(ch, D.TALENTI_FONTE[t]))).map((t) => '<option value="' + esc(t) + '">').join('') + '</datalist></div>';
     }
     const man = M.valida(ch).filter((x) => !x.ok);
     return '<div class="card"><h3>Livello attuale: ' + tot + '</h3>'
@@ -535,6 +542,13 @@
     stampa(el) {
       const ch = trova(el.dataset.id || S.id); if (!ch) return;
       $('#stampa').innerHTML = foglioHTML(ch); stampaPronta();
+    },
+    optTasha(el) { const ch = corrente(); ch.opt = ch.opt || {}; if (el.checked) ch.opt[el.dataset.val] = true; else delete ch.opt[el.dataset.val]; salvaCorrente(); render(); },
+    fonte(el) {
+      const ch = corrente(); const f = el.dataset.id; const on = !!el.checked;
+      D.fonti(ch)[f] = on; ch.manuali = Object.assign({ mdg: true }, ch.manuali || {}); ch.manuali[f] = on; if (f === 'tce') ch.tasha = on;
+      if (M.potaScelte) M.potaScelte(ch);
+      salvaCorrente(); render();
     },
     razza(el) {
       const ch = corrente(); ch.razza = el.value; const r = D.razza(el.value);

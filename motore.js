@@ -57,9 +57,24 @@
     return out;
   };
 
+  /* valori degli incrementi di caratteristica della razza (per la regola opzionale «incrementi personalizzati») */
+  M.valoriIncrementi = function (ch) {
+    const r = D.razza(ch.razza); if (!r) return [];
+    const v = [];
+    const add = (b) => Object.keys(b || {}).forEach((k) => { if (b[k] > 0) v.push(b[k]); });
+    add(r.bonus); const s = (r.sub || []).find((x) => x.id === ch.sub); if (s) add(s.bonus);
+    if (r.bonusLiberi) for (let i = 0; i < r.bonusLiberi.n; i++) v.push(r.bonusLiberi.valore);
+    return v.sort((a, b) => b - a);
+  };
+  M.persAttiva = () => false; // incrementi personalizzati rimossi (v1.15)
   M.bonusRazza = function (ch) {
     const r = D.razza(ch.razza); const out = {};
     if (!r) return out;
+    if (M.persAttiva(ch)) {
+      const a = ch.scelteRazza.pers.a || {};
+      M.valoriIncrementi(ch).forEach((v, i) => { if (a[i] && !(a[i] in out)) out[a[i]] = v; });
+      return out;
+    }
     const add = (b) => Object.keys(b || {}).forEach((k) => (out[k] = (out[k] || 0) + b[k]));
     add(r.bonus);
     const s = (r.sub || []).find((x) => x.id === ch.sub);
@@ -211,7 +226,7 @@
     r.incRazza = M.incantesimiRazza(ch, razza, sub, mods, pb, tot);
 
     // Risorse e privilegi
-    r.risorse = M.risorse(classi, mods, pb);
+    r.risorse = M.risorse(classi, mods, pb, ch);
     r.privilegi = [];
     classi.forEach((c) => {
       c.def.tratti.filter((t) => t[0] <= c.livello).forEach((t) => r.privilegi.push({ fonte: c.def.nome + ' ' + t[0], nome: t[1], desc: t[2] }));
@@ -228,6 +243,16 @@
       r.privilegi.push({ fonte: g.nome, nome: g.nome + ': ' + o.nome, desc });
     })));
     r.incSub = M.incantesimiSub(ch, classi);
+    if (ch.opt && D.OPZIONALI) {
+      const sost = new Set();
+      D.OPZIONALI.filter((o) => ch.opt[o.id] && D.fonteOk(ch, o.fonte)).forEach((o) => {
+        const k = classi.find((x) => x.id === o.cl); if (!k || k.livello < o.liv || (o.sub && !(k.sub && k.sub.id === o.sub))) return;
+        const p = { fonte: 'Opzionale ' + D.fonteSigla(o.fonte) + ' ' + o.liv, nome: o.nome, desc: o.desc };
+        if (o.usi) { const n = o.usi(k.livello, mods, pb); if (n > 0 && n <= 20) p.usi = n; }
+        r.privilegi.push(p); (o.sost || []).forEach((n) => sost.add(n));
+      });
+      if (sost.size) r.privilegi = r.privilegi.filter((p) => !sost.has(p.nome) || (p.fonte || '').indexOf('Opzionale') === 0);
+    }
     if (ch.stile) { const s = D.STILI.find((x) => x[0] === ch.stile); if (s) r.privilegi.push({ fonte: 'Stile', nome: 'Stile di Combattimento: ' + s[1], desc: s[2] }); }
     r.tratti = [];
     if (razza) { razza.tratti.forEach((t) => r.tratti.push({ nome: t[0], desc: t[1] })); }
@@ -236,7 +261,49 @@
       const d = D.DRAGHI.find((x) => x[0] === ch.scelteRazza.drago) || D.DRAGHI[7];
       r.tratti.push({ nome: 'Discendenza: drago ' + d[0], desc: 'Soffio e resistenza: ' + d[1] + '. CD soffio = ' + (8 + mods.cos + pb) + '.' });
     }
-    r.talenti = Object.keys(ch.asi || {}).filter((l) => +l <= tot && ch.asi[l].tipo === 'talento' && ch.asi[l].talento).map((l) => ({ liv: +l, nome: ch.asi[l].talento }));
+    r.talenti = Object.keys(ch.asi || {}).filter((l) => +l <= tot && ch.asi[l].tipo === 'talento' && ch.asi[l].talento).map((l) => ({ liv: +l, nome: ch.asi[l].talento, desc: (D.TALENTI_DESC || {})[ch.asi[l].talento] || '' }));
+    if (razza && razza.talentoLibero && (ch.scelteRazza || {}).talento) r.talenti.unshift({ liv: 1, nome: ch.scelteRazza.talento, desc: (D.TALENTI_DESC || {})[ch.scelteRazza.talento] || '' });
+
+    // Privilegi: valori al livello attuale, voci ridondanti nascoste, usi da segnare
+    (function () {
+      const dm = (L) => (L >= 17 ? 'd10' : L >= 11 ? 'd8' : L >= 5 ? 'd6' : 'd4');
+      const cs = (n) => (n >= 0 ? '+' + n : String(n));
+      const agg = {
+        'Ira': (L) => 'Azione bonus, dura 1 minuto: vantaggio alle prove e ai TS di Forza, danni in mischia con Forza ' + (L >= 16 ? '+4' : L >= 9 ? '+3' : '+2') + ', resistenza a danni contundenti/perforanti/taglienti. Non puoi lanciare incantesimi. Usi: ' + (L >= 20 ? 'illimitati' : (L >= 17 ? 6 : L >= 12 ? 5 : L >= 6 ? 4 : L >= 3 ? 3 : 2) + ' per riposo lungo') + '.',
+        'Critico Brutale': (L) => 'Sui critici in mischia tiri ' + (L >= 17 ? '3 dadi' : L >= 13 ? '2 dadi' : '1 dado') + ' di danno extra.',
+        'Ispirazione Bardica': (L) => 'Azione bonus: un alleato entro 18 m aggiunge ' + (L >= 15 ? 'd12' : L >= 10 ? 'd10' : L >= 5 ? 'd8' : 'd6') + ' a una prova, TS o attacco. Usi = mod. Carisma (' + Math.max(1, mods.car) + ')' + (L >= 5 ? ', riposo breve.' : ', riposo lungo.'),
+        'Canto di Riposo': (L) => 'Chi spende Dadi Vita nel riposo breve con te recupera ' + (L >= 17 ? 'd12' : L >= 13 ? 'd10' : L >= 9 ? 'd8' : 'd6') + ' PF in più.',
+        'Attacco Furtivo': (L) => 'Danni extra ' + Math.ceil(L / 2) + 'd6, una volta per turno, con vantaggio o con un alleato adiacente al bersaglio (arma accurata o a distanza).',
+        'Arti Marziali': (L) => 'Attacchi senz’armi e armi da monaco (senza armatura né scudo): usi Destrezza e il danno è 1' + dm(L) + ' (cresce al 5°, 11°, 17°). Dopo l’azione Attacco, un attacco senz’armi come azione bonus.',
+        'Ki': (L) => L + ' punti ki (CD ' + (8 + pb + mods.sag) + '), si ricaricano con un riposo breve. Raffica di Colpi: 1 ki, dopo l’azione Attacco fai 2 attacchi senz’armi come azione bonus. Difesa Paziente: 1 ki, Schivata come azione bonus. Passo del Vento: 1 ki, Disimpegno o Scatto come azione bonus e salto raddoppiato.',
+        'Deviare Proiettili': (L) => 'Reazione: riduci il danno di un attacco a distanza di 1d10 ' + cs(mods.des + L) + '.',
+        'Caduta Lenta': (L) => 'Reazione: riduci il danno da caduta di ' + (5 * L) + '.',
+        'Colpo Stordente': () => 'Spendi 1 ki dopo un colpo in mischia: TS Cos (CD ' + (8 + pb + mods.sag) + ') o il bersaglio è stordito fino alla fine del tuo prossimo turno.',
+        'Imposizione delle Mani': (L) => 'Riserva di ' + (5 * L) + ' PF per curare (anche malattie e veleno, 5 PF per volta); si ricarica con un riposo lungo.',
+        'Recuperare Energie': (L) => 'Azione bonus: recuperi 1d10 + ' + L + ' PF (1/riposo breve).',
+        'Fonte di Magia': (L) => L + ' punti stregoneria (riposo lungo): convertili in slot o viceversa.',
+        'Attacco Extra': (L, id) => (id === 'guerriero' ? (L >= 20 ? 4 : L >= 11 ? 3 : 2) : 2) + ' attacchi con l’azione di Attacco.',
+      };
+      const nascondi = /^(Difesa Senza Armatura|Movimento Senza Armatura|Movimento Veloce)$/;
+      const usi = {}; (r.risorse || []).forEach((x) => { usi[x[0].split(' – ').pop()] = x[2]; });
+      r.privilegi.forEach((p) => {
+        const m = /^(.+) (\d+)$/.exec(p.fonte || ''); if (!m) return;
+        const cl = classi.find((c) => c.def.nome === m[1]); if (!cl) return;
+        if (nascondi.test(p.nome)) { p.nascosto = true; return; }
+        if (agg[p.nome]) p.desc = agg[p.nome](cl.livello, cl.id);
+        if (p.nome === 'Incanalare Divinità') p.desc = 'Usi di energia divina: ' + (cl.id === 'paladino' ? 1 : (cl.livello >= 18 ? 3 : cl.livello >= 6 ? 2 : 1)) + ' per riposo breve.';
+        if (usi[p.nome] > 0 && usi[p.nome] <= 20) p.usi = usi[p.nome];
+      });
+      r.privilegi.forEach((p) => {
+        if (p.usi || !D.RIS_PRIV) return;
+        const m = /^(.+) (\d+)$/.exec(p.fonte || ''); if (!m) return;
+        const cl = classi.find((c) => c.def.nome === m[1] || (c.sub && c.sub.nome === m[1])); if (!cl) return;
+        const rp = D.RIS_PRIV[cl.id + '/' + p.nome]; if (!rp) return;
+        const n = rp(cl.livello, mods, pb); if (n > 0 && n <= 20) p.usi = n;
+      });
+      const mon = classi.find((c) => c.id === 'monaco');
+      if (mon && mon.livello >= 9) r.privilegi.push({ fonte: 'Monaco 9', nome: 'Corsa su Pareti e Liquidi', desc: 'Nel tuo movimento puoi correre su superfici verticali e sui liquidi senza cadere o affondare (se termini il turno su una superficie non solida cadi).' });
+    })();
 
     // Lingue e competenze (testo)
     // voci già gestite altrove (abilità, competenze, velocità, incantesimi, lingue): non servono nel riquadro "Privilegi e tratti"
@@ -295,9 +362,20 @@
     classi.forEach((c) => {
       if (!c.sottoclasseAttiva || !c.sub) return;
       let chiave = c.id + '/' + c.sub.id; let fonte = c.sub.nome;
-      if (c.id === 'druido') { const t = ((ch.scelte || {}).terreno || [])[0]; if (c.sub.id !== 'terra' || !t) return; chiave = 'terreno/' + t; fonte = 'Circolo della Terra (' + (D.TERRENI.find((x) => x[0] === t) || [0, t])[1] + ')'; }
-      const tab = D.INC_SUB[chiave]; const livs = D.INC_SUB_LIV[c.id]; if (!tab || !livs) return;
+      if (c.id === 'druido' && c.sub.id === 'terra') { const t = ((ch.scelte || {}).terreno || [])[0]; if (!t) return; chiave = 'terreno/' + t; fonte = 'Circolo della Terra (' + (D.TERRENI.find((x) => x[0] === t) || [0, t])[1] + ')'; }
+      const tab = D.INC_SUB[chiave]; const livs = (D.INC_SUB_LIV_KEY && D.INC_SUB_LIV_KEY[chiave]) || D.INC_SUB_LIV[c.id]; if (!tab || !livs) return;
       tab.forEach((par, i) => par.forEach((id) => { const sp = D.incantesimo(id); if (sp) voci.push({ id, nome: sp.nome, spLiv: sp.liv, fonte, liv: livs[i], classe: c.def.nome, disp: c.livello >= livs[i] }); }));
+    });
+    /* incantesimi che dipendono da una scelta (es. affinità dell'Anima Divina) */
+    classi.forEach((c) => {
+      if (!c.sottoclasseAttiva || !c.sub) return;
+      const sc = D.INC_SUB_SCELTA && D.INC_SUB_SCELTA[c.id + '/' + c.sub.id]; if (!sc) return;
+      const t = ((ch.scelte || {})[sc.gruppo] || [])[0]; const lst = t && sc.mappa[t]; if (!lst) return;
+      lst.forEach((id) => { const sp = D.incantesimo(id); if (sp) voci.push({ id, nome: sp.nome, spLiv: sp.liv, fonte: c.sub.nome, liv: sc.liv, classe: c.def.nome, disp: c.livello >= sc.liv }); });
+    });
+    (D.OPZIONALI || []).filter((o) => o.inc && ch.opt && ch.opt[o.id] && D.fonteOk(ch, o.fonte)).forEach((o) => {
+      const c = classi.find((x) => x.id === o.cl); if (!c || c.livello < o.liv) return;
+      o.inc.forEach((e) => { const id = typeof e[1] === 'string' && D.incantesimo(e[1]) ? e[1] : null; const sp = id && D.incantesimo(id); if (sp) voci.push({ id, nome: sp.nome, spLiv: sp.liv, fonte: o.nome, liv: e[0], classe: c.def.nome, disp: c.livello >= e[0] }); });
     });
     return voci.length ? { voci } : null;
   };
@@ -315,6 +393,9 @@
             : D.SLOT_PATTO[L - 1][1];
       info.livClasse = L;
       if (c.id === 'warlock' && c.sub && D.INC_SUB['warlock/' + c.sub.id]) info.extra = [].concat(...D.INC_SUB['warlock/' + c.sub.id].slice(0, info.livMax));
+      if (D.INC_FONTE) { const lv = (i) => { const sp = D.INCANTESIMI.find((x) => x.id === i); return sp ? sp.liv : 99; }; Object.keys(D.INC_FONTE).forEach((f) => { if (D.fonteOk(ch, f) && D.INC_FONTE[f][c.id]) info.extra = (info.extra || []).concat(D.INC_FONTE[f][c.id].filter((i) => lv(i) <= info.livMax)); }); }
+      if (c.id === 'warlock' && c.sub && c.sub.id === 'genio') { const t = ((ch.scelte || {}).tipogenio || [])[0]; const g = D.GENIO_TIPI && D.GENIO_TIPI[t]; if (g) info.extra = (info.extra || []).concat([].concat(...g.inc.slice(0, info.livMax)).filter((i) => !(info.extra || []).includes(i))); }
+      if (c.id === 'stregone' && c.sub && c.sub.id === 'divina') info.listaAlt = 'chierico';
       if (c.id === 'ladro' && c.sub && c.sub.id === 'mistificatore') { info.fissi = ['mano-magica']; info.scuole = ['Ammaliamento', 'Illusione']; }
       if (c.id === 'guerriero' && c.sub && c.sub.id === 'cavaliere') { info.scuole = ['Abiurazione', 'Invocazione']; }
       if (info.scuole) info.liberi = 1 + (L >= 8) + (L >= 14) + (L >= 20);
@@ -329,7 +410,7 @@
       if (inc.libro) info.libro = 6 + 2 * (L - 1);
       lista.push(info);
       if (inc.tipo === 'completo') { contrib += L; nCasters++; unico = ['completo', L]; }
-      else if (inc.tipo === 'meta') { contrib += Math.floor(L / 2); nCasters++; unico = ['meta', L]; }
+      else if (inc.tipo === 'meta') { contrib += inc.su ? Math.ceil(L / 2) : Math.floor(L / 2); nCasters++; unico = ['meta', L]; }
       else if (inc.tipo === 'terzo') { contrib += Math.floor(L / 3); nCasters++; unico = ['terzo', L]; }
       else if (inc.tipo === 'patto') { info.patto = D.SLOT_PATTO[L - 1]; }
     });
@@ -345,35 +426,36 @@
   };
 
   /* ---------- risorse di classe ---------- */
-  M.risorse = function (classi, mods, pb) {
+  M.risorse = function (classi, mods, pb, ch) {
     const out = [];
     classi.forEach((c) => {
       const L = c.livello; const n = c.def.nome;
       switch (c.id) {
-        case 'barbaro': out.push([n + ' – Ira', (L >= 20 ? 'illimitate' : L >= 17 ? 6 : L >= 12 ? 5 : L >= 6 ? 4 : L >= 3 ? 3 : 2) + ' usi/riposo lungo, danni in Ira ' + (L >= 16 ? '+4' : L >= 9 ? '+3' : '+2')]); break;
-        case 'bardo': out.push([n + ' – Ispirazione Bardica', Math.max(1, mods.car) + ' usi, ' + (L >= 15 ? 'd12' : L >= 10 ? 'd10' : L >= 5 ? 'd8' : 'd6') + (L >= 5 ? ' (riposo breve)' : ' (riposo lungo)')]); break;
-        case 'chierico': if (L >= 2) out.push([n + ' – Incanalare Divinità', (L >= 18 ? 3 : L >= 6 ? 2 : 1) + ' uso/i per riposo breve']); if (L >= 5) out.push([n + ' – Distruggere Non Morti', 'GS ' + (L >= 17 ? 4 : L >= 14 ? 3 : L >= 11 ? 2 : L >= 8 ? 1 : '1/2')]); break;
-        case 'druido': if (L >= 2) out.push([n + ' – Forma Selvatica', '2 usi/riposo breve, GS max ' + (L >= 8 ? '1 (con volo)' : L >= 4 ? '1/2 (no volo)' : '1/4 (no volo né nuoto)')]); break;
+        case 'barbaro': out.push([n + ' – Ira', (L >= 20 ? 'illimitate' : L >= 17 ? 6 : L >= 12 ? 5 : L >= 6 ? 4 : L >= 3 ? 3 : 2) + ' usi/riposo lungo, danni in Ira ' + (L >= 16 ? '+4' : L >= 9 ? '+3' : '+2'), L >= 20 ? 0 : L >= 17 ? 6 : L >= 12 ? 5 : L >= 6 ? 4 : L >= 3 ? 3 : 2]); break;
+        case 'bardo': out.push([n + ' – Ispirazione Bardica', Math.max(1, mods.car) + ' usi, ' + (L >= 15 ? 'd12' : L >= 10 ? 'd10' : L >= 5 ? 'd8' : 'd6') + (L >= 5 ? ' (riposo breve)' : ' (riposo lungo)'), Math.max(1, mods.car)]); break;
+        case 'chierico': if (L >= 2) out.push([n + ' – Incanalare Divinità', (L >= 18 ? 3 : L >= 6 ? 2 : 1) + ' uso/i per riposo breve', L >= 18 ? 3 : L >= 6 ? 2 : 1]); if (L >= 5) out.push([n + ' – Distruggere Non Morti', 'GS ' + (L >= 17 ? 4 : L >= 14 ? 3 : L >= 11 ? 2 : L >= 8 ? 1 : '1/2')]); break;
+        case 'druido': if (L >= 2) out.push([n + ' – Forma Selvatica', '2 usi/riposo breve, GS max ' + (L >= 8 ? '1 (con volo)' : L >= 4 ? '1/2 (no volo)' : '1/4 (no volo né nuoto)'), 2]); break;
         case 'guerriero':
-          out.push([n + ' – Recuperare Energie', '1d10 + ' + L + ' PF (1/riposo breve)']);
-          if (L >= 2) out.push([n + ' – Azione Impetuosa', (L >= 17 ? 2 : 1) + ' uso/i per riposo breve']);
-          if (L >= 9) out.push([n + ' – Indomito', (L >= 17 ? 3 : L >= 13 ? 2 : 1) + ' uso/i per riposo lungo']);
+          out.push([n + ' – Recuperare Energie', '1d10 + ' + L + ' PF (1/riposo breve)', 1]);
+          if (L >= 2) out.push([n + ' – Azione Impetuosa', (L >= 17 ? 2 : 1) + ' uso/i per riposo breve', L >= 17 ? 2 : 1]);
+          if (L >= 9) out.push([n + ' – Indomito', (L >= 17 ? 3 : L >= 13 ? 2 : 1) + ' uso/i per riposo lungo', L >= 17 ? 3 : L >= 13 ? 2 : 1]);
           break;
         case 'ladro': out.push([n + ' – Attacco Furtivo', Math.ceil(L / 2) + 'd6']); break;
-        case 'mago': out.push([n + ' – Recupero Arcano', 'slot recuperati fino a livello totale ' + Math.ceil(L / 2) + ' (1/giorno)']); break;
+        case 'mago': out.push([n + ' – Recupero Arcano', 'slot recuperati fino a livello totale ' + Math.ceil(L / 2) + ' (1/giorno)', 1]); break;
         case 'monaco':
           out.push([n + ' – Arti Marziali', 'dado ' + (L >= 17 ? 'd10' : L >= 11 ? 'd8' : L >= 5 ? 'd6' : 'd4')]);
-          if (L >= 2) out.push([n + ' – Ki', L + ' punti, CD ' + (8 + pb + mods.sag) + ' (riposo breve)']);
+          if (L >= 2) out.push([n + ' – Ki', L + ' punti, CD ' + (8 + pb + mods.sag) + ' (riposo breve)', L]);
           break;
         case 'paladino':
           out.push([n + ' – Imposizione delle Mani', 5 * L + ' PF di riserva (riposo lungo)']);
-          if (L >= 3) out.push([n + ' – Incanalare Divinità', '1 uso/riposo breve']);
+          if (L >= 3) out.push([n + ' – Incanalare Divinità', '1 uso/riposo breve', 1]);
           if (L >= 6) out.push([n + ' – Aura di Protezione', '+' + Math.max(1, mods.car) + ' ai TS, raggio ' + (L >= 18 ? '9 m' : '3 m')]);
           break;
         case 'ranger': out.push([n + ' – Nemici/Terreni prescelti', (L >= 14 ? 3 : L >= 6 ? 2 : 1) + ' nemici, ' + (L >= 10 ? 3 : L >= 6 ? 2 : 1) + ' terreni']); break;
-        case 'stregone': if (L >= 2) out.push([n + ' – Fonte di Magia', L + ' punti stregoneria']); if (L >= 3) out.push([n + ' – Metamagia', (L >= 17 ? 4 : L >= 10 ? 3 : 2) + ' opzioni']); break;
+        case 'stregone': if (L >= 2) out.push([n + ' – Fonte di Magia', L + ' punti stregoneria (riposo lungo)', L]); if (L >= 3) out.push([n + ' – Metamagia', (L >= 17 ? 4 : L >= 10 ? 3 : 2) + ' opzioni']); break;
         case 'warlock': if (L >= 2) out.push([n + ' – Suppliche Occulte', D.INVOCAZIONI[L - 1] + ' conosciute']); break;
       }
+      if (D.RIS_CLASSE && D.RIS_CLASSE[c.id]) D.RIS_CLASSE[c.id](c, mods, pb, ch).forEach((x) => out.push(x));
     });
     return out;
   };
@@ -409,7 +491,7 @@
     const br = M.bonusRazza(ch);
     // se la scelta libera non è ancora fatta, simula quella consigliata
     const r = D.razza(ch.razza);
-    if (r && r.bonusLiberi && (ch.scelteRazza.bonusLiberi || []).length < r.bonusLiberi.n) {
+    if (r && r.bonusLiberi && !M.persAttiva(ch) && (ch.scelteRazza.bonusLiberi || []).length < r.bonusLiberi.n) {
       M.consigliaBonusLiberi(ch).forEach((a) => (br[a] = (br[a] || 0) + r.bonusLiberi.valore));
     }
     const valuta = (vals) => { // vals indicizzati come prio
@@ -533,7 +615,8 @@
     if (ch.metodo === 'tiri') out.push({ ok: ch.tiri.length === 6 && [...pun].sort().join() === [...ch.tiri].sort().join(), t: 'Tiri: assegna tutti e sei i valori ottenuti' });
     const r = D.razza(ch.razza);
     if (r && r.sub && !ch.sub) out.push({ ok: false, t: 'Scegli la sottorazza' });
-    if (r && r.bonusLiberi) out.push({ ok: (ch.scelteRazza.bonusLiberi || []).length === r.bonusLiberi.n, t: 'Scegli i ' + r.bonusLiberi.n + ' bonus razziali liberi' });
+    if (r && M.persAttiva(ch)) { const a = (ch.scelteRazza.pers || {}).a || {}; const vals = M.valoriIncrementi(ch); const sc = vals.map((v, i) => a[i]).filter(Boolean); out.push({ ok: sc.length === vals.length && new Set(sc).size === sc.length, t: 'Incrementi personalizzati: assegna ogni bonus a una caratteristica diversa' }); }
+    else if (r && r.bonusLiberi) out.push({ ok: (ch.scelteRazza.bonusLiberi || []).length === r.bonusLiberi.n, t: 'Scegli i ' + r.bonusLiberi.n + ' bonus razziali liberi' });
     if (r && r.abilitaLibere) out.push({ ok: (ch.scelteRazza.abilita || []).length === r.abilitaLibere, t: 'Scegli le ' + r.abilitaLibere + ' abilità razziali' });
     out.push({ ok: (ch.abilita || []).length === c.nAbilita, t: 'Abilità di classe: ' + (ch.abilita || []).length + '/' + c.nAbilita });
     const md = M.maestrieDovute(ch);

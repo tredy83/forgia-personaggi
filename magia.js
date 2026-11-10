@@ -9,7 +9,7 @@
   // manuali abilitati per il personaggio (di base solo il Manuale del Giocatore)
   const manuali = (ch) => Object.assign({ mdg: true }, (ch && ch.manuali) || {});
   const manOk = (ch, s) => !!manuali(ch)[s.fonte || 'mdg'];
-  const lista = (k, liv, ch, extra) => D.INCANTESIMI.filter((s) => (s.classi.includes(k.lista) || (k.extra || []).includes(s.id)) && (liv === 0 ? s.liv === 0 : s.liv >= 1 && s.liv <= k.livMax) && (manOk(ch, s) || (extra || []).includes(s.id)));
+  const lista = (k, liv, ch, extra) => D.INCANTESIMI.filter((s) => (s.classi.includes(k.lista) || (k.listaAlt && s.classi.includes(k.listaAlt)) || (k.extra || []).includes(s.id)) && (liv === 0 ? s.liv === 0 : s.liv >= 1 && s.liv <= k.livMax) && (manOk(ch, s) || (extra || []).includes(s.id)));
   X.manuali = manuali; X.manOk = manOk;
 
   // quali liste usa ogni classe: [chiave, etichetta, massimo, sorgente]

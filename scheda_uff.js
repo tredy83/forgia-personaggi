@@ -98,22 +98,22 @@
     // privilegi e tratti: solo nomi (testo completo a pagina 4)
     {
       // elenco abilità: nome + breve descrizione, ridotto se non entra nel riquadro
-      const voci = d.privilegi.filter((x) => !x.nascosto).map((p) => ({ n: p.nome, d: (p.fonte !== 'Stile' && !/ \d+$/.test(p.fonte || '') && /: /.test(p.nome)) ? '': p.desc }))
+      const voci = d.privilegi.filter((x) => !x.nascosto).map((p) => ({ u: p.usi, n: p.nome, d: (p.fonte !== 'Stile' && !/ \d+$/.test(p.fonte || '') && /: /.test(p.nome)) ? '': p.desc }))
         .concat(d.tratti.filter((x) => !x.nascosto).map((t) => ({ n: t.nome, d: t.desc })))
-        .concat(d.talenti.map((t) => ({ n: 'Talento: ' + t.nome, d: '' })));
+        .concat(d.talenti.map((t) => ({ n: 'Talento: ' + t.nome, d: t.desc || '' })));
       const taglia = (t, max) => { if (!t || t.length <= max) return t; const c = t.slice(0, max); const p = Math.max(c.lastIndexOf('. '), c.lastIndexOf('; '), c.lastIndexOf(', ')); return (p > max * 0.5 ? c.slice(0, p) : c.slice(0, c.lastIndexOf(' '))) + '…'; };
       // le righe stampate nel riquadro distano 11 pt: ogni riga di testo occupa esattamente una riga del modulo
       const LH = 11.0; const RIGHE_MAX = 32;
-      const tiers = [[400, 7.4], [150, 7.2], [90, 7], [60, 6.8], [0, 7]];
+      const tiers = [[900, 7.2], [500, 7], [300, 6.8], [150, 6.8], [90, 6.8], [60, 6.8], [0, 7]];
       let scelta = tiers[tiers.length - 1], testo = [];
       for (const [mx, fs] of tiers) {
         const cpl = Math.floor(160 / (fs * 0.5)); let righe = 0;
-        testo = voci.map((v) => ({ n: v.n, d: mx ? taglia(v.d, mx) : '' }));
-        testo.forEach((v) => { righe += Math.ceil((v.n.length + 2 + (v.d ? v.d.length + 1 : 0)) / cpl); });
+        testo = voci.map((v) => ({ u: v.u, n: v.n, d: mx ? taglia(v.d, mx) : '' }));
+        testo.forEach((v) => { righe += Math.ceil((v.n.length + 2 + (v.d ? v.d.length + 1 : 0)) / cpl) + (v.u ? Math.ceil(v.u / 22) : 0); });
         scelta = [mx, fs];
         if (righe + (mx ? 0 : 1) <= RIGHE_MAX) break;
       }
-      const corpo = testo.map((v) => '<div><b>' + ESC(v.n) + '.</b>' + (v.d ? ' ' + ESC(v.d) : '') + '</div>').join('');
+      const corpo = testo.map((v) => '<div><b>' + ESC(v.n) + '.</b>' + (v.d ? ' ' + ESC(v.d) : '') + (v.u ? '<br>' + '<i class="cerchio" style="width:2.6mm;height:2.6mm;margin:0 .9mm 0 0"></i>'.repeat(v.u) : '') + '</div>').join('');
       h += '<div class="uf-b" style="left:408pt;top:384.8pt;width:160pt;height:' + (LH * RIGHE_MAX) + 'pt;font-size:' + scelta[1] + 'pt;line-height:' + LH + 'pt">' + corpo + (voci.length && !scelta[0] ? '<div style="font-size:6pt">(Descrizioni complete a pagina 4)</div>' : '') + '</div>';
     }
     const p1 = '<section class="uffpag"><img class="uf-bg" src="uff_1.jpg" alt="">' + h + LOGO + '</section>';
@@ -184,9 +184,9 @@
 
     /* ---------- PAGINA 4: privilegi e tratti completi (modello semplice) ---------- */
     const ris = d.risorse.map((r) => '<p class="piccolo"><b>' + ESC(r[0]) + ':</b> ' + ESC(r[1]) + '</p>').join('');
-    const priv = d.privilegi.filter((x) => !x.nascosto).map((p) => '<div class="privilegio"><h4>' + ESC(p.nome) + ' <small>' + ESC(p.fonte) + '</small></h4><p>' + ESC(p.desc) + '</p></div>').join('');
+    const priv = d.privilegi.filter((x) => !x.nascosto).map((p) => '<div class="privilegio"><h4>' + ESC(p.nome) + ' <small>' + ESC(p.fonte) + '</small></h4><p>' + ESC(p.desc) + '</p>' + (p.usi ? '<span class="usi">' + '<i class="cerchio"></i>'.repeat(p.usi) + '</span>' : '') + '</div>').join('');
     const trat = d.tratti.filter((x) => !x.nascosto).map((t) => '<div class="privilegio"><h4>' + ESC(t.nome) + '</h4><p>' + ESC(t.desc) + '</p></div>').join('');
-    const tal = d.talenti.map((t) => '<div class="privilegio"><h4>' + ESC(t.nome) + ' <small>livello ' + t.liv + '</small></h4></div>').join('');
+    const tal = d.talenti.map((t) => '<div class="privilegio"><h4>' + ESC(t.nome) + ' <small>livello ' + t.liv + '</small></h4>' + (t.desc ? '<p>' + ESC(t.desc) + '</p>' : '') + '</div>').join('');
     const p4 = '<section class="pagina">' + LOGO_P + '<h2>' + ESC(ch.nome || 'Personaggio') + ' · privilegi e tratti</h2>' + (ris ? '<h3>Risorse</h3>' + ris : '')
       + '<h3>Privilegi di classe</h3><div class="due-col">' + priv + '</div><h3>Tratti razziali</h3><div class="due-col">' + trat + '</div>' + (tal ? '<h3>Talenti</h3><div class="due-col">' + tal + '</div>' : '') + '</section>';
 
