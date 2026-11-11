@@ -46,6 +46,30 @@
     return { dt, X: (k) => dt[k] || '' };
   }
 
+  // colori del modello "bimbi": [tinta, nome]
+  X.COLORI_BIMBI = {
+    iniziativa: ['#ffd23f', 'Giallo'], ca: ['#5b7bff', 'Blu'], pf: ['#ff5a5a', 'Rosso'],
+    armi: ['#4fcf6a', 'Verde'], abilita: ['#35c9e0', 'Azzurro'], caratt: ['#c77dff', 'Viola'],
+  };
+
+
+  // pagina "legenda colori per il DM" (modello bimbi): una riga per colore
+  X.legendaDM = function () {
+    const K = X.COLORI_BIMBI;
+    const R = [
+      ['iniziativa', 'Iniziativa', 'riquadro in alto, accanto allo scudo', '«Tirate iniziativa: d20 più il numero del riquadro giallo.»', 'Tira un d20 e somma il numero scritto nel riquadro. Chi ottiene il totale più alto agisce per primo.'],
+      ['ca', 'Classe Armatura (CA)', 'lo scudo', '«Il goblin fa 14: colpisce la vostra CA blu?»', 'Confronta il tiro del mostro con il numero dello scudo. Se il tiro è uguale o più alto, il mostro colpisce.'],
+      ['pf', 'Punti Ferita', 'i due riquadri grandi al centro', '«Subite 5 danni: scalateli dai punti ferita rossi.»', 'Sottrae i danni ai punti ferita attuali. Il massimo è scritto in alto nel riquadro. A 0 si cade a terra. I PF temporanei vanno nel secondo riquadro rosso.'],
+      ['armi', 'Armi', 'riquadro «Attacchi & Incantesimi»', '«Attaccate: d20 più il Bonus Att. nel verde. Se colpite, tirate i danni.»', 'Trova la sua arma. Colonna «Bonus Att.» per colpire, colonna «Danni/Tipo» per il dado dei danni.'],
+      ['abilita', 'Abilità', 'elenco di 18 voci, colonna centrale', '«Prova di Percezione: d20 più il numero accanto a Percezione, nel riquadro azzurro.»', 'Cerca la voce nell\'elenco e somma il numero scritto sulla riga. Il pallino pieno ● segna le abilità in cui è bravo.'],
+      ['caratt', 'Caratteristiche e Tiri Salvezza', 'colonna di sinistra e riquadro sotto Ispirazione', '«Tiro salvezza su Destrezza: guardate il viola.» Oppure «Prova di Forza.»', 'Nei sei riquadri a sinistra il numero grande è il bonus da sommare al d20 e il numero nell\'ovale è il punteggio. Per i tiri salvezza legge la riga della caratteristica nominata.'],
+    ];
+    return '<section class="pagina ldm"><h2>Legenda colori per il DM</h2><p class="ldm-sub">Scheda WotC per bambini: ogni sezione della prima pagina ha il suo colore. Al tavolo basta dire il colore: «guardate il numero nel riquadro giallo».</p>'
+      + R.map((r, i) => '<div class="ldm-row"><div class="ldm-sw" style="background:' + K[r[0]][0] + '"><b>' + (i + 1) + '</b>' + K[r[0]][1] + '</div><div class="ldm-b"><h3>' + ESC(r[1]) + ' <small>' + ESC(r[2]) + '</small></h3>'
+        + '<div><div class="ldm-l">Il master dice</div><p class="ldm-say">' + ESC(r[3]) + '</p></div><div><div class="ldm-l">Il giocatore</div><p>' + ESC(r[4]) + '</p></div></div></div>').join('')
+      + '<p class="ldm-foot"><b>Per i primi incontri.</b> Nomina sempre colore e sezione insieme («l\'iniziativa, il giallo»). Dopo poche sessioni i bambini troveranno i numeri senza il colore.</p></section>';
+  };
+
   X.foglioUff = function (ch, u) {
     const d = M.derive(ch); const f = d.fin; const dt = ch.dett || {}; const fmt = u.fmt; const metri = u.metri;
     const clTxt = d.classi.map((c) => c.def.nome + ' ' + c.livello).join(' / ');
@@ -116,7 +140,22 @@
       const corpo = testo.map((v) => '<div><b>' + ESC(v.n) + '.</b>' + (v.d ? ' ' + ESC(v.d) : '') + (v.u ? '<br>' + '<i class="cerchio" style="width:2.6mm;height:2.6mm;margin:0 .9mm 0 0"></i>'.repeat(v.u) : '') + '</div>').join('');
       h += '<div class="uf-b" style="left:408pt;top:384.8pt;width:160pt;height:' + (LH * RIGHE_MAX) + 'pt;font-size:' + scelta[1] + 'pt;line-height:' + LH + 'pt">' + corpo + (voci.length && !scelta[0] ? '<div style="font-size:6pt">(Descrizioni complete a pagina 4)</div>' : '') + '</div>';
     }
-    const p1 = '<section class="uffpag"><img class="uf-bg" src="uff_1.jpg" alt="">' + h + LOGO + '</section>';
+
+    // modello "bimbi": stessa scheda ufficiale, con le sezioni evidenziate a colori (sotto il testo, sopra lo sfondo)
+    let colori = '';
+    if (ch.modelloScheda === 'bimbi') {
+      const P = 594 / 1238; // pixel dell'immagine -> pt
+      const R = (c, x1, y1, x2, y2, r) => '<i class="uf-col" style="left:' + (x1 * P) + 'pt;top:' + (y1 * P) + 'pt;width:' + ((x2 - x1) * P) + 'pt;height:' + ((y2 - y1) * P) + 'pt;background:' + c + ';border-radius:' + (r || 5) + 'pt"></i>';
+      const K = X.COLORI_BIMBI;
+      colori = R(K.caratt[0], 42, 250, 170, 1182, 7) + R(K.caratt[0], 184, 404, 413, 612, 6)
+        + R(K.ca[0], 460, 274, 546, 358, 16) + R(K.iniziativa[0], 566, 270, 672, 372, 6)
+        + R(K.pf[0], 452, 389, 795, 518, 6) + R(K.pf[0], 452, 524, 795, 626, 6)
+        + R(K.armi[0], 440, 784, 808, 1192, 6)
+        + R(K.abilita[0], 184, 636, 413, 1192, 6);
+      colori += '<div class="uf-leg">' + [['iniziativa', 'INIZIATIVA'], ['ca', 'CLASSE ARMATURA'], ['pf', 'PUNTI FERITA'], ['armi', 'ARMI'], ['abilita', 'ABILITÀ'], ['caratt', 'CARATTERISTICHE e TIRI SALVEZZA']]
+        .map(([k, n]) => '<span><i style="background:' + K[k][0] + '"></i>' + n + '</span>').join('') + '</div>';
+    }
+    const p1 = '<section class="uffpag"><img class="uf-bg" src="uff_1.jpg" alt="">' + colori + h + LOGO + '</section>';
 
     /* ---------- PAGINA 2 ---------- */
     h = C(143, 64, ch.nome || '', (ch.nome || '').length > 18 ? 11.5 : 15, 185);
@@ -201,10 +240,10 @@
             + (s.sintesi ? '<p class="piccolo"><i>(Sintesi: testo completo sul manuale)</i></p>' : '') + s.desc.map((p) => '<p class="piccolo">' + ESC(p) + '</p>').join('') + (s.alto ? '<p class="piccolo"><b>Ai livelli più alti.</b> ' + ESC(s.alto) + '</p>' : '') + '</div>').join('') + '</div></section>';
       }
     }
-    return p1 + p2 + p3 + p4 + p5;
+    return p1 + p2 + p3 + p4 + p5 + (ch.modelloScheda === 'bimbi' && ch.legendaDM ? X.legendaDM() : '');
   };
 
   X.foglio = function (ch, u) {
-    return ch.modelloScheda === 'semplice' ? X.foglioSemplice(ch, u) : X.foglioUff(ch, u);
+    return ch.modelloScheda === 'semplice' ? X.foglioSemplice(ch, u) : X.foglioUff(ch, u); // 'uff' e 'bimbi' = scheda ufficiale (bimbi con colori)
   };
 })(typeof globalThis !== 'undefined' ? globalThis : window);

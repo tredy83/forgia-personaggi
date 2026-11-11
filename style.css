@@ -142,6 +142,10 @@ td.az{white-space:nowrap}
 @page uff{size:A4;margin:0}
 .uffpag{position:relative;width:594pt;height:783pt;overflow:hidden;margin:0 auto 1rem;background:#fff;box-shadow:var(--ombra);page:uff}
 .uf-bg{position:absolute;left:0;top:0;width:594pt;height:783pt}
+.uf-col{position:absolute;mix-blend-mode:multiply;opacity:.7;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.uf-leg{position:absolute;left:20pt;top:99pt;width:554pt;display:flex;justify-content:space-between;font:700 6.6pt Arial,sans-serif;color:#222}
+.uf-leg span{display:flex;align-items:center;gap:3pt}
+.uf-leg i{display:inline-block;width:9pt;height:9pt;border:.6pt solid #222;border-radius:2pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .uf-t,.uf-b{position:absolute;color:#14246b;font-family:"Segoe Print","Bradley Hand","Comic Sans MS","Georgia",serif;white-space:nowrap;overflow:hidden;line-height:1.1}
 .uf-b{white-space:pre-wrap;overflow:hidden}
 .uf-b b{font-weight:900;background:none;text-decoration:none;-webkit-text-stroke:.45pt #14246b;color:#0b1550}
@@ -176,3 +180,28 @@ td.az{white-space:nowrap}
 @media screen and (min-width:801px){td.az{white-space:normal;min-width:15rem;text-align:right}td.az button{margin:.15rem .1rem}.card:has(> table){overflow-x:auto}}
 
 .tasha-flag{border-left:4px solid var(--oro,#b8860b)}.tasha-lab{display:flex;gap:.5rem;align-items:center;font-size:1.05rem;cursor:pointer}.tasha-flag p{margin:.4rem 0 0}
+
+/* legenda colori per il DM (modello bimbi) */
+.ldm{font-family:Arial,Helvetica,sans-serif;color:#1d2130}
+.ldm h2{margin:0 0 2mm;font-size:20pt}
+.ldm-sub{margin:0 0 5mm;font-size:10.5pt;color:#444}
+.ldm-row{display:grid;grid-template-columns:26mm 1fr;border:.3mm solid #888;border-radius:2mm;overflow:hidden;margin-bottom:3.5mm;break-inside:avoid}
+.ldm-sw{display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:9pt;text-transform:uppercase;letter-spacing:.05em;padding:2mm;text-align:center;color:#1d2130;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ldm-sw b{font-size:20pt;letter-spacing:0}
+.ldm-b{display:grid;grid-template-columns:1fr 1fr;gap:1.5mm 6mm;padding:2.5mm 3mm;background:#fff}
+.ldm-b h3{grid-column:1/-1;margin:0;font-size:12.5pt}
+.ldm-b h3 small{font-weight:400;font-size:9pt;color:#555;margin-left:2mm}
+.ldm-b p{margin:0;font-size:10pt;line-height:1.35}
+.ldm-l{font-size:7pt;text-transform:uppercase;letter-spacing:.08em;color:#555;font-weight:700;margin-bottom:.8mm}
+.ldm-say{font-weight:700;font-size:10.5pt!important}
+.ldm-foot{margin:4mm 0 0;font-size:9.5pt;color:#444;border-top:.3mm solid #aaa;padding-top:3mm}
+.ldm h2,.ldm h3{font-family:Arial,Helvetica,sans-serif;text-transform:none;letter-spacing:0;border:0}
+.ldm h2{border-bottom:.4mm solid #1d2130;padding-bottom:1.5mm}
+.ldm-row{margin-bottom:2.6mm}
+.ldm-b{padding:2mm 3mm}
+.ldm-sub{margin-bottom:3.5mm}
+.ldm-b h3{border-bottom:.3mm solid #ccc;padding-bottom:1mm}
+.ldm-b h3 small{text-transform:none;letter-spacing:0;font-variant:normal}
+.ldm{min-height:0!important}
+.ldm-foot{margin-top:2.5mm;padding-top:2mm}
+.ldm{display:block!important;width:auto}

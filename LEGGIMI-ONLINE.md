@@ -118,3 +118,8 @@ Un personaggio con elementi di un manuale già scelti li mantiene anche se si sp
 2. Creare un file di dati (come `tasha.js`, `tasha_sub.js`, `tasha_extra.js`) e caricarlo in `index.html` dopo `manuali.js`.
 3. Marcare ogni elemento con `fonte: 'id'`: classi, sottoclassi, razze, stili e manovre (4° elemento della riga), opzioni dentro un gruppo di scelta (`D.OPZ_FONTE['gruppo/opzione'] = 'id'`), talenti (`D.TALENTI_FONTE`, `D.TALENTI_DESC`), incantesimi aggiuntivi per classe (`D.INC_FONTE.id`), privilegi opzionali (`D.OPZIONALI.push({..., fonte:'id'})`), cerchietti dei privilegi (`D.RIS_PRIV['classe/Nome']`).
 4. Gli incantesimi del manuale vanno nell'elenco incantesimi con `man: 'id'`. La casella compare da sola.
+
+
+## Scheda per bambini (v1.16)
+In **Scheda → Opzioni di stampa → Modello di scheda** puoi scegliere tra «Ufficiale D&D» (normale) e «Ufficiale D&D per bambini». La versione bambini è **identica alla scheda WotC**, ma con le sezioni della prima pagina colorate: Iniziativa = giallo, Classe Armatura = blu, Punti Ferita = rosso, Armi = verde, Abilità = azzurro, Caratteristiche (e Tiri Salvezza) = viola. Una striscia con la legenda dei colori è stampata sotto l'intestazione. Per vedere i colori, nel dialogo di stampa attiva «Grafica di sfondo».
+Scegliendo il modello bambini compare in automatico il flag **«Stampa legenda scheda per DM»**: se attivo, in fondo alla stampa si aggiunge una pagina con la legenda dei colori per il master (cosa dire al tavolo e cosa fa il giocatore). Il pulsante **«Stampa solo la legenda per il DM»** stampa soltanto quella pagina.
